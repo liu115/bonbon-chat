@@ -1,0 +1,311 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>歡迎來到 BonBon</title>
+    <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css">
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <style>
+        body{font-family: "微軟正黑體";}
+        input{font-family: "微軟正黑體", Verdana;}
+        *:focus{outline: 0;}
+        #detect-phones, #detect-tablets, #detect-desktops {
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+        #detect-tablets, #detect-desktops {display: none;}
+
+        @media(min-width: 768px) {
+            #detect-phones {display: none;}
+            #detect-tablets {display: initial;}
+        }
+
+        @media(min-width: 992px) {
+            #detect-tablets {display: none;}
+            #detect-desktops {display: initial;}
+        }
+
+        /* reset */
+        body, h1, input {
+            padding: 0;
+            margin: 0;
+        }
+
+        /* layout */
+        body {
+            background: url(http://upload.wikimedia.org/wikipedia/commons/0/02/Johannesburg_Sunrise,_City_of_Gold.jpg) center center     no-repeat;
+            background-size: cover;
+            height: 100%;
+        }
+        #content {
+            width: 95%;
+            padding-top: 100px;
+            margin: auto;
+        }
+        #description {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        #side {width: 100%;}
+        @media(min-width: 768px) {
+            #content {width: 80%;}
+            #description {
+                float: left;
+                width: 50%;
+                margin: 0;
+            }
+            #side {
+                float: right;
+                width: 45%;
+            }
+        }
+        @media(min-width: 992px) {
+            #content {width: 60%;}
+            #description {width: 60%;}
+            #side {width: 35%;}
+        }
+
+        /* content area */
+        #description h1 {
+            color: white;
+            font-size: 32pt;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        #description h2 {
+            color: white;
+            font-size: 16pt;
+            font-weight: bold;
+            line-height: 180%;
+            margin-bottom: 20px;
+        }
+
+        /* login and sign-up-up area */
+        #login-area {
+            background: #F6F6F6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 1px black;
+        }
+        #sign-up-area {
+            background: #F6F6F6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 1px black;
+        }
+        .subtitle {
+            display: block;
+            font-weight: bold;
+            padding: 15px 0 15px 18px;
+            border-bottom: 1px solid #DDD;
+        }
+        .side-content {
+            padding: 18px;
+        }
+        .wrapper-input {
+            background: white;
+            padding: 8px 10px;
+            border: 1px solid #CCC;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .wrapper-radio {
+            float: left;
+            background: transparent;
+            padding: 0;
+            border: 0;
+        }
+        .wrapper-error-return {
+            display: none;
+            color: #A44;
+            font-size: small;
+            background: #EDD;
+            padding: 8px 10px;
+            border: 1px solid #CBB;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            line-height: 140%;
+        }
+        .wrapper-input input[type="text"], .wrapper-input input[type="password"] {
+            width: 100%;
+            border: 0;
+        }
+        .wrapper-input input[type="radio"] {
+            display: none;
+        }
+        .wrapper-input input[type="radio"] + label {
+            float: left;
+            color: black;
+            font-size: small;
+            background: white;
+            padding: 8px 12px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+            margin-right: 6px;
+            cursor: pointer;
+        }
+        .wrapper-input input[type="radio"] + label:hover {
+            background: #EEE;
+            border: 1px solid #AAA;
+        }
+        .wrapper-input input:checked + label, .wrapper-input input:checked + label:hover {
+            color: white;
+            background: #5CB85C;
+            border: 1px solid #4CAE4C;
+        }
+        .wrapper-button {
+            text-align: right;
+        }
+        .form-button {
+            display: block;
+            float: right;
+            color: white;
+            font-size: small;
+            text-decoration: none;
+            background: #337AB7;
+            padding: 10px 14px;
+            border: 1px solid #2E6DA4;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-button:hover {
+            background: #286090;
+        }
+
+        .clear {clear: both;}
+
+    </style>
+    <script>
+    function inputStyle(elementName, method) {
+        var element = "wrapper-" + elementName;
+        if(method == 1) document.getElementById(element).style.boxShadow = "0 0 2px #29F";
+        else if(method == 2) document.getElementById(element).style.boxShadow = "0 0 2px red";
+        else document.getElementById(element).style.boxShadow = "none";
+    }
+
+    var validateError;
+    var forms = ["login", "sign-up"];
+    var formItems = ["id", "pass", "email"];
+    function formValidate(formID) {
+        validateError = 0;
+        if(formID == 0) {//login
+            for(i = 0; i < 2; i++) checkEmpty(0, i)
+        } else {//sign up
+            for(i = 0; i < 3; i++) checkEmpty(1, i)
+        }
+        if(validateError) return false;
+        else return true;
+    }
+    function checkEmpty(formID, fieldID) {
+        var elementName = forms[formID] + "-" + formItems[fieldID];
+        if(document.getElementById(elementName).value == "") {
+            inputStyle(elementName, 2);
+            validateError = 1;
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="detect-phones">Phones</div>
+    <div id="detect-tablets">Tablets</div>
+    <div id="detect-desktops">Desktops</div>
+
+    <div id="content">
+        <div id="description">
+            <h1>歡迎來到 BonBon</h1>
+            <h2>It's bonbon time! </h2>
+        </div>
+
+        <div id="side">
+            <div id="login-area">
+                <span class="subtitle">登入</span>
+                <div class="side-content">
+                    <div id="wrapper-login-id" class="wrapper-input">
+                        <input type="text" name="id" id="login-id" placeholder="使用者名稱" onfocus="inputStyle('login-id', 1)" onblur="inputStyle('login-id', 0)">
+                    </div>
+                    <div id="wrapper-login-pass"  class="wrapper-input">
+                        <input type="password" name="pass" id="login-pass" placeholder="密碼" onfocus="inputStyle('login-pass', 1)" onblur="inputStyle('login-pass', 0)">
+                    </div>
+                    <div id="error-return-login"  class="wrapper-error-return"></div>
+                    <div class="wrapper-button">
+                        <a href="#" id="button-login" class="form-button" onclick="return false">登入</a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+            <div id="sign-up-area">
+                <span class="subtitle">註冊</span>
+                <div class="side-content">
+                    <div id="wrapper-sign-up-id"  class="wrapper-input">
+                        <input type="text" name="id" id="sign-up-id" placeholder="使用者名稱" onfocus="inputStyle('sign-up-id', 1)" onblur="inputStyle('sign-up-id', 0)">
+                    </div>
+                    <div id="wrapper-sign-up-pass" class="wrapper-input">
+                        <input type="password" name="pass" id="sign-up-pass" placeholder="密碼" onfocus="inputStyle('sign-up-pass', 1)" onblur="inputStyle('sign-up-pass', 0)">
+                    </div>
+                    <div id="wrapper-sign-up-email" class="wrapper-input">
+                        <input type="text" name="email" id="sign-up-email" placeholder="電子郵件地址" onfocus="inputStyle('sign-up-email', 1)" onblur="inputStyle('sign-up-email', 0)">
+                    </div>
+                    <div class="wrapper-input wrapper-radio">
+                        <input type="radio" name="sex" id="b" value="b" checked>
+                        <label for="b">男性</label>
+                        <input type="radio" name="sex" id="g" value="g">
+                        <label for="g">女性</label>
+                        <input type="radio" name="sex" id="o" value="o">
+                        <label for="o">其他</label>
+                    </div>
+                    <div class="wrapper-button">
+                        <a href="#" id="button-sign-up" class="form-button" onclick="return false">註冊</a>
+                    </div>
+                    <div id="error-return-sign-up"  class="wrapper-error-return clear"></div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <script>
+    $("#button-login").click(function() {
+        if(formValidate(0)) {
+            $.ajax({
+                type: "POST",
+                url: "/login",
+                data: '{"id": "' + $("#login-id").val() + '", "pass": "' + $("#login-pass").val() + '"}',
+                success: function(data, status) {
+                    if(data == "false") {
+                        document.getElementById("error-return-login").style.display = "initial";
+                        document.getElementById("error-return-login").innerHTML = "您所輸入的使用者名稱、密碼與我們的紀錄不符，請再次確認後重試。";
+                    }
+                    if(status == "false") {
+                        document.getElementById("error-return-login").style.display = "initial";
+                        document.getElementById("error-return-login").innerHTML = "伺服器錯誤，請稍後重試。";
+                    }
+                },
+                contentType: "application/json"
+            });
+        }
+    });
+    $("#button-sign-up").click(function() {
+        if(formValidate(1)) {
+            $.ajax({
+                type: "POST",
+                url: "/register",
+                data: '{"id": "' + $("#sign-up-id").val() + '", "pass": "' + $("#sign-up-pass").val() + '", "email": "' + $("#sign-up-email").val() + '", "sex": "' +  $("input[name=sex]:checked").val() + '"}',
+                success: function(data, status) {
+                    if(data == "false") {
+                        document.getElementById("error-return-sign-up").style.display = "initial";
+                        document.getElementById("error-return-sign-up").innerHTML = "請輸入的正確的電子郵件地址。";
+                    }
+                    if(status == "false") {
+                        document.getElementById("error-return-sign-up").style.display = "initial";
+                        document.getElementById("error-return-sign-up").innerHTML = "伺服器錯誤，請稍後重試。";
+                    }
+                },
+                contentType: "application/json"
+            });
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css">
+    <style>
+        *{font-family:verdana;}
+        #detect-phones, #detect-tablets, #detect-desktops {
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+        #detect-tablets, #detect-desktops {display: none;}
+
+        @media(min-width: 768px) {
+            #detect-phones {display: none;}
+            #detect-tablets {display: initial;}
+        }
+
+        @media(min-width: 992px) {
+            #detect-tablets {display: none;}
+            #detect-desktops {display: initial;}
+        }
+
+        /* reset */
+        body, h1, input {
+            padding: 0;
+            margin: 0;
+        }
+
+        /* layout */
+        #background-image {
+            background: url(https://abs.twimg.com/a/1422515903/img/t1/front_page/exp_photo_set_gopro.jpg) center center no-repeat;
+            background-size: cover;
+            height: 100%;
+        }
+        #content {
+            width: 95%;
+            padding-top: 80px;
+            margin: auto;
+        }
+        #description {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        #side {width: 100%;}
+        @media(min-width: 768px) {
+            #content {width: 80%;}
+            #description {
+                float: left;
+                width: 50%;
+                margin: 0;
+            }
+            #side {
+                float: right;
+                width: 45%;
+            }
+        }
+        @media(min-width: 992px) {
+            #content {width: 60%;}
+            #description {width: 60%;}
+            #side {width: 35%;}
+        }
+
+        /* content area */
+        #description h1 {
+            color: white;
+            font-size: 32pt;
+            margin-bottom: 30px;
+        }
+        #description h2 {
+            color: white;
+            font-size: 16pt;
+            line-height: 180%;
+            margin-bottom: 20px;
+        }
+
+        /* login and sign-up-up area */
+        #login-area {
+            background: #F6F6F6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 1px black;
+        }
+        #sign-up-area {
+            background: #F6F6F6;
+            border-radius: 5px;
+            box-shadow: 0 0 1px black;
+        }
+        .subtitle {
+            display: block;
+            font-weight: bold;
+            padding: 15px 0 15px 18px;
+            border-bottom: 1px solid #DDD;
+        }
+        .side-content {
+            padding: 18px;
+        }
+        .wrapper-input {
+            background: white;
+            padding: 8px 10px;
+            border: 1px solid #CCC;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .wrapper-radio {
+            float: left;
+            background: transparent;
+            padding: 0;
+            border: 0;
+        }
+        .wrapper-input input[type="text"] {
+            width: 100%;
+            border: 0;
+        }
+        .wrapper-input input[type="radio"] {
+            display: none;
+        }
+        .wrapper-input input[type="radio"] + label {
+            float: left;
+            color: #999;
+            font-size: small;
+            background: #FFF;
+            padding: 8px 15px;
+            border: 1px solid #CCC;
+            border-radius: 3px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        .wrapper-input input:checked + label {
+            color: white;
+            background: #29F;
+            border: 1px solid #07D;
+            transition: all 0.3s ease-in 0s;
+        }
+        .wrapper-button {
+            text-align: right;
+        }
+        .form-button {
+            float: right;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px #666;
+            background: #29F;
+            padding: 6px 15px;
+            border: 1px solid #07D;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-button:active {
+            position: relative;
+            top: 1px;
+        }
+
+        .clear {clear: both;}
+
+    </style>
+    <script>
+    function inputStyle(elementName, method) {
+        var element = "wrapper-" + elementName;
+        if(method == 1) document.getElementById(element).style.boxShadow = "0 0 2px #29F";
+        else if(method == 2) document.getElementById(element).style.boxShadow = "0 0 2px red";
+        else document.getElementById(element).style.boxShadow = "none";
+    }
+
+    var flag = 0;
+    var forms = ["login", "sign-up"];
+    var formItems = ["id", "pass", "email"];
+    function formValidate(formID) {
+        if(formID == 0) {
+            for(i = 0; i < 2; i++) checkEmpty(0, i)
+        } else {
+            for(i = 0; i < 3; i++) checkEmpty(1, i)
+        }
+            if(flag) return false;
+    }
+    function checkEmpty(formID, fieldID) {
+        var elementName = forms[formID] + "-" + formItems[fieldID];
+        if(document.getElementById(elementName).value == "") {
+            inputStyle(elementName, 2);
+            flag = 1;
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="detect-phones">Phones</div>
+    <div id="detect-tablets">Tablets</div>
+    <div id="detect-desktops">Desktops</div>
+
+    <div id="background-image">
+        <div id="content">
+            <div id="description">
+                <h1>歡迎來到 Twitter。</h1>
+                <h2>iPhone 6 讓商務應用，強大更甚以往。第二代 64 位元桌上型電腦級架構所打造的 A8 晶片、Touch ID 指紋身分識別感應器、優異的電池續航力、更快速的 LTE 無線連結、成千上萬款商務 app，以及 iOS 8。一切，盡在渾然一體的纖薄設計中。</h2>
+            </div>
+
+            <div id="side">
+                <div id="login-area">
+                    <span class="subtitle">登入</span>
+                    <div class="side-content">
+                        <form onsubmit="return formValidate(0);">
+                            <div id="wrapper-login-id" class="wrapper-input">
+                                <input type="text" name="id" id="login-id" placeholder="使用者名稱" onfocus="inputStyle('login-id', 1)" onblur="inputStyle('login-id', 0)">
+                            </div>
+                            <div id="wrapper-login-pass"  class="wrapper-input">
+                                <input type="text" name="pass" id="login-pass" placeholder="密碼" onfocus="inputStyle('login-pass', 1)" onblur="inputStyle('login-pass', 0)">
+                            </div>
+                            <div class="wrapper-button">
+                                <input type="submit" class="form-button" value="登入">
+                            </div>
+                            <div class="clear"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="sign-up-area">
+                    <span class="subtitle">註冊</span>
+                    <div class="side-content">
+                        <form onsubmit="return formValidate(1);">
+                            <div id="wrapper-sign-up-id"  class="wrapper-input">
+                                <input type="text" name="id" id="sign-up-id" placeholder="使用者名稱" onfocus="inputStyle('sign-up-id', 1)" onblur="inputStyle('sign-up-id', 0)">
+                            </div>
+                            <div id="wrapper-sign-up-pass" class="wrapper-input">
+                                <input type="text" name="pass" id="sign-up-pass" placeholder="密碼" onfocus="inputStyle('sign-up-pass', 1)" onblur="inputStyle('sign-up-pass', 0)">
+                            </div>
+                            <div id="wrapper-sign-up-email" class="wrapper-input">
+                                <input type="text" name="email" id="sign-up-email" placeholder="電子郵件地址" onfocus="inputStyle('sign-up-email', 1)" onblur="inputStyle('sign-up-email', 0)">
+                            </div>
+                            <div class="wrapper-input wrapper-radio">
+                                <input type="radio" name="sex" id="b" value="b">
+                                <label for="b">男性</label>
+                                <input type="radio" name="sex" id="g" value="g">
+                                <label for="g">女性</label>
+                            </div>
+                            <div class="wrapper-button">
+                                <input type="submit" class="form-button" value="註冊">
+                            </div>
+                            <div class="clear"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+</body>
+</html>

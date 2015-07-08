@@ -1,0 +1,145 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://meyerweb.com/eric/tools/css/reset/reset.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/chat_page.css">
+    <title>ChatPage</title>
+</head>
+<body onresize="resize()">
+    <!-- media type detection -->
+    <!--
+    <div id="media-type">
+        <span id="media-type-phones">Media type: Phones</span>
+        <span id="media-type-tablets">Media type: Tablets</span>
+        <span id="media-type-desktops">Media type: Desktops</span>
+    </div>
+    -->
+    <!-- start of navigation area -->
+    <nav id="nav">
+        <div id="nav-profile">
+            <span class="profile-avatar"><a><img src="img/me_finn.png"></a></span>
+            <span class="profile-name">阿寶 (Finn)</span>
+            <a class="profile-status">我們在惡夜魔境裡見面吧，你這變態怪咖！</a>
+        </div>
+        <a id="new-connection">建立新連線</a>
+        <ul id="menu">
+            <li><a><span><i class="fa fa-comments"></i>朋友</span></a></li>
+            <li><a><span><i class="fa fa-pencil"></i>個人資料</span></a></li>
+            <li><a><span><i class="fa fa-cog"></i>設定</span></a></li>
+            <li><a><span><i class="fa fa-info"></i>說明</span></a></li>
+            <li><a><span><i class="fa fa-sign-out"></i>登出</span></a></li>
+        </ul>
+        </nav>
+    <!-- end of navigation area -->
+    <!-- start of friend list area -->
+    <div id="friend-area">
+        <div id="friend-search">
+            <div id="wrapper-input-search" class="wrapper-input">
+                <input type="text" placeholder="搜尋朋友">
+            </div>
+        </div>
+        <!-- message: read -->
+        <div class="friend-unit friend-read">
+            <div class="friend-avatar">
+                <img src="img/friend_1.jpg">
+            </div>
+            <div class="friend-info">
+                <p class="friend-info-name">火焰公主</p>
+                <p class="friend-info-status">幹，他會說三小。</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        <!-- message: selected -->
+        <div class="friend-unit friend-selected">
+            <div class="friend-avatar">
+                <img src="img/friend_2.jpg">
+            </div>
+            <div class="friend-info">
+                <p class="friend-info-name">老皮</p>
+                <p class="friend-info-status">吃葡萄，不吐葡萄皮。</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        <!-- message: unread -->
+        <div class="friend-unit friend-unread">
+            <div class="friend-avatar">
+                <img src="img/friend_3.jpg">
+            </div>
+            <div class="friend-info">
+                <p class="friend-info-name">冰霸王</p>
+                <p class="friend-info-status">我是一根香蕉。</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+
+        <div class="friend-unit friend-read off-line">
+            <div class="friend-avatar">
+                <img src="img/friend_4.jpg">
+            </div>
+            <div class="friend-info">
+                <p class="friend-info-name">嗶莫</p>
+                <p class="friend-info-status">不知道要打什麼。</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+        <div class="friend-unit friend-unread off-line">
+            <div class="friend-avatar">
+                <img src="img/friend_5.jpg">
+            </div>
+            <div class="friend-info">
+                <p class="friend-info-name">艾薇爾</p>
+                <p class="friend-info-status">晚餐要吃啥？</p>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+    </div>
+    <!-- end of friend list area -->
+
+    <!-- start of message area -->
+    <div id="message-area">
+        <div id="message-header">
+            <i class="fa fa-mars fa-sex"></i>老皮 - <a id="message-header-sign"href="#">吃葡萄，不吐葡萄皮。</a>
+        </div>
+        <div id="message-content">
+            <p><span class="message-system">已建立連線，開始聊天吧！<span></p>
+            <p><span class="message-others">老皮：嗨<span></p>
+            <p><span class="message-me">我：滾！</span></p>
+        </div>
+        <div id="message-panel">
+            <div id="message-box">
+                <div id="wrapper-message-box" class="wrapper-input">
+                    <input type="text" id="text-send-message" placeholder="請在這裡輸入訊息！">
+                </div>
+            </div>
+            <div class="pull-left">
+                <a id="button-bonbon" class="message-button" onclick="return false">Bonbon!</a>
+                <a id="button-report" class="message-button" onclick="return false">檢舉</a>
+            </div>
+            <div class="pull-right">
+                <a id="button-send-image" class="message-button" onclick="return false">傳送圖片</a>
+                <a id="button-send-message" class="message-button" onclick="return false">傳送訊息</a>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+
+    </div>
+    <!-- end of message area -->
+    <script>
+    resize();
+    function resize() {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        document.getElementById("message-area").style.width = width - 521;
+        document.getElementById("message-content").style.height = height - document.getElementById("message-header").offsetHeight - document.getElementById("message-panel").offsetHeight - 15;//15 for padding-top
+    }
+    /*
+    function sendBonBon() {
+        document.getElementById("button-bonbon").innerHTML = "已送出Bonbon";
+        return false;
+    }
+    */
+    </script>
+    <script src="js/chatSocket.js"></script>
+</body>
+</html>
