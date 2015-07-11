@@ -45,3 +45,19 @@ $ go build bonbon # Suceed if no output
 * Finish your setup.
 * jerry73204, MROS: setup GIT repo. initialize development environment
 * 岳承: Clean up HTML, JS, CSS codes. Determine which frontend framework to be used.
+
+## Task # 2
+* Due on 2015/07/14
+
+### Jobs
+* Yue-Cheng
+  1. remove jquery, restructure
+  2. chat panel scroll bar
+
+* jerry73204
+  1. database infrastructure
+  2. fixup coding style (2-space indent)
+
+* MROS
+  1. routing funcionality
+  2. websocket interface
