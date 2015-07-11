@@ -1,10 +1,10 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet" href="css/reset.css">
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bower/reset-css/reset.css">
+	<link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" href="css/style.css">
-	<script src="js/jquery-2.1.3.min.js"></script>
+	<script src="bower/jquery/dist/jquery.min.js"></script>
 	<script src="js/jquery.tagcloud.js"></script>
 	<!--[if lt IE 9]>
 	<script type="text/javascript" src="js/excanvas.js"></script>
@@ -14,7 +14,7 @@
 	window.onload = function() {
 		try {
 			TagCanvas.Start('tagCanvas','tags',{
-				activeCursor: 'pointer', 
+				activeCursor: 'pointer',
 				textColour: '#337AB7',
 				outlineColour: '#EEE',
 				reverse: true,
@@ -119,7 +119,7 @@
 		</div>
 	</div>
 	<!-- end of friend list area -->
-	
+
 	<!-- start of message area -->
 	<div id="message-area">
 		<div id="message-header">
@@ -148,7 +148,7 @@
 		</div>
 	</div>
 	<!-- end of message area -->
-	
+
 	<!-- start of all-friend list -->
 	<div id="all-friend-area">
 		<div id="all-friend-header">朋友列表（5/50）</div>
@@ -195,12 +195,12 @@
 		</div>
 	</div>
 	<!-- end of all-friend list -->
-	
+
 	<script>
 	/* pageID(0, 1, 2) = (chat page, friend list page , tag setting page) */
 	var page_displaying = 0;
 	var pageArray = ["message", "all-friend", "setting-tag"];
-	
+
 	resize();
 	function resize(target) {
 		var width = window.innerWidth;
@@ -214,14 +214,14 @@
 			document.getElementById(pageArray[target] + "-content").style.height = height - document.getElementById(pageArray[target] + "-header").offsetHeight - 15;//15 for padding-top
 		}
 	}
-	
+
 	function showPage(pageID) {
 		if(pageID != page_displaying) makeVisible(page_displaying, false);
 		makeVisible(pageID, true);
 		page_displaying = pageID;
 		resize(page_displaying);
 	}
-	
+
 	function makeVisible(target, show) {
 		if(show) document.getElementById(pageArray[target] + "-area").style.display = "block";
 		else document.getElementById(pageArray[target] + "-area").style.display = "none";
@@ -246,7 +246,7 @@
 	};
 
 	$(function () {
-		$("#tag_cloud a").tagcloud();	
+		$("#tag_cloud a").tagcloud();
 	});
 	</script>
 	<script src="js/chatSocket.js"></script>
