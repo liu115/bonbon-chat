@@ -53,5 +53,5 @@ git diff-index --check --cached $against -- || exit 1
 command -v golint || (echo 'command "golint" not found. Refer to README.md for setup.'; exit 1)
 
 # Run golint
-GOLINT_OUTPUT="$(find -name '*.go' -print0 | xargs -0 golint 2>&1)"
+GOLINT_OUTPUT="$(find ./bonbon -name '*.go' -maxdepth 1 -print0 | xargs -0 golint 2>&1)"
 [ -z "$GOLINT_OUTPUT" ] || (echo "$GOLINT_OUTPUT"; exit 1)

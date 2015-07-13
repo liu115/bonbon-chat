@@ -32,6 +32,23 @@ $ ln -s $PWD ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
 $ go build bonbon # Suceed if no output
 ```
 
+# 執行伺服器
+
+1. 安裝依賴
+```
+$ ./set-deps.sh # 假設在本專案跟目錄
+```
+
+2. 編譯
+```
+$ go install bonbon/bonbon-server
+```
+
+3. 執行
+```
+$ bonbon-server # 假設 $GOPATH/bin 在 $PATH 內
+```
+
 # Advices
 * Never directly commit to master. Always do your job on your branch.
 * Master branch is updated only by "pull requests".
