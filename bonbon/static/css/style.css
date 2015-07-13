@@ -143,7 +143,7 @@ nav {
 }
 
 .friend-avatar {
-	float:left;	
+	float:left;
 	width: 50px;
 	margin-left: 15px;
 }
@@ -214,6 +214,7 @@ nav {
 	background: #F6F6F6;
 	padding: 14px 10px 14px 15px;
 	border-bottom: 1px solid #CCC;
+
 }
 
 #message-header-sign {
@@ -287,19 +288,20 @@ nav {
 #message-content, #all-friend-content, #setting-info-content, #setting-tag-content {
 	background: #D9EDF7;
 	padding-top: 15px;
+
 }
 
 #message-content {
-	
+	overflow: scroll;
 }
 
 #all-friend-content {
 	padding-top: 25px;
 }
 
-.message-me, 
-.message-others, 
-.message-system, 
+.message-me,
+.message-others,
+.message-system,
 .message-from-system {
 	display: inline-block;
 	color: white;
@@ -367,8 +369,8 @@ nav {
 		display: initial;
 		}
 	}
-	
-	
+
+
 .wrapper-input {
 	background: white;
 	padding: 4px 8px;
@@ -388,8 +390,8 @@ nav {
 }
 
 /**/
-#all-friend-area, 
-#setting-info-area, 
+#all-friend-area,
+#setting-info-area,
 #setting-tag-area {
 	display: none;
 	position: fixed;
@@ -409,7 +411,7 @@ nav {
 /* ----- */
 #login-area {
 	margin: 0 auto;
-	width: 90%;	
+	width: 90%;
 	background: #F6F6F6;
 	border-radius: 5px;
 	margin-bottom: 20px;
