@@ -22,12 +22,12 @@ var SideBar = React.createClass({
 var FriendBox = React.createClass({
   render: function() {
     return (
-      <div >
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")}>
         <div className="friend-avatar">
-          <img src={this.props.img}/>
+          <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
-          <p className="friend-info-name">{this.props.name}</p>
+          <p className="friend-info-name">{this.props.friend.name}</p>
           <p className="friend-info-status">最後的聊天內容</p>
         </div>
         <div style={{clear: "both"}}></div>
@@ -38,15 +38,6 @@ var FriendBox = React.createClass({
 var FriendList = React.createClass({
   getInitialState: function() {
     return {
-      selected: 1,
-      friends: [
-        [0, '陌生人', 'read', '', 'img/friend_0.jpg'],
-        [1, 'Apple', 'selected', '', 'img/friend_1.jpg'],
-        [2, 'Banana', 'read', '', 'img/friend_2.jpg'],
-        [3, 'Cake', 'unread', '', 'img/friend_3.jpg'],
-        [4, 'Donut', 'read', 'off-line', 'img/friend_4.jpg'],
-        [5, 'Egg', 'unread', 'off-line', 'img/friend_5.jpg']
-      ]
     };
   },
   friendClickHandler: function(e) {
@@ -68,13 +59,11 @@ var FriendList = React.createClass({
     			</div>
     		</div>
         {
-          this.state.friends.map(function(friend){
+          this.props.friends.map(function(friend){
             return (
-              <div className={"friend-unit " + "friend-" + friend[2] + " " + friend[3]}>
-                <FriendBox ref={'friend'+friend[0]} name={friend[1]} img={friend[4]} onClick={this.friendClickHandler}/>
-              </div>
-            )
-          })
+              <FriendBox friend={friend} select={this.props.select}/>
+            );
+          }.bind(this))
         }
     	</div>
     );
@@ -183,8 +172,8 @@ var ChatRoom = React.createClass({
 var Content = React.createClass({
   getInitialState: function() {
     return {
-      who: 'Apple',
-      header: 'Its where my demons hide.',
+      who: 1,
+      header: 'Its where my demons hide.', /* header need fix */
       friends: [
         {
           index: 0,
@@ -240,8 +229,8 @@ var Content = React.createClass({
   render: function() {
     return (
       <div>
-        <FriendList friends={this.state.friends} selectedFriend={this.state.who}/>
-        <ChatRoom name={this.state.who} header={this.state.header} select={this.selectFriend}/>
+        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
+        <ChatRoom name={this.state.who} header={this.state.header}/>
       </div>
     );
   }
