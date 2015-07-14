@@ -1,0 +1,22 @@
+{
+  "name": "bonbon",
+  "version": "0.1.0",
+  "authors": [
+    "liu115 <jimmydiablo@gmail.com>"
+  ],
+  "dependencies": {
+    "react": "",
+    "jquery": "",
+    "font-awesome": "",
+    "reset-css": ""
+  },
+  "description": "bonbon is a....",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
