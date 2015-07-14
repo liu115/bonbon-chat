@@ -12,8 +12,8 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// Start : 一個gin handler，為websocket之入口
-func Start(c *gin.Context) {
+// ChatHandler 一個gin handler，為websocket之入口
+func ChatHandler(c *gin.Context) {
 	fmt.Println("got request")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err == nil {

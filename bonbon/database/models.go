@@ -21,6 +21,7 @@ type Friend struct {
 	FriendID int
 }
 
+// ChatRoom database model for chat room
 type ChatRoom struct {
 	ID int
 }
