@@ -292,7 +292,8 @@ nav {
 }
 
 #message-content {
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
 }
 
 #all-friend-content {

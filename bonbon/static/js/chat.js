@@ -1,4 +1,4 @@
-var mySocket = new WebSocket("ws://localhost:8080/chat");
+//var mySocket = new WebSocket("ws://localhost:8080/chat");
 var SideBar = React.createClass({
   render: function() {
     return (
@@ -22,12 +22,12 @@ var SideBar = React.createClass({
 var FriendBox = React.createClass({
   render: function() {
     return (
-      <div className="friend-unit friend-read">
+      <div>
         <div className="friend-avatar">
-          <img src="img/friend_0.jpg"/>
+          <img src={this.props.img}/>
         </div>
         <div className="friend-info">
-          <p className="friend-info-name">陌生人</p>
+          <p className="friend-info-name">{this.props.name}</p>
           <p className="friend-info-status">最後的聊天內容</p>
         </div>
         <div style={{clear: "both"}}></div>
@@ -36,6 +36,29 @@ var FriendBox = React.createClass({
   }
 });
 var FriendList = React.createClass({
+  getInitialState: function() {
+    return {
+      selected: 1,
+      friends: [
+        [0, '陌生人', 'read', '', 'img/friend_0.jpg'],
+        [1, 'Apple', 'selected', '', 'img/friend_1.jpg'],
+        [2, 'Banana', 'read', '', 'img/friend_2.jpg'],
+        [3, 'Cake', 'unread', '', 'img/friend_3.jpg'],
+        [4, 'Donut', 'read', 'off-line', 'img/friend_4.jpg'],
+        [5, 'Egg', 'unread', 'off-line', 'img/friend_5.jpg']
+      ]
+    };
+  },
+  friendClickHandler: function(e) {
+    alert("clicked");
+    this.state.friends[this.state.selected][2] = 'read';
+    this.state.selected = e.target.ref.substring(6);
+    this.state.friends[this.state.selected][2] = 'selected';
+    this.setState({
+      selected: this.state.selected,
+      friends: this.state.friends
+    });
+  },
   render: function() {
     return (
       <div id="friend-area">
@@ -44,71 +67,15 @@ var FriendList = React.createClass({
     				<input type="text" placeholder="搜尋朋友"/>
     			</div>
     		</div>
-    		// stranger
-    		<div className="friend-unit friend-read">
-    			<div className="friend-avatar">
-    				<img src="img/friend_0.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">陌生人</p>
-    				<p className="friend-info-status">最後的聊天內容</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    		//message: selected
-    		<div className="friend-unit friend-selected">
-    			<div className="friend-avatar">
-    				<img src="img/friend_1.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">Apple</p>
-    				<p className="friend-info-status">目前選取的朋友</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    		// message: on-line, have read
-    		<div className="friend-unit friend-read">
-    			<div className="friend-avatar">
-    				<img src="img/friend_2.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">Banana</p>
-    				<p className="friend-info-status">上線的朋友、所有訊息已讀</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    		// message: on-line, something unread
-    		<div className="friend-unit friend-unread">
-    			<div className="friend-avatar">
-    				<img src="img/friend_3.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">Cake</p>
-    				<p className="friend-info-status">上線的朋友、有訊息未讀</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    		// message: off-line, have unread
-    		<div className="friend-unit friend-read off-line">
-    			<div className="friend-avatar">
-    				<img src="img/friend_4.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">Donut</p>
-    				<p className="friend-info-status">離線的朋友、所有訊息已讀</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    		<div className="friend-unit friend-unread off-line">
-    			<div className="friend-avatar">
-    				<img src="img/friend_5.jpg"/>
-    			</div>
-    			<div className="friend-info">
-    				<p className="friend-info-name">Egg</p>
-    				<p className="friend-info-status">離線的朋友、有訊息未讀</p>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
+        {
+          this.state.friends.map(function(friend){
+            return (
+              <div className={"friend-unit " + "friend-" + friend[2] + " " + friend[3]} onClick={this.friendClickHandler}>
+                <FriendBox ref={'friend'+friend[0]} name={friend[1]} img={friend[4]}/>
+              </div>
+            )
+          })
+        }
     	</div>
     );
   }
@@ -119,7 +86,18 @@ var ChatRoom = React.createClass({
     //name is this.props.name and header take from the name
     return {
       messages: [
-        ['system', '已建立連線，開始聊天吧！'], ['me', 'hihi'], ['others', 'abcde']
+        {
+          from: 'system',
+          content: '已建立連線，開始聊天吧！'
+        },
+        {
+          from: 'me',
+          content: 'hihi'
+        },
+        {
+          from: 'others',
+          content: 'abcde'
+        }
       ],
       userInput: '',
       scroll: 0,
@@ -135,11 +113,16 @@ var ChatRoom = React.createClass({
   sendMessage: function(e) {
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    this.state.messages.push(['me', 'lalala']);
+    if (this.state.userInput != ''){
+    this.state.messages.push({
+      from: 'me',
+      content: this.state.userInput
+    });
     this.setState({
       messages: this.state.messages,
       userInput: ''
     });
+    }
   },
   handleResize: function(e) {
     this.setState({
@@ -162,7 +145,7 @@ var ChatRoom = React.createClass({
     		<div id="message-content" style={{height: (this.state.roomHeight + 'px')}}>
         {
           this.state.messages.map(function(msg) {
-            return <p><span className={"message-" + msg[0]}>{msg[1]}</span></p>
+            return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
           })
         }
     		</div>
