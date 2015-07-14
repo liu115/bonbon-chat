@@ -78,3 +78,16 @@ $ bonbon-server # 假設 $GOPATH/bin 在 $PATH 內
 * MROS
   1. routing funcionality
   2. websocket interface
+
+## Task # 3
+* Due on 2015/07/18
+
+### Jobs
+* Yue-Cheng
+  1. fix styling in chat.html
+
+* jerry73204
+  1. basic database interface (Account, ChatRoom)
+
+* MROS
+  1. websocket interface
