@@ -22,7 +22,7 @@ var SideBar = React.createClass({
 var FriendBox = React.createClass({
   render: function() {
     return (
-      <div>
+      <div >
         <div className="friend-avatar">
           <img src={this.props.img}/>
         </div>
@@ -50,7 +50,7 @@ var FriendList = React.createClass({
     };
   },
   friendClickHandler: function(e) {
-    alert("clicked");
+    alert("claaaicked");
     this.state.friends[this.state.selected][2] = 'read';
     this.state.selected = e.target.ref.substring(6);
     this.state.friends[this.state.selected][2] = 'selected';
@@ -70,8 +70,8 @@ var FriendList = React.createClass({
         {
           this.state.friends.map(function(friend){
             return (
-              <div className={"friend-unit " + "friend-" + friend[2] + " " + friend[3]} onClick={this.friendClickHandler}>
-                <FriendBox ref={'friend'+friend[0]} name={friend[1]} img={friend[4]}/>
+              <div className={"friend-unit " + "friend-" + friend[2] + " " + friend[3]}>
+                <FriendBox ref={'friend'+friend[0]} name={friend[1]} img={friend[4]} onClick={this.friendClickHandler}/>
               </div>
             )
           })
@@ -114,14 +114,22 @@ var ChatRoom = React.createClass({
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
     if (this.state.userInput != ''){
-    this.state.messages.push({
-      from: 'me',
-      content: this.state.userInput
-    });
-    this.setState({
-      messages: this.state.messages,
-      userInput: ''
-    });
+      this.state.messages.push({
+        from: 'me',
+        content: this.state.userInput
+      });
+      this.setState({
+        messages: this.state.messages,
+        userInput: ''
+      });
+      //scrollTop = scrollHeight
+    }
+    React.findDOMNode(this.refs.refInput).focus();
+  },
+  sendMessageByKeyboard: function(e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      this.sendMessage();
     }
   },
   handleResize: function(e) {
@@ -132,6 +140,7 @@ var ChatRoom = React.createClass({
   },
   componentDidMount: function() {
     window.addEventListener('resize', this.handleResize);
+    React.findDOMNode(this.refs.refInput).focus();
   },
   componentWillUnmount: function() {
     window.removeEventListener('resize', this.handleResize);
@@ -152,7 +161,7 @@ var ChatRoom = React.createClass({
     		<div id="message-panel" ref="panel">
     			<div id="message-box">
     				<div id="wrapper-message-box" className="wrapper-input">
-    					<input type="text" name="id" id="login-id" value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
+    					<input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
     				</div>
     			</div>
     			<div className="pull-left">
@@ -175,14 +184,64 @@ var Content = React.createClass({
   getInitialState: function() {
     return {
       who: 'Apple',
-      header: 'Its where my demons hide.'
+      header: 'Its where my demons hide.',
+      friends: [
+        {
+          index: 0,
+          name: '陌生人',
+          stat: 'read',
+          online: true,
+          img: 'img/friend_0.jpg'
+        },
+        {
+          index: 1,
+          name: 'Apple',
+          stat: 'selected',
+          online: true,
+          img: 'img/friend_1.jpg'
+        },
+        {
+          index: 2,
+          name: 'Banana',
+          stat: 'read',
+          online: true,
+          img: 'img/friend_2.jpg'
+        },
+        {
+          index: 3,
+          name: 'Cake',
+          stat: 'unread',
+          online: true,
+          img: 'img/friend_3.jpg'
+        },
+        {
+          index: 4,
+          name: 'Donut',
+          stat: 'read',
+          online: false,
+          img: 'img/friend_4.jpg'
+        },
+        {
+          index: 5,
+          name: 'Egg',
+          stat: 'unread',
+          online: false,
+          img: 'img/friend_5.jpg'
+        }
+      ]
     };
+  },
+  selectFriend: function(selectedFriend) {
+    setState({
+      who: selectedFriend
+      //set header from data base
+    });
   },
   render: function() {
     return (
       <div>
-        <FriendList />
-        <ChatRoom name={this.state.who} header={this.state.header}/>
+        <FriendList friends={this.state.friends} selectedFriend={this.state.who}/>
+        <ChatRoom name={this.state.who} header={this.state.header} select={this.selectFriend}/>
       </div>
     );
   }
