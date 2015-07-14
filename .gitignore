@@ -2,6 +2,3 @@
 .*~
 *.swp
 .DS_Store
-
-# gom local package
-_vendor/

@@ -9,6 +9,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+// Show : just for test
 func Show() {
 	println("ohoh")
 }
