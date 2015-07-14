@@ -67,20 +67,6 @@ var ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
-      messages: [
-        {
-          from: 'system',
-          content: '已建立連線，開始聊天吧！'
-        },
-        {
-          from: 'me',
-          content: 'hihi'
-        },
-        {
-          from: 'others',
-          content: 'abcde'
-        }
-      ],
       userInput: '',
       scroll: 0,
       roomWidth: window.innerWidth - 521,
@@ -96,12 +82,11 @@ var ChatRoom = React.createClass({
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
     if (this.state.userInput != ''){
-      this.state.messages.push({
+      this.props.addMessage(this.props.target, 'buttom', {
         from: 'me',
         content: this.state.userInput
       });
       this.setState({
-        messages: this.state.messages,
         userInput: ''
       });
       //scrollTop = scrollHeight
@@ -135,7 +120,7 @@ var ChatRoom = React.createClass({
         </div>
         <div id="message-content" style={{height: (this.state.roomHeight + 'px')}}>
         {
-          this.state.messages.map(function(msg) {
+          this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
           })
         }
@@ -167,6 +152,37 @@ var Content = React.createClass({
     return {
       who: 1,
       header: 'Its where my demons hide.', /* header need fix */
+      messages: [
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          }
+        ],
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          },
+          {
+            from: 'me',
+            content: 'hihi'
+          },
+          {
+            from: 'others',
+            content: 'abcde'
+          }
+        ],
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          }
+        ],
+        [],
+        [],
+        []
+      ],
       friends: [
         {
           index: 0,
@@ -222,11 +238,19 @@ var Content = React.createClass({
       //set header from data base
     });
   },
+  addMessage: function(who, where, message) {
+    if (where == 'buttom') {
+      this.state.messages[who].push(message);
+    }
+    this.setState({
+      messages: this.state.messages
+    });
+  },
   render: function() {
     return (
       <div>
         <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
-        <ChatRoom target={this.state.who} friends={this.state.friends} header={this.state.header}/>
+        <ChatRoom messages={this.state.messages[this.state.who]} target={this.state.who} friends={this.state.friends} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
   }
