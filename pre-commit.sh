@@ -50,8 +50,8 @@ git diff-index --check --cached $against -- || exit 1
 
 # Environment sanity check
 [ ! -z "$GOPATH" ] || (echo 'GOPATH is not set. Refer to README.md for setup.'; exit 1)
-command -v golint || (echo 'command "golint" not found. Refer to README.md for setup.'; exit 1)
+command -v golint > /dev/null || (echo 'command "golint" not found. Refer to README.md for setup.'; exit 1)
 
 # Run golint
-GOLINT_OUTPUT="$(find ./bonbon -name '*.go' -print0 | xargs -0 golint 2>&1)"
+GOLINT_OUTPUT="$(find ./bonbon -type d -print0 | xargs -0 -n 1 golint 2>&1)"
 [ -z "$GOLINT_OUTPUT" ] || (echo "$GOLINT_OUTPUT"; exit 1)
