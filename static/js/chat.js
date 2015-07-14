@@ -10,9 +10,9 @@ var SideBar = React.createClass({
         </div>
         <a id="new-connection">建立新連線</a>
         <ul id="menu">
-          <li><a><span><i className="fa fa-comment"></i>朋友列表</span></a></li>
-          <li><a><span><i className="fa fa-cog"></i>標籤設定</span></a></li>
-          <li><a><span><i className="fa fa-sign-out"></i>登出</span></a></li>
+          <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
+          <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
+          <li><a><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
         </ul>
       </nav>
       //<!-- end of navigation area -->
@@ -20,9 +20,12 @@ var SideBar = React.createClass({
   }
 });
 var FriendBox = React.createClass({
+  handleClick: function() {
+    this.props.select(this.props.friend.index);
+  },
   render: function() {
     return (
-      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")}>
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
         <div className="friend-avatar">
           <img src={this.props.friend.img}/>
         </div>
@@ -39,16 +42,6 @@ var FriendList = React.createClass({
   getInitialState: function() {
     return {
     };
-  },
-  friendClickHandler: function(e) {
-    alert("claaaicked");
-    this.state.friends[this.state.selected][2] = 'read';
-    this.state.selected = e.target.ref.substring(6);
-    this.state.friends[this.state.selected][2] = 'selected';
-    this.setState({
-      selected: this.state.selected,
-      friends: this.state.friends
-    });
   },
   render: function() {
     return (
@@ -138,7 +131,7 @@ var ChatRoom = React.createClass({
     return (
       <div id="message-area" style={{width: (this.state.roomWidth + 'px')}}>
         <div id="message-header" ref="header">
-          {this.props.name} - <a id="message-header-sign" href="#">{this.props.header}</a>
+          {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
         <div id="message-content" style={{height: (this.state.roomHeight + 'px')}}>
         {
@@ -221,8 +214,11 @@ var Content = React.createClass({
     };
   },
   selectFriend: function(selectedFriend) {
-    setState({
-      who: selectedFriend
+    this.state.friends[this.state.who].stat = 'read';
+    this.state.friends[selectedFriend].stat = 'selected';
+    this.setState({
+      who: selectedFriend,
+      friends: this.state.friends
       //set header from data base
     });
   },
@@ -230,7 +226,7 @@ var Content = React.createClass({
     return (
       <div>
         <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
-        <ChatRoom name={this.state.who} header={this.state.header}/>
+        <ChatRoom target={this.state.who} friends={this.state.friends} header={this.state.header}/>
       </div>
     );
   }
