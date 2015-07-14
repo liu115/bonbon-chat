@@ -3,4 +3,3 @@
 *.swp
 .DS_Store
 _vendor/
-./bonbon-server

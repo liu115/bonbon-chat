@@ -1,9 +1,9 @@
 # Example setup
 1. Install golang on your system.
 ```
-$ apt-get install golang # Ubuntu, Debian, etc
-$ yum install golang     # Fedora, CentOS, etc
-$ pacman -S go           # ArchLinux
+# apt-get install golang # Ubuntu, Debian, etc
+# yum install golang     # Fedora, CentOS, etc
+# pacman -S go           # ArchLinux
 ```
 
 2. Set environment variable GOPATH.
@@ -24,7 +24,6 @@ $ ln -s ../../pre-commit.sh .git/hooks/pre-commit
 
 5. Link project source in GOPATH.
 ```
-$ cd bonbon
 $ ln -s $PWD ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
 ```
 
@@ -37,17 +36,17 @@ $ go build bonbon # Suceed if no output
 
 1. 安裝依賴
 ```
-$ gom install # 假設在本專案跟目錄
+$ ./set-deps.sh # 假設在本專案跟目錄
 ```
 
 2. 編譯
 ```
-$ gom build bonbon/bonbon-server
+$ go install bonbon/bonbon-server
 ```
 
 3. 執行
 ```
-$ ./bonbon-server
+$ bonbon-server # 假設 $GOPATH/bin 在 $PATH 內
 ```
 
 # Advices
@@ -79,16 +78,3 @@ $ ./bonbon-server
 * MROS
   1. routing funcionality
   2. websocket interface
-
-## Task # 3
-* Due on 2015/07/14
-
-### Jobs
-* Yue-Cheng
-  1. fix styling in chat.html
-
-* jerry73204
-  1. basic database interface (Account, ChatRoom)
-
-* MROS
-  1. websocket interface
