@@ -1,0 +1,75 @@
+前後端介面
+
+1. 登入
+2. 初始化
+3. 個人設定
+	a. 個人上傳設定
+	b. 通知所有好友，此人修改
+4. 要求匿名連線
+	a. 陌生人
+	b. 隨機臉書好友
+5. 聊天、對話間進行操作（與好友or陌生人or隨機臉書好友）
+	a. 互傳訊息
+	b. 斷線（陌生人）
+	c. bonbon（陌生人）
+	d. 歷史（好友）
+	e. 已讀
+	f. 上下線
+6.  a. 成為好友
+	b. 刪好友
+7. 好友資料
+8. 傳圖 （暫時不做）
+
+websocket 強在不需要進行輪詢，若沒有伺服器需要主動傳訊息的狀況，是可以考慮用AJAX來做
+websocket使用異步回覆
+
+傳輸方式
+1. 登入使用FB oauth，登入後記錄access_token，即其到期時間，在此之前用網站本身的session去記是否登入
+2. AJAX，僅使用一次，websocket功能不大
+3. AJAX，可設定{大頭貼, 簽名檔}
+4. websocket
+5. websocket
+6. websocket
+7. 塞網址
+
+API 實體
+1. GET /
+2. GET /init
+	回應{"setting": {"sign": "XXXXXXX"},
+      "friends": [{"id": XXXXXX, "msg": "XXXXXX", "sign": "XXXXXXX", "nick": "XXXXX"}, ...]}
+	說明：msg為上次未讀訊息
+3.
+	請求 PUT /setting
+	回應 200 OK
+4.  請求 {"cmd": "connect", "type": "fb_friend or stranger"}
+	回應 {"OK": true, "cmd": "connect", "content": {"sign": "XXXXXXX"}}
+5.
+	a. 請求 {"cmd": "send", "who": "對方id or stranger", "msg": "XXXXXXX", "order": XXX}
+	   回應 {"OK": true, "cmd": "send", "who": "對方id or stranger", "time": XXXXXX, "order": XX}
+	b. 請求 {"cmd": "disconnect"}
+	   回應 {"OK": true, "cmd": "disconnect"}
+	c. 請求 {"cmd": "bonbon"}
+	   回應 {"OK": true, "cmd": "bonbon"}
+	d. 請求 {"cmd": "history", "who": "對方id", "number": XX, "when": XXXXXXX, "order": XXX}
+	   回應 {"cmd": "history", "who": "對方id", "number": XX, "order": XXX}
+    說明：a, d的order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
+	e. 請求 {"cmd": "read", "who": "對方id"}
+		 請求 {"OK": true, "cmd": "read", "who": "對方id"}
+	f. 伺服器主動 {"cmd": "status", "who": "對方id", "status": "on or off"}
+6.
+	a. 伺服器主動 {"cmd": "new_friend", "who": "對方id", "nick", "XXXXX"}       伺服器先送假暱稱
+	b. 請求 {"cmd": "delete", "who": "對方id"}
+       回應 {"OK": true", "cmd": "delete", "who": "對方id}
+7. 請求 GET /user/id
+   回應 {"nick": "XXXX", "sign": "XXXXXX"}
+
+
+前端行為
+1.
+2. 大頭貼為固定網址/user_photo/id，圖片都拿網址後插入頁面，需要拿取的有，{自己資料{簽名檔}, []朋友名單{id, 未讀訊息, 簽名檔}}
+3. multipart
+4.
+5.
+6.
+   a. 在好友欄內加入新人，
+   b. 拔掉好友
