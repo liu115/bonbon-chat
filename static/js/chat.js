@@ -10,9 +10,9 @@ var SideBar = React.createClass({
         </div>
         <a id="new-connection">建立新連線</a>
         <ul id="menu">
-          <li><a><span><i className="fa fa-comment"></i>朋友列表</span></a></li>
-          <li><a><span><i className="fa fa-cog"></i>標籤設定</span></a></li>
-          <li><a><span><i className="fa fa-sign-out"></i>登出</span></a></li>
+          <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
+          <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
+          <li><a><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
         </ul>
       </nav>
       //<!-- end of navigation area -->
@@ -20,14 +20,17 @@ var SideBar = React.createClass({
   }
 });
 var FriendBox = React.createClass({
+  handleClick: function() {
+    this.props.select(this.props.friend.index);
+  },
   render: function() {
     return (
-      <div>
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
         <div className="friend-avatar">
-          <img src={this.props.img}/>
+          <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
-          <p className="friend-info-name">{this.props.name}</p>
+          <p className="friend-info-name">{this.props.friend.name}</p>
           <p className="friend-info-status">最後的聊天內容</p>
         </div>
         <div style={{clear: "both"}}></div>
@@ -38,26 +41,7 @@ var FriendBox = React.createClass({
 var FriendList = React.createClass({
   getInitialState: function() {
     return {
-      selected: 1,
-      friends: [
-        [0, '陌生人', 'read', '', 'img/friend_0.jpg'],
-        [1, 'Apple', 'selected', '', 'img/friend_1.jpg'],
-        [2, 'Banana', 'read', '', 'img/friend_2.jpg'],
-        [3, 'Cake', 'unread', '', 'img/friend_3.jpg'],
-        [4, 'Donut', 'read', 'off-line', 'img/friend_4.jpg'],
-        [5, 'Egg', 'unread', 'off-line', 'img/friend_5.jpg']
-      ]
     };
-  },
-  friendClickHandler: function(e) {
-    alert("clicked");
-    this.state.friends[this.state.selected][2] = 'read';
-    this.state.selected = e.target.ref.substring(6);
-    this.state.friends[this.state.selected][2] = 'selected';
-    this.setState({
-      selected: this.state.selected,
-      friends: this.state.friends
-    });
   },
   render: function() {
     return (
@@ -68,13 +52,11 @@ var FriendList = React.createClass({
           </div>
         </div>
         {
-          this.state.friends.map(function(friend){
+          this.props.friends.map(function(friend){
             return (
-              <div className={"friend-unit " + "friend-" + friend[2] + " " + friend[3]} onClick={this.friendClickHandler}>
-                <FriendBox ref={'friend'+friend[0]} name={friend[1]} img={friend[4]}/>
-              </div>
-            )
-          })
+              <FriendBox friend={friend} select={this.props.select}/>
+            );
+          }.bind(this))
         }
       </div>
     );
@@ -85,20 +67,6 @@ var ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
-      messages: [
-        {
-          from: 'system',
-          content: '已建立連線，開始聊天吧！'
-        },
-        {
-          from: 'me',
-          content: 'hihi'
-        },
-        {
-          from: 'others',
-          content: 'abcde'
-        }
-      ],
       userInput: '',
       scroll: 0,
       roomWidth: window.innerWidth - 521,
@@ -114,14 +82,21 @@ var ChatRoom = React.createClass({
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
     if (this.state.userInput != ''){
-    this.state.messages.push({
-      from: 'me',
-      content: this.state.userInput
-    });
-    this.setState({
-      messages: this.state.messages,
-      userInput: ''
-    });
+      this.props.addMessage(this.props.target, 'buttom', {
+        from: 'me',
+        content: this.state.userInput
+      });
+      this.setState({
+        userInput: ''
+      });
+      //scrollTop = scrollHeight
+    }
+    React.findDOMNode(this.refs.refInput).focus();
+  },
+  sendMessageByKeyboard: function(e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      this.sendMessage();
     }
   },
   handleResize: function(e) {
@@ -132,6 +107,7 @@ var ChatRoom = React.createClass({
   },
   componentDidMount: function() {
     window.addEventListener('resize', this.handleResize);
+    React.findDOMNode(this.refs.refInput).focus();
   },
   componentWillUnmount: function() {
     window.removeEventListener('resize', this.handleResize);
@@ -140,32 +116,32 @@ var ChatRoom = React.createClass({
     return (
       <div id="message-area" style={{width: (this.state.roomWidth + 'px')}}>
         <div id="message-header" ref="header">
-          {this.props.name} - <a id="message-header-sign" href="#">{this.props.header}</a>
+          {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
         <div id="message-content" style={{height: (this.state.roomHeight + 'px')}}>
         {
-          this.state.messages.map(function(msg) {
+          this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
           })
         }
-        </div>
-        <div id="message-panel" ref="panel">
-          <div id="message-box">
-            <div id="wrapper-message-box" className="wrapper-input">
-              <input type="text" name="id" id="login-id" value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
-            </div>
-          </div>
-          <div className="pull-left">
-            <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
-            <a id="button-report" className="message-button" onclick="return false">離開</a>
-          </div>
-          <div className="pull-right">
-            <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
-            <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
-          </div>
-          <div style={{clear: "both"}}></div>
-        </div>
-      </div>
+    		</div>
+    		<div id="message-panel" ref="panel">
+    			<div id="message-box">
+    				<div id="wrapper-message-box" className="wrapper-input">
+    					<input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
+    				</div>
+    			</div>
+    			<div className="pull-left">
+    				<a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
+    				<a id="button-report" className="message-button" onclick="return false">離開</a>
+    			</div>
+    			<div className="pull-right">
+    				<a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
+    				<a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
+    			</div>
+    			<div style={{clear: "both"}}></div>
+    		</div>
+    	</div>
     );
   }
 });
@@ -174,15 +150,107 @@ var ChatRoom = React.createClass({
 var Content = React.createClass({
   getInitialState: function() {
     return {
-      who: 'Apple',
-      header: 'Its where my demons hide.'
+      who: 1,
+      header: 'Its where my demons hide.', /* header need fix */
+      messages: [
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          }
+        ],
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          },
+          {
+            from: 'me',
+            content: 'hihi'
+          },
+          {
+            from: 'others',
+            content: 'abcde'
+          }
+        ],
+        [
+          {
+            from: 'system',
+            content: '已建立連線，開始聊天吧！'
+          }
+        ],
+        [],
+        [],
+        []
+      ],
+      friends: [
+        {
+          index: 0,
+          name: '陌生人',
+          stat: 'read',
+          online: true,
+          img: 'img/friend_0.jpg'
+        },
+        {
+          index: 1,
+          name: 'Apple',
+          stat: 'selected',
+          online: true,
+          img: 'img/friend_1.jpg'
+        },
+        {
+          index: 2,
+          name: 'Banana',
+          stat: 'read',
+          online: true,
+          img: 'img/friend_2.jpg'
+        },
+        {
+          index: 3,
+          name: 'Cake',
+          stat: 'unread',
+          online: true,
+          img: 'img/friend_3.jpg'
+        },
+        {
+          index: 4,
+          name: 'Donut',
+          stat: 'read',
+          online: false,
+          img: 'img/friend_4.jpg'
+        },
+        {
+          index: 5,
+          name: 'Egg',
+          stat: 'unread',
+          online: false,
+          img: 'img/friend_5.jpg'
+        }
+      ]
     };
+  },
+  selectFriend: function(selectedFriend) {
+    this.state.friends[this.state.who].stat = 'read';
+    this.state.friends[selectedFriend].stat = 'selected';
+    this.setState({
+      who: selectedFriend,
+      friends: this.state.friends
+      //set header from data base
+    });
+  },
+  addMessage: function(who, where, message) {
+    if (where == 'buttom') {
+      this.state.messages[who].push(message);
+    }
+    this.setState({
+      messages: this.state.messages
+    });
   },
   render: function() {
     return (
       <div>
-        <FriendList />
-        <ChatRoom name={this.state.who} header={this.state.header}/>
+        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
+        <ChatRoom messages={this.state.messages[this.state.who]} target={this.state.who} friends={this.state.friends} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
   }
