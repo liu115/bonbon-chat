@@ -9,6 +9,7 @@ import (
 func main() {
 	app := gin.Default()
 	app.GET("/chat", communicate.ChatHandler)
+	app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})

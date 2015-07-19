@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>fb test</title>
+        <script type="text/javascript" id="facebook-jssdk" src="http://connect.facebook.net/en_US/sdk.js"></script>
+    </head>
+    <body>
+
+        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+        </fb:login-button>
+
+        <div id="status">
+        </div>
+
+        <script>
+         function statusChangeCallback(response) {
+             if (response.status === 'connected') {
+                 var body = "access_token=" + response.authResponse.accessToken;
+                 var req = new XMLHttpRequest();
+                 req.onreadystatechange = function () {
+                     console.log(this);
+                 };
+                 req.open("POST", "/login", true);
+                 req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                 req.send(body);
+             } else if (response.status === 'not_authorized') {
+                 document.getElementById('status').innerHTML = 'Please log ' +
+                                                               'into this app.';
+             } else {
+                 document.getElementById('status').innerHTML = 'Please log ' +
+                                                               'into Facebook.';
+             }
+         }
+
+         function checkLoginState() {
+             FB.getLoginStatus(function(response) {
+                 statusChangeCallback(response);
+             });
+         }
+
+         window.fbAsyncInit = function() {
+             FB.init({
+                 appId      : '915780538494020',
+                 xfbml      : true,
+                 version    : 'v2.4'
+             });
+         };
+
+         FB.getLoginStatus(function(response) {
+             statusChangeCallback(response);
+         });
+        </script>
+    </body>
+</html>
