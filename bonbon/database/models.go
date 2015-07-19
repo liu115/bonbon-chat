@@ -1,7 +1,6 @@
 package database
 
 import (
-	// "fmt"
 	"time"
 	"bonbon/config"
 )
@@ -42,7 +41,7 @@ func GetAccount(token string) *Account {
 	user := Account{}
 	query := db.Where("facebook_id = ?", facebookID).First(&user)
 
-	// create account exists
+	// create account if not exist
 	if query.Error != nil {
 		user = Account{AccessToken: token,
 			FacebookID: facebookID,
