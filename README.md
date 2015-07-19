@@ -96,3 +96,16 @@ $ ./bonbon-server
 
 * MROS
   1. websocket interface
+
+## Break after task # 3
+* Until 2015/07/21
+* Hackathon Taiwan on dates 2015/07/18-19
+
+### Summary
+* Done restructure of frontend code (thanks liu115)
+* building-execution (go build) and package management (gom) precedures are established
+* basic database connection can be done
+* basic websocket interface and a draft of websocket api are proposed (need discussion)
+
+### Jobs
+* Discussion api draft proposed by MROS (API.txt)
