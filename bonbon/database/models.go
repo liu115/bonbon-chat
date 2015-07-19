@@ -1,6 +1,7 @@
 package database
 
 import (
+	// "fmt"
 	"time"
 	"bonbon/config"
 )
@@ -39,11 +40,29 @@ func GetAccount(token string) *Account {
 	// update account database
 	db := GetDB()
 	user := Account{}
-	db.Where("facebook_id = ? and is_enabled = ?", facebookID, true).First(&user)
+	query := db.Where("facebook_id = ?", facebookID).First(&user)
 
-	user.AccessToken = token
-	user.FacebookName = facebookName
-	db.Save(&user)
+	// create account exists
+	if query.Error != nil {
+		user = Account{AccessToken: token,
+			FacebookID: facebookID,
+			FacebookName: facebookName,
+			IsEnabled: true,
+		}
+		query := db.Create(&user)
+
+		if query.Error != nil {
+			return nil
+		}
+	} else {
+		user.AccessToken = token
+		user.FacebookName = facebookName
+		query := db.Save(&user)
+
+		if query.Error != nil {
+			return nil
+		}
+	}
 
 	return &user
 }
