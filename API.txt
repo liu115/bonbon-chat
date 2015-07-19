@@ -13,6 +13,7 @@
 	b. 斷線（陌生人）
 	c. bonbon（陌生人）
 	d. 歷史（好友）
+	e. 已讀
 6.  a. 成為好友
 	b. 刪好友
 7. 好友資料
@@ -33,7 +34,9 @@ websocket使用異步回覆
 API 實體
 1. GET /
 2. GET /init
-	回應{"setting": {"sign": "XXXXXXX"}, "friends": [{"id": XXXXXX, "msg": "XXXXXX", "sign": "XXXXXXX"}]}
+	回應{"setting": {"sign": "XXXXXXX"},
+      "friends": [{"id": XXXXXX, "msg": "XXXXXX", "sign": "XXXXXXX", "nick": "XXXXX"}, ...]}
+	說明：msg為上次未讀訊息
 3.
 	請求 PUT /setting
 	回應 200 OK
@@ -49,20 +52,22 @@ API 實體
 	d. 請求 {"cmd": "history", "who": "對方id", "number": XX, "when": XXXXXXX, "order": XXX}
 	   回應 {"cmd": "hidtory", "who": "對方id", "number": XX, "order": XXX}
     說明：a, d的order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
-6. 
+	e. 請求 {"cmd": "read", "who": "對方id"}
+		 請求 {"OK": true, "cmd": "read", "who": "對方id"}
+6.
 	a. 伺服器主動 {"cmd": "new_friend", "who": "對方id", "nick", "XXXXX"}       伺服器先送假暱稱
 	b. 請求 {"cmd": "delete", "who": "對方id"}
        回應 {"OK": true", "cmd": "delete", "who": "對方id}
 7. 請求 GET /user/id
    回應 {"nick": "XXXX", "sign": "XXXXXX"}
-   
+
 
 前端行為
-1. 
-2. 大頭貼為固定網址/user_photo，圖片都拿網址後插入頁面，需要拿取的有，{自己資料{簽名檔}, []朋友名單{id, 未讀訊息, 簽名檔}}
+1.
+2. 大頭貼為固定網址/user_photo/id，圖片都拿網址後插入頁面，需要拿取的有，{自己資料{簽名檔}, []朋友名單{id, 未讀訊息, 簽名檔}}
 3. multipart
-4. 
+4.
 5.
-6. 
+6.
    a. 在好友欄內加入新人，
    b. 拔掉好友

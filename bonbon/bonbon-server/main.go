@@ -9,6 +9,7 @@ import (
 
 func main() {
 	app := gin.Default()
+	app.GET("/init", communicate.InitHandler)
 	app.GET("/chat", communicate.ChatHandler)
 	app.POST("/signup", account.SignUpHandler)
 	app.POST("/login", account.LoginHandler)
