@@ -24,25 +24,33 @@ func ChatHandler(id int, c *gin.Context) {
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err == nil {
-				var decodedMsg map[string]interface{}
-				json.Unmarshal(msg, &decodedMsg)
-				switch decodedMsg["cmd"] {
-				case "init":
-					// TODO: 需要資料庫
-				case "setting":
-					// TODO: 需要資料庫
-				case "change_nick":
-					// TODO: 需要資料庫
-				case "connect":
-				case "connected":
-				case "send":
-				case "disconnect":
-				case "disconnected":
-				case "new_friend":
-					// TODO: 需要資料庫
-				default:
-					fmt.Println("未知的請求")
-				}
+				go func() {
+					var decodedMsg map[string]interface{}
+					json.Unmarshal(msg, &decodedMsg)
+					switch decodedMsg["cmd"] {
+					case "init":
+						// TODO: 需要資料庫
+					case "setting":
+						// TODO: 需要資料庫
+					case "change_nick":
+						// TODO: 需要資料庫
+					case "connect":
+					case "connected":
+					case "send":
+						sum := 0
+						for i := 0; i < 1e10; i++ {
+							sum += i
+						}
+						fmt.Println(sum)
+					case "disconnect":
+					case "disconnected":
+					case "new_friend":
+						// TODO: 需要資料庫
+					default:
+						fmt.Println("未知的請求")
+					}
+				}()
+				fmt.Println("end one read")
 			} else {
 				fmt.Println("can't read message, client close")
 				break

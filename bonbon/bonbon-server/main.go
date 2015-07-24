@@ -4,10 +4,13 @@ import (
 	"bonbon/communicate"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"runtime"
 	"strconv"
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	app := gin.Default()
 	// app.GET("/chat", communicate.ChatHandler)
 	app.GET("/test/chat/:id", func(c *gin.Context) {
