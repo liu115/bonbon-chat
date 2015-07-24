@@ -17,16 +17,24 @@ func ChatHandler(c *gin.Context) {
 	fmt.Println("got request")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err == nil {
+		// TODO: 送出初始化訊息
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err == nil {
-				var decodeP map[string]string
-				json.Unmarshal(msg, &decodeP)
-				switch decodeP["fun"] {
+				var decodedMsg map[string]string
+				json.Unmarshal(msg, &decodedMsg)
+				switch decodedMsg["cmd"] {
+				case "init":
+				case "setting":
+				case "change_nick":
+				case "connect":
+				case "connected":
 				case "send":
 					fmt.Println("使用者傳送訊息")
-				case "history":
-					fmt.Println("要求歷史")
+				case "disconnect":
+				case "disconnected":
+				case "status":
+				case "new_friend":
 				default:
 					fmt.Println("未知的請求")
 
