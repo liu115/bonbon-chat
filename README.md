@@ -34,19 +34,24 @@ $ go build bonbon # Suceed if no output
 
 # 執行伺服器
 
-1. 安裝依賴
+1. 安裝gom
 ```
-$ ./set-deps.sh # 假設在本專案跟目錄
-```
-
-2. 編譯
-```
-$ go install bonbon/bonbon-server
+$ go get github.com/mattn/gom # 第一次安裝，之後可省略這步驟
 ```
 
-3. 執行
+2. 安裝依賴
 ```
-$ bonbon-server # 假設 $GOPATH/bin 在 $PATH 內
+$ gom install # 假設在本專案跟目錄
+```
+
+3. 編譯
+```
+$ gom build bonbon/bonbon-server
+```
+
+4. 執行
+```
+$ ./bonbon-server
 ```
 
 # Advices
@@ -91,3 +96,16 @@ $ bonbon-server # 假設 $GOPATH/bin 在 $PATH 內
 
 * MROS
   1. websocket interface
+
+## Break after task # 3
+* Until 2015/07/21
+* Hackathon Taiwan on dates 2015/07/18-19
+
+### Summary
+* Done restructure of frontend code (thanks liu115)
+* building-execution (go build) and package management (gom) precedures are established
+* basic database connection can be done
+* basic websocket interface and a draft of websocket api are proposed (need discussion)
+
+### Jobs
+* Discussion api draft proposed by MROS (API.txt)

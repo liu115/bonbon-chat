@@ -2,30 +2,22 @@ package database
 
 import (
 	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
+	"bonbon/config"
 )
 
-// SQLConnection struct type for database connection hadle
-type SQLConnection struct {
-	db gorm.DB
-}
+var isDatabaseInitialized = false
 
-// Connect start connection to database
-func (conn *SQLConnection) Connect() {
-	db, err := gorm.Open("sqlite3", "/tmp/bonbon.db")
-
+// GetDB start connection to database
+func GetDB() (gorm.DB) {
+	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
 	if err != nil {
 		panic(err)
 	}
-	conn.db = db
-}
 
-// CreateAccount helper function for creating accounts
-func (conn *SQLConnection) CreateAccount(email string, username string) {
-	// TODO sanity check
-	// account := Account{Email: email, Username: username}
-}
-
-// RemoveAccount helper function for removing accounts
-func (conn *SQLConnection) RemoveAccount(email string, username string) {
-	// TODO implementation
+	if !isDatabaseInitialized {
+		db.AutoMigrate(&Account{}, &Friend{}, &ChatRoom{})
+		isDatabaseInitialized = true
+	}
+	return db
 }
