@@ -1,0 +1,63 @@
+前後端介面
+
+1. 登入
+2. 初始化
+3. 個人設定
+	a. 個人上傳設定 僅簽名、名字
+	b. 通知所有好友，此人修改
+4. 要求匿名連線
+	a. 陌生人
+	b. 隨機臉書好友
+	c. 朋友的朋友
+5. 聊天、對話間進行操作（與好友or陌生人or隨機臉書好友）
+	a. 互傳訊息
+	b. 斷線（陌生人）
+	c. bonbon（陌生人）
+	d. 歷史（好友） X
+	e. 已讀 X
+	f. 上下線
+6.  a. 成為好友
+	b. 刪好友 X
+7. 好友資料 撲克牌假名
+8. 傳圖 （暫時不做） X
+
+websocket 強在不需要進行輪詢，若沒有伺服器需要主動傳訊息的狀況，是可以考慮用AJAX來做
+websocket使用異步回覆
+
+傳輸方式
+1. 登入使用FB oauth，登入後記錄access_token，即其到期時間，在此之前用網站本身的session去記是否登入
+2. websocket
+3. websocket
+4. websocket
+5. websocket
+6. websocket
+7. 塞網址
+
+API 實體
+1. GET /
+2.  websocket onopen
+	{"setting": {"sign": "XXXXXXX"},
+      "friends": [{"id": XXXXXX, "sign": "XXXXXXX", "nick": "XXXXX"}, ...]}
+3. 
+	a. {"cmd": "setting", "content": {"sign": "XXXXXX"}}
+       {"OK": true, "cmd": "setting", "content": {"sign": "XXXXXXX"}}
+	b. 伺服器主動 {"cmd": "change_nick", "who": "對方id", "sign": "XXXXXX"}
+
+4.  請求 {"cmd": "connect", "type": "fb_friend or stranger"}
+	回應 {"OK": true or fase, "cmd": "connect", "content": {"sign": "XXXXXXX"}}
+5.
+	a. 請求 {"cmd": "send", "who": "對方id or stranger", "msg": "XXXXXXX", "order": XXX} // 修改使之類似bonbon
+	   回應 {"OK": true, "cmd": "send", "who": "對方id or stranger", "time": XXXXXX, "order": XX}
+    說明：order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
+	b. 請求 {"cmd": "disconnect"}
+	   回應 {"OK": true, "cmd": "disconnect"}
+	   伺服器主動斷另一邊
+	c. 請求 {"cmd": "bonbon"}
+	   回應 {"OK": true, "cmd": "bonbon"}
+	d. 
+	e. 
+	f. 伺服器主動 {"cmd": "status", "who": "對方id", "status": "on or off"}
+6.
+	a. 伺服器主動 {"cmd": "new_friend", "who": "對方id", "nick", "XXXXX"}       伺服器先送假暱稱
+	b. 
+
