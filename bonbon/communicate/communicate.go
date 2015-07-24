@@ -5,23 +5,26 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"net/http"
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 // ChatHandler 一個gin handler，為websocket之入口
-func ChatHandler(c *gin.Context) {
-	fmt.Println("got request")
+func ChatHandler(id int, c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err == nil {
-		// TODO: 送出初始化訊息
+		fmt.Printf("id %d login\n", id)
+		// TODO 通知所有人此人上線
+		// TODO 送出初始化訊息
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err == nil {
-				var decodedMsg map[string]string
+				var decodedMsg map[string]interface{}
 				json.Unmarshal(msg, &decodedMsg)
 				switch decodedMsg["cmd"] {
 				case "init":
@@ -35,7 +38,6 @@ func ChatHandler(c *gin.Context) {
 				case "send":
 				case "disconnect":
 				case "disconnected":
-				case "status":
 				case "new_friend":
 					// TODO: 需要資料庫
 				default:
@@ -47,6 +49,6 @@ func ChatHandler(c *gin.Context) {
 			}
 		}
 	} else {
-		fmt.Print("establish connection error")
+		fmt.Printf("establish connection error: %s\n", err.Error())
 	}
 }
