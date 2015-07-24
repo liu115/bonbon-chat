@@ -36,27 +36,30 @@ websocket使用異步回覆
 API 實體
 1. GET /
 2.  websocket onopen
-	{"setting": {"sign": "XXXXXXX"},
-      "friends": [{"id": XXXXXX, "sign": "XXXXXXX", "nick": "XXXXX"}, ...]}
+	{"cmd": "init",
+	"setting": {"sign": "XXXXXXX"},
+    "friends": [{"id": XXXXXX, "sign": "XXXXXXX", "nick": "XXXXX"}, ...]}
 3. 
 	a. {"cmd": "setting", "content": {"sign": "XXXXXX"}}
        {"OK": true, "cmd": "setting", "content": {"sign": "XXXXXXX"}}
 	b. 伺服器主動 {"cmd": "change_nick", "who": "對方id", "sign": "XXXXXX"}
 
-4.  請求 {"cmd": "connect", "type": "fb_friend or stranger"}
+4.  請求 {"cmd": "connect", "type": "fb_friend or stranger"} // 修改使之類似bonbon
 	回應 {"OK": true or fase, "cmd": "connect", "content": {"sign": "XXXXXXX"}}
+	伺服器主動：{"cmd": "connected", "content": {"sign": "XXXXXXX"}}
 5.
-	a. 請求 {"cmd": "send", "who": "對方id or stranger", "msg": "XXXXXXX", "order": XXX} // 修改使之類似bonbon
+	a. 請求 {"cmd": "send", "who": "對方id or stranger", "msg": "XXXXXXX", "order": XXX}
 	   回應 {"OK": true, "cmd": "send", "who": "對方id or stranger", "time": XXXXXX, "order": XX}
     說明：order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
 	b. 請求 {"cmd": "disconnect"}
 	   回應 {"OK": true, "cmd": "disconnect"}
-	   伺服器主動斷另一邊
+	   伺服器主動斷另一邊 {"cmd": "disconnected"}
 	c. 請求 {"cmd": "bonbon"}
 	   回應 {"OK": true, "cmd": "bonbon"}
 	d. 
 	e. 
-	f. 伺服器主動 {"cmd": "status", "who": "對方id", "status": "on or off"}
+	f. onopen
+	伺服器主動 {"cmd": "status", "who": "對方id", "status": "on or off"}
 6.
 	a. 伺服器主動 {"cmd": "new_friend", "who": "對方id", "nick", "XXXXX"}       伺服器先送假暱稱
 	b. 

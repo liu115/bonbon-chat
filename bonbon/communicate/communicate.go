@@ -25,19 +25,21 @@ func ChatHandler(c *gin.Context) {
 				json.Unmarshal(msg, &decodedMsg)
 				switch decodedMsg["cmd"] {
 				case "init":
+					// TODO: 需要資料庫
 				case "setting":
+					// TODO: 需要資料庫
 				case "change_nick":
+					// TODO: 需要資料庫
 				case "connect":
 				case "connected":
 				case "send":
-					fmt.Println("使用者傳送訊息")
 				case "disconnect":
 				case "disconnected":
 				case "status":
 				case "new_friend":
+					// TODO: 需要資料庫
 				default:
 					fmt.Println("未知的請求")
-
 				}
 			} else {
 				fmt.Println("can't read message, client close")
