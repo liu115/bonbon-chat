@@ -91,6 +91,12 @@ var ChatRoom = React.createClass({
       });
       //scrollTop = scrollHeight
     }
+    this.setState({
+      scroll: React.findDOMNode(this.refs.refContent).scrollHeight
+    }, function() {
+      React.findDOMNode(this.refs.refContent).scrollTop = (this.state.scroll);
+
+    });
     React.findDOMNode(this.refs.refInput).focus();
   },
   sendMessageByKeyboard: function(e) {
@@ -105,12 +111,19 @@ var ChatRoom = React.createClass({
       roomHeight: window.innerHeight - React.findDOMNode(this.refs.header).offsetHeight - React.findDOMNode(this.refs.panel).offsetHeight - 15
     });
   },
+  handleScroll: function() {
+    this.setState({
+      scroll: React.findDOMNode(this.refs.refContent).scrollTop
+    });
+  },
   componentDidMount: function() {
     window.addEventListener('resize', this.handleResize);
+    window.addEventListener('scroll', this.handleScroll);
     React.findDOMNode(this.refs.refInput).focus();
   },
   componentWillUnmount: function() {
     window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('scroll', this.handleScroll);
   },
   render: function() {
     return (
@@ -118,7 +131,7 @@ var ChatRoom = React.createClass({
         <div id="message-header" ref="header">
           {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
-        <div id="message-content" style={{height: (this.state.roomHeight + 'px')}}>
+        <div id="message-content" ref="refContent" style={{height: (this.state.roomHeight + 'px')}}>
         {
           this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
