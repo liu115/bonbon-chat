@@ -28,6 +28,9 @@ function createClient(id) {
 	client.sendTo = function (id, msg) {
 		client.send(JSON.stringify({Cmd: "send", Who: id, Msg: msg}))
 	}
+	client.toStranger = function (msg) {
+		client.sendTo(0, msg)
+	}
 	return client
 }
 
