@@ -6,12 +6,13 @@ import (
 
 // Account database model for account
 type Account struct {
-	ID              int        `sql:"AUTO_INCREMENT" gorm:"primary_key"`
+	ID              int          `sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	FacebookID      string
 	FacebookName    string
 	AccessToken     string
+	Signature       string
 	Friends         []Friendship
-	CreateAt        time.Time  `sql:"DEFAULT:current_timestamp"`
+	CreateAt        time.Time    `sql:"DEFAULT:current_timestamp"`
 }
 
 // Friendship database model for a friend relation to another

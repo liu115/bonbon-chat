@@ -9,7 +9,15 @@ import (
 	"bonbon/config"
 )
 
-var isDatabaseInitialized = false
+func init() {
+	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
+	if err != nil {
+		log.Fatalf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
+		return
+	}
+
+	db.AutoMigrate(&Account{}, &Friendship{})
+}
 
 // GetDB start connection to database
 func GetDB() (*gorm.DB, error) {
@@ -18,10 +26,6 @@ func GetDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if !isDatabaseInitialized {
-		db.AutoMigrate(&Account{}, &Friendship{})
-		isDatabaseInitialized = true
-	}
 	return &db, nil
 }
 
@@ -82,7 +86,7 @@ func CreateAccountByToken(token string) (*Account, error) {
 }
 
 // GetAccountByID get account object by id
-func GetAccountByID(ID int) (*Account, error) {
+func GetAccountByID(id int) (*Account, error) {
 	// update account database
 	db, err := GetDB()
 	if err != nil {
@@ -90,7 +94,7 @@ func GetAccountByID(ID int) (*Account, error) {
 	}
 
 	account := Account{}
-	query := db.Where("id = ?", ID).First(&account)
+	query := db.Where("id = ?", id).First(&account)
 
 	// create account if not exist
 	if query.Error != nil {
@@ -251,6 +255,47 @@ func RemoveFriendship(leftID int, rightID int) error {
 
 	if rightHasFriendship {
 		db.Delete(&rightFriendship)
+	}
+
+	return nil
+}
+
+// GetSignature get the signature string of an account
+func GetSignature(id int) (*string, error) {
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+
+	account := Account{}
+	query := db.Where("id = ?", id).First(&account)
+
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return &account.Signature, nil
+}
+
+// SetSignature set the signature string of an account
+func SetSignature(id int, signature string) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+
+	account := Account{}
+	query := db.Where("id = ?", id).First(&account)
+
+	if query.Error != nil {
+		return query.Error
+	}
+
+	account.Signature = signature
+	query = db.Save(&account)
+
+	if query.Error != nil {
+		return query.Error
 	}
 
 	return nil
