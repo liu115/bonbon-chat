@@ -2,15 +2,26 @@ package main
 
 import (
 	"strconv"
-	"bonbon/communicate"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
+	"github.com/gin-gonic/gin"
+	"bonbon/communicate"
+	"bonbon/config"
 )
 
 func main() {
+	// load config file
+	err := config.LoadConfigFile("bonbon.conf")
+	if err != nil {
+		panic(err.Error())
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	// setup server
+	gin.SetMode(config.Mode)
+
+	// set routes
 	app := gin.Default()
 	app.GET("/test/chat/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
@@ -27,5 +38,7 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
-	app.Run(":8080")
+
+	// run server
+	app.Run(config.Address)
 }
