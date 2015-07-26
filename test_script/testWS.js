@@ -19,6 +19,10 @@ function createClient(id) {
 	client.on('open', function () {
 		client.send("hello")
 	})
+
+	client.connect = function (type) {
+		client.send(JSON.stringify({Cmd: "connect", Type: type}))
+	}
 	return client
 }
 
