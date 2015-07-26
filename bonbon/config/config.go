@@ -4,6 +4,12 @@ import (
 	"github.com/huandu/facebook"
 )
 
+// ElectiveNickNames
+var ElectiveNickNames = []string{"Yuri", "Mighty", "7122"}
+
+// NumFriendsLimit maximum number of friends per account
+var NumFriendsLimit = 50
+
 // FBAppID App ID for Facebook graph api
 var FBAppID = "915780538494020"
 
