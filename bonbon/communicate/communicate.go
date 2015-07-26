@@ -18,13 +18,14 @@ var upgrader = websocket.Upgrader{
 
 type user struct {
 	conns []*websocket.Conn
-	match int // -1表示無配對
-	lock  *sync.Mutex
+	match int         // -1表示無配對
+	lock  *sync.Mutex // lock住conns
 }
 
 var onlineUser = make(map[int]*user)
 
 // 粒度高，將降低效能
+// TODO: 改為讀寫鎖或拆分粒度
 var globalMatchLock = new(sync.Mutex)
 
 // -1代表目前無人
@@ -40,8 +41,16 @@ func handleSend(msg []byte, id int, conn *websocket.Conn) {
 	if err == nil {
 		println(req.Msg)
 		now := time.Now().UnixNano()
-		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now}
+		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 		if req.Who != 0 && sendJSONTo(req.Who, ss) {
+			sendJSONTo(id, respondToSend(req, now, true))
+		} else if req.Who == 0 {
+			globalMatchLock.Lock()
+			if onlineUser[id].match != -1 {
+				ss.Who = 0
+				sendJSONTo(onlineUser[id].match, ss)
+			}
+			globalMatchLock.Unlock()
 			sendJSONTo(id, respondToSend(req, now, true))
 		} else {
 			sendJSONTo(id, respondToSend(req, now, false))

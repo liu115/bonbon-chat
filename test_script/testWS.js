@@ -17,11 +17,19 @@ function createClient(id) {
 	})
 
 	client.on('open', function () {
-		client.send("hello")
 	})
 
 	client.connect = function (type) {
 		client.send(JSON.stringify({Cmd: "connect", Type: type}))
+	}
+	client.disconnect = function () {
+		client.send(JSON.stringify({Cmd: "disconnect"}))
+	}
+	client.sendTo = function (id, msg) {
+		client.send(JSON.stringify({Cmd: "send", Who: id, Msg: msg}))
+	}
+	client.toStranger = function (msg) {
+		client.sendTo(0, msg)
 	}
 	return client
 }

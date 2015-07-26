@@ -48,10 +48,12 @@ API 實體
 	回應 {"OK": true or fase, "Cmd": "connect"}
 	伺服器主動：{"Cmd": "connected", "Sign": "XXXXXXX"}
 5.
-	a. 請求 {"Cmd": "send", "Who": "對方id or stranger", "Msg": "XXXXXXX", "Order": XXX}
-	   回應 {"OK": true, "Cmd": "send", "Who": "對方id or stranger", "Time": XXXXXX, "Order": XX}
-	   伺服器主動 {"Cmd": "sendFromServer", "Who": "原id or stranger", "Time": XXXXX}
-    說明：order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
+	a. 請求 {"Cmd": "send", "Who": "對方id or 0(stranger)", "Msg": "XXXXXXX", "Order": XXX}
+	   回應 {"OK": true, "Cmd": "send", "Who": "對方id or 0(stranger)", "Time": XXXXXX, "Order": XX}
+	   伺服器主動 {"Cmd": "sendFromServer", "Who": "原id or 0(stranger)", "Time": XXXXX, "Msg": "XXXXXXXX"}
+    說明：
+		Who 為 0 則為陌生人
+		order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
 	b. 請求 {"Cmd": "disconnect"}
 	   回應 {"OK": true, "Cmd": "disconnect"}
 	   伺服器主動斷另一邊 {"Cmd": "disconnected"}
