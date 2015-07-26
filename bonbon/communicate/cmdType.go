@@ -19,6 +19,7 @@ type SendFromServer struct {
 	Cmd  string
 	Who  int
 	Time int64
+	Msg  string
 }
 
 func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {

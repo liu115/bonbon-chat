@@ -40,7 +40,7 @@ func handleSend(msg []byte, id int, conn *websocket.Conn) {
 	if err == nil {
 		println(req.Msg)
 		now := time.Now().UnixNano()
-		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now}
+		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 		if req.Who != 0 && sendJSONTo(req.Who, ss) {
 			sendJSONTo(id, respondToSend(req, now, true))
 		} else {
