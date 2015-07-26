@@ -1,18 +1,17 @@
 package main
 
 import (
+	"strconv"
 	"bonbon/communicate"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
-	"strconv"
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	app := gin.Default()
-	// app.GET("/chat", communicate.ChatHandler)
 	app.GET("/test/chat/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -22,7 +21,8 @@ func main() {
 			c.String(404, "not found")
 		}
 	})
-	// app.POST("/login", LoginHandler)
+	app.GET("/init", communicate.InitHandler)
+	app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
