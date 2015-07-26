@@ -45,13 +45,18 @@ func handleSend(msg []byte, id int, conn *websocket.Conn) {
 		if req.Who != 0 && sendJSONTo(req.Who, ss) {
 			sendJSONTo(id, respondToSend(req, now, true))
 		} else if req.Who == 0 {
+			var stranger int
 			globalMatchLock.Lock()
-			if onlineUser[id].match != -1 {
+			if stranger = onlineUser[id].match; stranger != -1 {
 				ss.Who = 0
 				sendJSONTo(onlineUser[id].match, ss)
 			}
 			globalMatchLock.Unlock()
-			sendJSONTo(id, respondToSend(req, now, true))
+			if stranger == -1 {
+				sendJSONTo(id, respondToSend(req, now, false))
+			} else {
+				sendJSONTo(id, respondToSend(req, now, true))
+			}
 		} else {
 			sendJSONTo(id, respondToSend(req, now, false))
 		}
