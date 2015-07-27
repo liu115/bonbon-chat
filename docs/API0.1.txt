@@ -43,7 +43,7 @@ API 實體
 3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
        {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
-	b. 伺服器主動 {"Cmd": "change_nick", "Who": "對方id", "Sign": "XXXXXX"}
+	b. 伺服器主動 {"Cmd": "change_nick", "Who": "對方id", "NickName": "XXXXXX"}
 
 4.  請求 {"Cmd": "connect", "Type": "L1_FB_friend or L2_FB_friend or stranger"} // 修改使之類似bonbon
 	回應 {"OK": true or fase, "Cmd": "connect"}
