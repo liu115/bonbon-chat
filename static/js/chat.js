@@ -268,35 +268,3 @@ var Content = React.createClass({
     );
   }
 });
-
-var PageAll = React.createClass({
-  getInitialState: function(){
-    return {
-      login: false
-    };
-  },
-  render: function() {
-    if (this.states.login) {
-      return (
-        <div>
-          <SideBar/>
-          <Content/>
-        </div>
-      );
-    }
-    else {
-      return (
-        <div>
-          <LoginPage/>
-        </div>
-      );
-    }
-  }
-});
-
-React.render(
-  <div>
-    <PageAll/>
-  </div>,
-  document.getElementById('all')
-);
