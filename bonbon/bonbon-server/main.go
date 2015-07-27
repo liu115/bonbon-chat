@@ -1,18 +1,28 @@
 package main
 
 import (
-	"bonbon/communicate"
-	"github.com/gin-gonic/gin"
+	"strconv"
 	"net/http"
 	"runtime"
-	"strconv"
+	"github.com/gin-gonic/gin"
+	"bonbon/communicate"
+	"bonbon/config"
 )
 
 func main() {
+	// load config file
+	err := config.LoadConfigFile("bonbon.conf")
+	if err != nil {
+		panic(err.Error())
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	// setup server
+	gin.SetMode(config.Mode)
+
+	// set routes
 	app := gin.Default()
-	// app.GET("/chat", communicate.ChatHandler)
 	app.GET("/test/chat/:id", func(c *gin.Context) {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -22,10 +32,13 @@ func main() {
 			c.String(404, "not found")
 		}
 	})
-	// app.POST("/login", LoginHandler)
+	app.GET("/init", communicate.InitHandler)
+	app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
-	app.Run(":8080")
+
+	// run server
+	app.Run(config.Address)
 }

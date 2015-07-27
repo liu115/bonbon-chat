@@ -39,7 +39,7 @@ API 實體
 	{"Cmd": "init",
 	"Setting": {"Sign": "XXXXXXX"},
     "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX"}, ...]}
-3. 
+3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
        {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
 	b. 伺服器主動 {"Cmd": "change_nick", "Who": "對方id", "Sign": "XXXXXX"}
@@ -59,11 +59,11 @@ API 實體
 	   伺服器主動斷另一邊 {"Cmd": "disconnected"}
 	c. 請求 {"Cmd": "bonbon"}
 	   回應 {"OK": true, "Cmd": "bonbon"}
-	d. 
-	e. 
+	d.
+	e.
 	f. onopen
 	伺服器主動 {"Cmd": "status", "Who": "對方id", "Status": "on or off"}
 6.
 	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick", "XXXXX"}       伺服器先送假暱稱
-	b. 
+	b.
 
