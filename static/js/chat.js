@@ -270,13 +270,27 @@ var Content = React.createClass({
 });
 
 var PageAll = React.createClass({
+  getInitialState: function(){
+    return {
+      login: false
+    };
+  },
   render: function() {
-    return (
-      <div>
-        <SideBar/>
-        <Content/>
-      </div>
-    );
+    if (this.states.login) {
+      return (
+        <div>
+          <SideBar/>
+          <Content/>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div>
+          <LoginPage/>
+        </div>
+      );
+    }
   }
 });
 
