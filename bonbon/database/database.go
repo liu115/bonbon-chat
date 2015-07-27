@@ -58,7 +58,7 @@ func CreateAccountByToken(token string) (*Account, error) {
 		return nil, err
 	}
 
-	account := Account{}
+	var account Account
 	query := db.Where("facebook_id = ?", facebookID).First(&account)
 
 	// create account if not exist
@@ -93,7 +93,7 @@ func GetAccountByID(id int) (*Account, error) {
 		return nil, err
 	}
 
-	account := Account{}
+	var account Account
 	query := db.Where("id = ?", id).First(&account)
 
 	// create account if not exist
@@ -111,7 +111,7 @@ func GetFriendships(accountID int) ([]Friendship, error) {
 		return nil, err
 	}
 
-	friendShips := []Friendship{}
+	var friendShips []Friendship
 	query := db.Where("account_id = ?", accountID).Find(&friendShips)
 
 	if query.Error != nil {
@@ -129,8 +129,8 @@ func MakeFriendship(leftID int, rightID int) error {
 		return err
 	}
 
-	leftAccount := Account{}
-	rightAccount := Account{}
+	var leftAccount Account
+	var rightAccount Account
 
 	query := db.Where("id = ?", leftID).First(&leftAccount)
 	if query.Error != nil {
@@ -148,10 +148,10 @@ func MakeFriendship(leftID int, rightID int) error {
 	}
 
 	// sanity check on friend relations
-	leftFriends := []Friendship{}
+	var leftFriends []Friendship
 	db.Model(&leftAccount).Related(&leftFriends, "AccountID")
 
-	rightFriends := []Friendship{}
+	var rightFriends []Friendship
 	db.Model(&rightAccount).Related(&rightFriends, "AccountID")
 
 	if len(leftFriends) > config.NumFriendsLimit || len(rightFriends) > config.NumFriendsLimit {
@@ -213,8 +213,8 @@ func RemoveFriendship(leftID int, rightID int) error {
 	}
 
 	// get accounts from database
-	leftAccount := Account{}
-	rightAccount := Account{}
+	var leftAccount Account
+	var rightAccount Account
 
 	query := db.Where("id = ?", leftID).First(&leftAccount)
 	if query.Error != nil {
@@ -230,13 +230,13 @@ func RemoveFriendship(leftID int, rightID int) error {
 	leftHasFriendship := true
 	rightHasFriendship := true
 
-	leftFriendship := Friendship{}
+	var leftFriendship Friendship
 	query = db.Where("account_id = ? and friend_id = ?", leftAccount.ID, rightAccount.ID).First(&leftFriendship)
 	if query.Error != nil {
 		leftHasFriendship = false
 	}
 
-	rightFriendship := Friendship{}
+	var rightFriendship Friendship
 	query = db.Where("account_id = ? and friend_id = ?", rightAccount.ID, leftAccount.ID).First(&rightFriendship)
 	if query.Error != nil {
 		rightHasFriendship = false
@@ -267,7 +267,7 @@ func GetSignature(id int) (*string, error) {
 		return nil, err
 	}
 
-	account := Account{}
+	var account Account
 	query := db.Where("id = ?", id).First(&account)
 
 	if query.Error != nil {
@@ -284,7 +284,7 @@ func SetSignature(id int, signature string) error {
 		return err
 	}
 
-	account := Account{}
+	var account Account
 	query := db.Where("id = ?", id).First(&account)
 
 	if query.Error != nil {
