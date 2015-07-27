@@ -1,6 +1,7 @@
 package communicate
 
 import (
+	"bonbon/database"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"sync"
 	"time"
-	"bonbon/database"
 )
 
 var upgrader = websocket.Upgrader{
@@ -199,7 +199,7 @@ func disconnectByID(id int) {
 	}
 	globalMatchLock.Unlock()
 	// 將io取出鎖外操作
-	fmt.Printf("stranger is %d\n", stranger)
+	fmt.Printf("%d disconnect with %d\n", id, stranger)
 	if stranger > 0 {
 		sendJSONTo(stranger, map[string]interface{}{"Cmd": "disconnected"})
 	}
