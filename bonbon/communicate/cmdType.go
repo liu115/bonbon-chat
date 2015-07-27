@@ -12,6 +12,23 @@ type SendCmd struct {
 	Order int
 }
 
+type setNickNameRequest struct {
+	Cmd  string
+	Who  int
+	Sign string
+}
+
+type updateSettingsRequest struct {
+	Cmd  string
+	Settings struct {
+		Signature string
+	}
+}
+
+type simpleResponse struct {
+	OK bool
+}
+
 type SendCmdResponse struct {
 	OK    bool
 	Who   int

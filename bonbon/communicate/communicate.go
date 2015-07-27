@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"bonbon/database"
 )
 
 var upgrader = websocket.Upgrader{
@@ -135,6 +136,60 @@ func handleConnect(msg []byte, id int) {
 	}
 }
 
+// handle account settings update
+func handleUpdateSettings(msg []byte, id int) {
+	// decode JSON request
+	var request updateSettingsRequest
+	err := json.Unmarshal(msg, &request)
+	if err != nil {
+		response := simpleResponse{OK: false}
+		sendJSONTo(id, &response)
+		return
+	}
+
+	// update database
+	err = database.SetSignature(id, request.Settings.Signature)
+	if err != nil {
+		response := simpleResponse{OK: false}
+		sendJSONTo(id, &response)
+		return
+	}
+
+	// send success response
+	response := simpleResponse{OK: true}
+	sendJSONTo(id, &response)
+}
+
+// handle setting nickname of friends
+func handleSetNickName(msg []byte, id int) {
+	// decode JSON request
+	var request setNickNameRequest
+	err := json.Unmarshal(msg, &request)
+	if err != nil {
+		response := simpleResponse{OK: false}
+		sendJSONTo(id, &response)
+		return
+	}
+
+	// update database
+	err = database.SetNickNameOfFriendship(id, request.Who, request.Sign)
+	if err != nil {
+		response := simpleResponse{OK: false}
+		sendJSONTo(id, &response)
+		return
+	}
+
+	// send success response
+	response := simpleResponse{OK: true}
+	sendJSONTo(id, &response)
+}
+
+func handleBonbon(id int, strangerID int) {
+	// TODO
+	// err := database.MakeFriendship(id, strangerID)
+	// ...
+}
+
 func disconnectByID(id int) {
 	var stranger int
 	globalMatchLock.Lock()
@@ -208,8 +263,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 // ChatHandler 一個gin handler，為websocket之入口
 func ChatHandler(id int, c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err == nil {
-	} else {
+	if err != nil {
 		fmt.Printf("establish connection, %s\n", err.Error())
 		return
 	}
@@ -229,9 +283,9 @@ func ChatHandler(id int, c *gin.Context) {
 				json.Unmarshal(msg, &decodedMsg)
 				switch decodedMsg["Cmd"] {
 				case "setting":
-					// TODO: 需要資料庫
+					handleUpdateSettings(msg, id)
 				case "change_nick":
-					// TODO: 需要資料庫
+					handleSetNickName(msg, id)
 				case "connect":
 					fmt.Printf("id %d try connect\n", id)
 					handleConnect(msg, id)
@@ -240,7 +294,8 @@ func ChatHandler(id int, c *gin.Context) {
 				case "disconnect":
 					handleDisconnect(id)
 				case "bonbon":
-					// TODO: 需要資料庫
+					// TODO get stranger
+					// handleBonbon(id, ...stranger id...)
 				default:
 					fmt.Println("未知的請求")
 				}
