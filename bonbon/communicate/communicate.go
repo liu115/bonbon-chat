@@ -32,8 +32,22 @@ var globalMatchLock = new(sync.Mutex)
 var waitingStranger = -1
 var StrangerLock = new(sync.Mutex)
 
+// 通用性安全傳送訊息
+func sendJSONTo(id int, json interface{}) bool {
+	onlineUser[id].lock.Lock()
+	if onlineUser[id] != nil && len(onlineUser[id].conns) > 0 {
+		for i := 0; i < len(onlineUser[id].conns); i++ {
+			onlineUser[id].conns[i].WriteJSON(json)
+		}
+		onlineUser[id].lock.Unlock()
+		// TODO: 判斷是否成功送出
+		return true
+	}
+	onlineUser[id].lock.Unlock()
+	return false
+}
+
 // 實作 send message API
-// TODO: send to stranger
 func handleSend(msg []byte, id int, conn *websocket.Conn) {
 	var req SendCmd
 	err := json.Unmarshal(msg, &req)
@@ -66,35 +80,6 @@ func handleSend(msg []byte, id int, conn *websocket.Conn) {
 }
 
 // 實作隨機連結(connect) API
-type connectCmd struct {
-	Cmd  string
-	Type string
-}
-
-type connectCmdResponse struct {
-	OK  bool
-	Cmd string
-}
-
-type connectSuccess struct {
-	Cmd  string
-	Sign string
-}
-
-func sendJSONTo(id int, json interface{}) bool {
-	onlineUser[id].lock.Lock()
-	if onlineUser[id] != nil && len(onlineUser[id].conns) > 0 {
-		for i := 0; i < len(onlineUser[id].conns); i++ {
-			onlineUser[id].conns[i].WriteJSON(json)
-		}
-		onlineUser[id].lock.Unlock()
-		// TODO: 判斷是否成功送出
-		return true
-	}
-	onlineUser[id].lock.Unlock()
-	return false
-}
-
 func handleConnect(msg []byte, id int) {
 	fmt.Printf("start handle Connect\n")
 	var req connectCmd

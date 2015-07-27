@@ -7,22 +7,6 @@ import (
 	"net/http"
 )
 
-type friend struct {
-	ID   int
-	Sign string
-	Nick string
-	Msg  []string
-}
-
-type setting struct {
-	Sign string
-}
-
-type initMsg struct {
-	Setting setting
-	Friends []friend
-}
-
 // InitHandler 用於初始化的handler
 func InitHandler(c *gin.Context) {
 	fake := initMsg{

@@ -1,5 +1,6 @@
 package communicate
 
+// structure for send
 type SendCmd struct {
 	Cmd   string
 	Who   int
@@ -32,3 +33,39 @@ func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {
 	}
 	return res
 }
+
+// structure for connect
+type connectCmd struct {
+	Cmd  string
+	Type string
+}
+
+type connectCmdResponse struct {
+	OK  bool
+	Cmd string
+}
+
+type connectSuccess struct {
+	Cmd  string
+	Sign string
+}
+
+// structure for init
+type friend struct {
+	ID   int
+	Sign string
+	Nick string
+	Msg  []string
+}
+
+type setting struct {
+	Sign string
+}
+
+type initMsg struct {
+	Cmd     string
+	Setting setting
+	Friends []friend
+}
+
+func getMyInitInfo() {}
