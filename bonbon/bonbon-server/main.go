@@ -1,12 +1,12 @@
 package main
 
 import (
-	"strconv"
-	"net/http"
-	"runtime"
-	"github.com/gin-gonic/gin"
 	"bonbon/communicate"
 	"bonbon/config"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"runtime"
+	"strconv"
 )
 
 func main() {
@@ -32,8 +32,7 @@ func main() {
 			c.String(404, "not found")
 		}
 	})
-	app.GET("/init", communicate.InitHandler)
-	app.POST("/login", LoginHandler)
+	// app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
