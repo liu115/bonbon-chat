@@ -37,6 +37,7 @@ API 實體
 1. GET /
 2.  websocket onopen
 	{"Cmd": "init",
+	"OK": true or false
 	"Setting": {"Sign": "XXXXXXX"},
     "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX"}, ...]}
 3.

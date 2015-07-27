@@ -1,12 +1,12 @@
 package database
 
 import (
-	"log"
+	"bonbon/config"
 	"errors"
-	"math/rand"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"bonbon/config"
+	"log"
+	"math/rand"
 )
 
 func init() {
@@ -64,7 +64,7 @@ func CreateAccountByToken(token string) (*Account, error) {
 	// create account if not exist
 	if query.Error != nil {
 		account = Account{AccessToken: token,
-			FacebookID: facebookID,
+			FacebookID:   facebookID,
 			FacebookName: facebookName,
 		}
 		query := db.Create(&account)
@@ -187,8 +187,8 @@ func MakeFriendship(leftID int, rightID int) error {
 	if !leftHasFriendship {
 		leftFriendship := Friendship{
 			AccountID: leftAccount.ID,
-			NickName: config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
-			FriendID: rightAccount.ID,
+			NickName:  config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
+			FriendID:  rightAccount.ID,
 		}
 		db.Create(&leftFriendship)
 	}
@@ -196,8 +196,8 @@ func MakeFriendship(leftID int, rightID int) error {
 	if !rightHasFriendship {
 		rightFriendship := Friendship{
 			AccountID: rightAccount.ID,
-			NickName: config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
-			FriendID: leftAccount.ID,
+			NickName:  config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
+			FriendID:  leftAccount.ID,
 		}
 		db.Create(&rightFriendship)
 	}

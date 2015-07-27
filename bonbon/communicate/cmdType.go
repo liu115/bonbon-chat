@@ -1,5 +1,9 @@
 package communicate
 
+import (
+	"bonbon/database"
+)
+
 // structure for send
 type SendCmd struct {
 	Cmd   string
@@ -55,17 +59,43 @@ type friend struct {
 	ID   int
 	Sign string
 	Nick string
-	Msg  []string
 }
 
 type setting struct {
 	Sign string
 }
 
-type initMsg struct {
+type initCmd struct {
 	Cmd     string
+	OK      bool
 	Setting setting
 	Friends []friend
 }
 
-func getMyInitInfo() {}
+func getInitInfo(id int) (*initCmd, error) {
+	account, err := database.GetAccountByID(id)
+	if err != nil {
+		return &initCmd{Cmd: "init", OK: false}, err
+	}
+	friendships, err := database.GetFriendships(id)
+	if err != nil {
+		return &initCmd{Cmd: "init", OK: false}, err
+	}
+	var friends []friend
+	for i := 0; i < len(friendships); i++ {
+		// 這邊的檢查可能可以容錯高一點
+		friend_account, err := database.GetAccountByID(friendships[i].FriendID)
+		if err == nil {
+			new_firiend := friend{
+				ID:   friendships[i].FriendID,
+				Sign: friend_account.Signature,
+				Nick: friendships[i].NickName,
+			}
+			friends = append(friends, new_firiend)
+		} else {
+			return &initCmd{Cmd: "init", OK: false}, err
+		}
+	}
+	my_setting := setting{Sign: account.Signature}
+	return &initCmd{Cmd: "init", OK: true, Setting: my_setting, Friends: friends}, nil
+}
