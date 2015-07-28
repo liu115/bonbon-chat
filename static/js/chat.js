@@ -1,12 +1,18 @@
 //var mySocket = new WebSocket("ws://localhost:8080/chat");
 var SideBar = React.createClass({
+  getInitialState: function() {
+    this.props.chatSocket.addHandler("init", function(cmd) {
+      this.setState({Sign: cmd.Setting.Sign})
+    }.bind(this))
+    return {Sign: "我建超世志，必至無上道"}
+  },
   render: function() {
     return (
       //<!-- start of navigation area -->
       <nav id="nav">
         <div id="nav-profile">
           <span className="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
-          <a className="profile-status">這是我的簽名檔（狀態）</a>
+          <a className="profile-status">{this.state.Sign}</a>
         </div>
         <a id="new-connection">建立新連線</a>
         <ul id="menu">
@@ -268,3 +274,16 @@ var Content = React.createClass({
     );
   }
 });
+var App = React.createClass({
+  getInitialState: function() {
+    return {chatSocket: createSocket()}
+  },
+  render: function() {
+    return (
+      <div>
+        <SideBar chatSocket={this.state.chatSocket}/>
+        <Content chatSocket={this.state.chatSocket}/>
+      </div>
+    )
+  }
+})
