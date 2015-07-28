@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"bonbon/config"
 	"errors"
 	"github.com/jinzhu/gorm"
@@ -9,14 +10,15 @@ import (
 	"math/rand"
 )
 
-func init() {
+// InitDatabase the database package initialization function
+func InitDatabase() error {
 	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
 	if err != nil {
-		log.Fatalf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
-		return
+		return fmt.Errorf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
 	}
 
 	db.AutoMigrate(&Account{}, &Friendship{})
+	return nil
 }
 
 // GetDB start connection to database
