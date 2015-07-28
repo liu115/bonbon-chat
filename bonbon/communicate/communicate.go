@@ -68,7 +68,7 @@ func handleSend(msg []byte, id int) {
 	err := json.Unmarshal(msg, &req)
 	// 無法偵測出json格式是否正確
 	if err == nil {
-		println(req.Msg)
+		fmt.Println(req.Msg)
 		now := time.Now().UnixNano()
 		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 		if req.Who != 0 && sendJSONTo(req.Who, ss) == nil {
@@ -90,7 +90,7 @@ func handleSend(msg []byte, id int) {
 			sendJSONTo(id, respondToSend(req, now, false))
 		}
 	} else {
-		fmt.Println("unmarshal send cmd, %s", err.Error())
+		fmt.Printf("unmarshal send cmd, %s\n", err.Error())
 	}
 }
 
@@ -132,7 +132,7 @@ func handleConnect(msg []byte, id int) {
 		case "L2_FB_friend":
 		}
 	} else {
-		fmt.Println("unmarshal connect cmd, %s", err.Error())
+		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 	}
 }
 
