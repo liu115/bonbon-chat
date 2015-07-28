@@ -26,7 +26,7 @@ var SideBar = React.createClass({
 });
 var FriendBox = React.createClass({
   handleClick: function() {
-    this.props.select(this.props.friend.index);
+    this.props.select(this.props.index);
   },
   render: function() {
     return (
@@ -49,6 +49,10 @@ var FriendList = React.createClass({
     };
   },
   render: function() {
+    var friendBoxs = [];
+    for (var i = 0; i < this.props.friends.length; i++) {
+      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} select={this.props.select}/>);
+    }
     return (
       <div id="friend-area">
         <div id="friend-search">
@@ -56,13 +60,7 @@ var FriendList = React.createClass({
             <input type="text" placeholder="搜尋朋友"/>
           </div>
         </div>
-        {
-          this.props.friends.map(function(friend){
-            return (
-              <FriendBox friend={friend} select={this.props.select}/>
-            );
-          }.bind(this))
-        }
+        { friendBoxs }
       </div>
     );
   }
