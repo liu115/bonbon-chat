@@ -320,3 +320,20 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 	db.Save(&friendship)
 	return nil
 }
+
+// AppendActivityLog push a new activity log to database
+func AppendActivityLog(accountID int, action string, description string) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+
+	log := ActivityLog{
+		AccountID: accountID,
+		Action: action,
+		Description: description,
+	}
+
+	db.Create(&log)
+	return nil
+}

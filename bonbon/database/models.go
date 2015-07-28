@@ -22,3 +22,12 @@ type Friendship struct {
 	NickName  string
 	FriendID  int
 }
+
+// ActivityLog the log structure of activities
+type ActivityLog struct {
+	ID          int       `sql:"AUTO_INCREMENT" gorm:"primary_key"`
+	AccountID   int       `sql:"index"`
+	Action      string
+	Description string
+	Time        time.Time `sql:"DEFAULT:current_timestamp"`
+}
