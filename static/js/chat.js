@@ -177,17 +177,20 @@ var Content = React.createClass({
           online: true,
           stat: i == 0 ? 'selected' : 'read',
           img: 'img/friend_' + parseInt(i + 1) + '.jpg',
-          Sign: cmd.Friends[i].Sign,
+          sign: cmd.Friends[i].Sign,
           messages: [],
         };
         friends.push(friend);
       }
-      this.setState({friends: friends});
+      this.setState({
+        friends: friends,
+        header: friends[this.state.who].sign
+      });
     }.bind(this));
     return {
       who: 0,
-      header: 'Its where my demons hide.', /* header need fix */
-      friends: []
+      friends: [{messages: []}],
+      header: '', /* header need fix */
     };
   },
   selectFriend: function(selectedFriend) {
@@ -195,8 +198,8 @@ var Content = React.createClass({
     this.state.friends[selectedFriend].stat = 'selected';
     this.setState({
       who: selectedFriend,
-      friends: this.state.friends
-      //set header from data base
+      friends: this.state.friends,
+      header: this.state.friends[selectedFriend].sign
     });
   },
   addMessage: function(who, where, message) {
