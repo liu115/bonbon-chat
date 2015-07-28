@@ -1,4 +1,3 @@
-//var mySocket = new WebSocket("ws://localhost:8080/chat");
 var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
@@ -101,7 +100,6 @@ var ChatRoom = React.createClass({
       scroll: React.findDOMNode(this.refs.refContent).scrollHeight
     }, function() {
       React.findDOMNode(this.refs.refContent).scrollTop = (this.state.scroll);
-
     });
     React.findDOMNode(this.refs.refInput).focus();
   },
@@ -168,84 +166,28 @@ var ChatRoom = React.createClass({
 
 var Content = React.createClass({
   getInitialState: function() {
+    this.props.chatSocket.addHandler('init', function(cmd) {
+      var friends = [];
+      for (var i = 0; i < cmd.Friends.length; i++) {
+        console.log(cmd.Friends[i])
+        var friend = {
+          index: i,
+          name: cmd.Friends[i].Nick,
+          ID: cmd.Friends[i].ID,
+          online: true,
+          stat: i == 0 ? 'selected' : 'read',
+          img: 'img/friend_' + parseInt(i + 1) + '.jpg',
+          Sign: cmd.Friends[i].Sign,
+          messages: [],
+        };
+        friends.push(friend);
+      }
+      this.setState({friends: friends});
+    }.bind(this));
     return {
-      who: 1,
+      who: 0,
       header: 'Its where my demons hide.', /* header need fix */
-      messages: [
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          }
-        ],
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          },
-          {
-            from: 'me',
-            content: 'hihi'
-          },
-          {
-            from: 'others',
-            content: 'abcde'
-          }
-        ],
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          }
-        ],
-        [],
-        [],
-        []
-      ],
-      friends: [
-        {
-          index: 0,
-          name: '陌生人',
-          stat: 'read',
-          online: true,
-          img: 'img/friend_0.jpg'
-        },
-        {
-          index: 1,
-          name: 'Apple',
-          stat: 'selected',
-          online: true,
-          img: 'img/friend_1.jpg'
-        },
-        {
-          index: 2,
-          name: 'Banana',
-          stat: 'read',
-          online: true,
-          img: 'img/friend_2.jpg'
-        },
-        {
-          index: 3,
-          name: 'Cake',
-          stat: 'unread',
-          online: true,
-          img: 'img/friend_3.jpg'
-        },
-        {
-          index: 4,
-          name: 'Donut',
-          stat: 'read',
-          online: false,
-          img: 'img/friend_4.jpg'
-        },
-        {
-          index: 5,
-          name: 'Egg',
-          stat: 'unread',
-          online: false,
-          img: 'img/friend_5.jpg'
-        }
-      ]
+      friends: []
     };
   },
   selectFriend: function(selectedFriend) {
@@ -259,17 +201,17 @@ var Content = React.createClass({
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
-      this.state.messages[who].push(message);
+      this.state.friends[who].messages.push(message);
     }
     this.setState({
-      messages: this.state.messages
+      friends: this.state.friends
     });
   },
   render: function() {
     return (
       <div>
         <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
-        <ChatRoom messages={this.state.messages[this.state.who]} target={this.state.who} friends={this.state.friends} header={this.state.header} addMessage={this.addMessage}/>
+        <ChatRoom messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
   }
