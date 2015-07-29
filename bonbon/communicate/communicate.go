@@ -82,7 +82,7 @@ func handleSend(msg []byte, id int, u *user) {
 }
 
 // 實作隨機連結(connect) API
-func handleConnect(msg []byte, id int) {
+func handleConnect(msg []byte, id int, u *user) {
 	fmt.Printf("start handle Connect\n")
 	var req connectCmd
 	err := json.Unmarshal(msg, &req)
@@ -96,14 +96,14 @@ func handleConnect(msg []byte, id int) {
 	case "stranger":
 		StrangerLock.Lock()
 		disconnectByID(id)
-		// 此時必為無配對
+		// 此時必為無配對，因為只能在strangerLock內建立match，而剛剛消除了match
 		if waitingStranger == -1 || waitingStranger == id {
 			waitingStranger = id
 		} else {
-			stranger = waitingStranger
+			stranger = waitingStranger // 若在stranger為waitingStranger，則在strangerLock內不可能消失
 			waitingStranger = -1
 			globalMatchLock.Lock()
-			onlineUser[id].match = stranger
+			u.match = stranger
 			onlineUser[stranger].match = id
 			globalMatchLock.Unlock()
 		}
@@ -112,7 +112,7 @@ func handleConnect(msg []byte, id int) {
 		if stranger != -1 {
 			fmt.Printf("%d connect to %d\n", id, stranger)
 			sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
-			sendJsonByID(id, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+			sendJsonByUser(u, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
 		}
 
 	case "L1_FB_friend":
@@ -223,11 +223,6 @@ func removeFromStrangerQueue(id int) {
 }
 
 func clearOffline(id int, conn *websocket.Conn) {
-	// 若還在等待陌生人
-	removeFromStrangerQueue(id)
-	// 若還在連線
-	disconnectByID(id)
-
 	// 刪除本連線
 	onlineLock.Lock()
 	u := onlineUser[id]
@@ -242,6 +237,10 @@ func clearOffline(id int, conn *websocket.Conn) {
 	}
 	u.conns = append(conns[:which], conns[which+1:]...)
 	if len(conns) == 0 {
+		// 若還在等待陌生人
+		removeFromStrangerQueue(id)
+		// 若還在連線
+		disconnectByID(id)
 		delete(onlineUser, id)
 	}
 	u.lock.Unlock()
@@ -258,6 +257,7 @@ func ChatHandler(id int, c *gin.Context) {
 	}
 	user := initOnline(id, conn)
 	err = sendInitMsg(id)
+	var wg sync.WaitGroup
 	if err != nil {
 		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
 		goto clear
@@ -266,19 +266,20 @@ func ChatHandler(id int, c *gin.Context) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err == nil {
+			wg.Add(1)
 			go func() {
 				fmt.Printf("id %d: %s\n", id, msg)
 				var decodedMsg map[string]interface{}
 				json.Unmarshal(msg, &decodedMsg)
 				switch decodedMsg["Cmd"] {
-				// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能、減少重複（不用鎖了又去拿一次）
+				// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
 				case "setting":
 					handleUpdateSettings(msg, id)
 				case "change_nick":
 					handleSetNickName(msg, id)
 				case "connect":
 					fmt.Printf("id %d try connect\n", id)
-					handleConnect(msg, id)
+					handleConnect(msg, id, user)
 				case "send":
 					handleSend(msg, id, user)
 				case "disconnect":
@@ -289,11 +290,13 @@ func ChatHandler(id int, c *gin.Context) {
 				default:
 					fmt.Println("未知的請求")
 				}
+				wg.Done()
 			}()
 		} else {
 			break
 		}
 	}
+	wg.Wait()
 clear:
 	clearOffline(id, conn)
 }
