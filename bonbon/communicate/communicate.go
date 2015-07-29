@@ -3,7 +3,6 @@ package communicate
 import (
 	"bonbon/database"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -25,6 +24,7 @@ type user struct {
 }
 
 var onlineUser = make(map[int]*user)
+var onlineLock = new(sync.RWMutex)
 
 // 粒度高，將降低效能
 // TODO: 改為讀寫鎖或拆分粒度
@@ -34,28 +34,13 @@ var globalMatchLock = new(sync.Mutex)
 var waitingStranger = -1
 var StrangerLock = new(sync.Mutex)
 
-// 通用性安全傳送訊息
-func sendJSONTo(id int, json interface{}) error {
-	onlineUser[id].lock.Lock()
-	if onlineUser[id] != nil && len(onlineUser[id].conns) > 0 {
-		for i := 0; i < len(onlineUser[id].conns); i++ {
-			onlineUser[id].conns[i].WriteJSON(json)
-		}
-		onlineUser[id].lock.Unlock()
-		// TODO: 判斷是否成功送出
-		return nil
-	}
-	onlineUser[id].lock.Unlock()
-	return errors.New("sendJSONTo: can't send")
-}
-
 // 實作init訊息
 func sendInitMsg(id int) error {
 	msg, err := getInitInfo(id)
 	if err != nil {
 		return err
 	}
-	err = sendJSONTo(id, msg)
+	err = sendJsonByID(id, msg)
 	if err != nil {
 		return err
 	}
@@ -67,30 +52,36 @@ func handleSend(msg []byte, id int) {
 	var req SendCmd
 	err := json.Unmarshal(msg, &req)
 	// 無法偵測出json格式是否正確
-	if err == nil {
-		println(req.Msg)
-		now := time.Now().UnixNano()
-		ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
-		if req.Who != 0 && sendJSONTo(req.Who, ss) == nil {
-			sendJSONTo(id, respondToSend(req, now, true))
-		} else if req.Who == 0 {
-			var stranger int
-			globalMatchLock.Lock()
-			if stranger = onlineUser[id].match; stranger != -1 {
-				ss.Who = 0
-				sendJSONTo(onlineUser[id].match, ss)
-			}
-			globalMatchLock.Unlock()
-			if stranger == -1 {
-				sendJSONTo(id, respondToSend(req, now, false))
-			} else {
-				sendJSONTo(id, respondToSend(req, now, true))
-			}
+	if err != nil {
+		fmt.Printf("unmarshal send cmd, %s\n", err.Error())
+		return
+	}
+	u, err := getUserByID(id)
+	if err != nil {
+		fmt.Printf("handleSend, %s", err.Error())
+	}
+
+	println(req.Msg)
+	now := time.Now().UnixNano()
+	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
+
+	if req.Who != 0 && sendJsonByID(req.Who, ss) == nil {
+		sendJsonByID(id, respondToSend(req, now, true))
+	} else if req.Who == 0 {
+		var stranger int
+		globalMatchLock.Lock()
+		if stranger = u.match; stranger != -1 {
+			ss.Who = 0
+			sendJsonByID(u.match, ss)
+		}
+		globalMatchLock.Unlock()
+		if stranger == -1 {
+			sendJsonByID(id, respondToSend(req, now, false))
 		} else {
-			sendJSONTo(id, respondToSend(req, now, false))
+			sendJsonByID(id, respondToSend(req, now, true))
 		}
 	} else {
-		fmt.Println("unmarshal send cmd, %s", err.Error())
+		sendJsonByID(id, respondToSend(req, now, false))
 	}
 }
 
@@ -101,7 +92,7 @@ func handleConnect(msg []byte, id int) {
 	err := json.Unmarshal(msg, &req)
 	if err == nil {
 		fmt.Printf("Try choose stranger\n")
-		sendJSONTo(id, connectCmdResponse{OK: true, Cmd: "connect"})
+		sendJsonByID(id, connectCmdResponse{OK: true, Cmd: "connect"})
 		var stranger = -1
 		switch req.Type {
 		case "stranger":
@@ -124,8 +115,8 @@ func handleConnect(msg []byte, id int) {
 			// TODO: 取得對方的簽名
 			if stranger != -1 {
 				fmt.Printf("%d connect to %d\n", id, stranger)
-				sendJSONTo(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
-				sendJSONTo(id, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+				sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+				sendJsonByID(id, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
 			}
 
 		case "L1_FB_friend":
@@ -143,7 +134,7 @@ func handleUpdateSettings(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJSONTo(id, &response)
+		sendJsonByID(id, &response)
 		return
 	}
 
@@ -151,13 +142,13 @@ func handleUpdateSettings(msg []byte, id int) {
 	err = database.SetSignature(id, request.Settings.Signature)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJSONTo(id, &response)
+		sendJsonByID(id, &response)
 		return
 	}
 
 	// send success response
 	response := simpleResponse{OK: true}
-	sendJSONTo(id, &response)
+	sendJsonByID(id, &response)
 }
 
 // handle setting nickname of friends
@@ -167,7 +158,7 @@ func handleSetNickName(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJSONTo(id, &response)
+		sendJsonByID(id, &response)
 		return
 	}
 
@@ -175,13 +166,13 @@ func handleSetNickName(msg []byte, id int) {
 	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJSONTo(id, &response)
+		sendJsonByID(id, &response)
 		return
 	}
 
 	// send success response
 	response := simpleResponse{OK: true}
-	sendJSONTo(id, &response)
+	sendJsonByID(id, &response)
 }
 
 func handleBonbon(id int, strangerID int) {
@@ -201,22 +192,20 @@ func disconnectByID(id int) {
 	// 將io取出鎖外操作
 	fmt.Printf("%d disconnect with %d\n", id, stranger)
 	if stranger > 0 {
-		sendJSONTo(stranger, map[string]interface{}{"Cmd": "disconnected"})
+		sendJsonByID(stranger, map[string]interface{}{"Cmd": "disconnected"})
 	}
 }
 
 // 實作斷線
 func handleDisconnect(id int) {
 	disconnectByID(id)
-	sendJSONTo(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+	sendJsonByID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
 }
 
-// XXX：不釋放記憶體則會被越吃越多，但百萬人也才數十MB
-// 但釋放後待解決lock消失的問題
-func initOnline(id int, conn *websocket.Conn) {
-	// XXX: 初始化時可能被多次重入
+func initOnline(id int, conn *websocket.Conn) *user {
 	// TODO: 先檢測是否存在於資料庫
 	fmt.Printf("id %d login\n", id)
+	onlineLock.Lock()
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
 			match: -1,
@@ -228,6 +217,8 @@ func initOnline(id int, conn *websocket.Conn) {
 		onlineUser[id].conns = append(onlineUser[id].conns, conn)
 		onlineUser[id].lock.Unlock()
 	}
+	onlineLock.Unlock()
+	return onlineUser[id] //此時必定還存在
 }
 
 func removeFromStrangerQueue(id int) {
@@ -245,8 +236,10 @@ func clearOffline(id int, conn *websocket.Conn) {
 	disconnectByID(id)
 
 	// 刪除本連線
-	onlineUser[id].lock.Lock()
-	conns := onlineUser[id].conns
+	onlineLock.Lock()
+	u := onlineUser[id]
+	u.lock.Lock()
+	conns := u.conns
 	var which int
 	for i := 0; i < len(conns); i++ {
 		if conn == conns[i] {
@@ -254,9 +247,12 @@ func clearOffline(id int, conn *websocket.Conn) {
 			break
 		}
 	}
-	onlineUser[id].conns = append(conns[:which], conns[which+1:]...)
-
-	onlineUser[id].lock.Unlock()
+	u.conns = append(conns[:which], conns[which+1:]...)
+	if len(conns) == 0 {
+		delete(onlineUser, id)
+	}
+	u.lock.Unlock()
+	onlineLock.Unlock()
 	fmt.Printf("id %d 下線了\n", id)
 }
 
