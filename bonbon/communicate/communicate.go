@@ -87,7 +87,7 @@ func handleConnect(msg []byte, id int, u *user) {
 	var req connectCmd
 	err := json.Unmarshal(msg, &req)
 	if err != nil {
-		fmt.Println("unmarshal connect cmd, %s", err.Error())
+		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
 	sendJsonByID(id, connectCmdResponse{OK: true, Cmd: "connect"})
@@ -108,11 +108,22 @@ func handleConnect(msg []byte, id int, u *user) {
 			globalMatchLock.Unlock()
 		}
 		StrangerLock.Unlock()
-		// TODO: 取得對方的簽名
+
+		// get signatures of both
+		selfSignature, err := database.GetSignature(id)
+		if err != nil {
+			// TODO handle error
+		}
+
+		strangerSignature, err := database.GetSignature(stranger)
+		if err != nil {
+			// TODO handle error
+		}
+
 		if stranger != -1 {
 			fmt.Printf("%d connect to %d\n", id, stranger)
-			sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
-			sendJsonByUser(u, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+			sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: *selfSignature})
+			sendJsonByUser(u, connectSuccess{Cmd: "connected", Sign: *strangerSignature})
 		}
 
 	case "L1_FB_friend":
@@ -196,7 +207,12 @@ func handleDisconnect(id int) {
 }
 
 func initOnline(id int, conn *websocket.Conn) *user {
-	// TODO: 先檢測是否存在於資料庫
+	// check if this account exists
+	_, err := database.GetAccountByID(id)
+	if err != nil {
+		// TODO do error handling if id is illegal
+	}
+
 	fmt.Printf("id %d login\n", id)
 	onlineLock.Lock()
 	if onlineUser[id] == nil {
