@@ -35,7 +35,6 @@ func GetDB() (*gorm.DB, error) {
 func CreateAccountByToken(token string) (*Account, error) {
 	// get Facebook session
 	fbSession := config.GlobalApp.Session(token)
-
 	err := fbSession.Validate()
 	if err != nil {
 		return nil, err
@@ -43,7 +42,6 @@ func CreateAccountByToken(token string) (*Account, error) {
 
 	// get name and id from Facebook
 	res, err := fbSession.Get("/me", nil)
-
 	if err != nil {
 		return nil, err
 	}
@@ -319,6 +317,59 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 	friendship.NickName = nickName
 	db.Save(&friendship)
 	return nil
+}
+
+// GetFacebookFriends return a slice of accounts considered as the friends on Facebook
+func GetFacebookFriends(id int) ([]Account, error) {
+	// get account
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	// list friends from Facebook Graph API
+	fbSession := config.GlobalApp.Session(account.AccessToken)
+	res, err := fbSession.Get("/me/friends", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var facebookFriendIDs []string
+
+	paging, err := res.Paging(fbSession)
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		data := paging.Data()
+
+		for _, item := range data {
+			facebookFriendIDs = append(facebookFriendIDs, item["id"].(string))
+		}
+
+		noMore, err := paging.Next()
+		if err != nil {
+			return nil, err
+		} else if noMore {
+			break
+		}
+	}
+
+	// find Facebook friends in database
+	var accountFriends []Account
+	query = db.Where("facebook_id in (?)", facebookFriendIDs).Find(&accountFriends)
+	if query.Error != nil {
+		return nil, err
+	}
+
+	return accountFriends, nil
 }
 
 // AppendActivityLog push a new activity log to database

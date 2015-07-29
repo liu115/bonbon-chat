@@ -39,7 +39,6 @@ func main() {
 			c.String(404, "not found")
 		}
 	})
-	// app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
