@@ -172,7 +172,7 @@ func handleSetNickName(msg []byte, id int) {
 	}
 
 	// update database
-	err = database.SetNickNameOfFriendship(id, request.Who, request.Sign)
+	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
 	if err != nil {
 		response := simpleResponse{OK: false}
 		sendJSONTo(id, &response)
