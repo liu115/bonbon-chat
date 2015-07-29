@@ -46,7 +46,7 @@ EOF
 fi
 
 # If there are whitespace errors, print the offending file names and fail.
-# git diff-index --check --cached $against -- || exit 1
+git diff-index --check --cached $against --
 
 # Environment sanity check
 [ ! -z "$GOPATH" ] || (echo 'GOPATH is not set. Refer to README.md for setup.'; exit 1)

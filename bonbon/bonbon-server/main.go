@@ -3,6 +3,7 @@ package main
 import (
 	"bonbon/communicate"
 	"bonbon/config"
+	"bonbon/database"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
@@ -12,6 +13,12 @@ import (
 func main() {
 	// load config file
 	err := config.LoadConfigFile("bonbon.conf")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// init database
+	err = database.InitDatabase()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -32,7 +39,6 @@ func main() {
 			c.String(404, "not found")
 		}
 	})
-	// app.POST("/login", LoginHandler)
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
