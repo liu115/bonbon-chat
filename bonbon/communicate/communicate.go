@@ -48,17 +48,13 @@ func sendInitMsg(id int) error {
 }
 
 // 實作 send message API
-func handleSend(msg []byte, id int) {
+func handleSend(msg []byte, id int, u *user) {
 	var req SendCmd
 	err := json.Unmarshal(msg, &req)
 	// 無法偵測出json格式是否正確
 	if err != nil {
 		fmt.Printf("unmarshal send cmd, %s\n", err.Error())
 		return
-	}
-	u, err := getUserByID(id)
-	if err != nil {
-		fmt.Printf("handleSend, %s", err.Error())
 	}
 
 	println(req.Msg)
@@ -90,40 +86,37 @@ func handleConnect(msg []byte, id int) {
 	fmt.Printf("start handle Connect\n")
 	var req connectCmd
 	err := json.Unmarshal(msg, &req)
-	if err == nil {
-		fmt.Printf("Try choose stranger\n")
-		sendJsonByID(id, connectCmdResponse{OK: true, Cmd: "connect"})
-		var stranger = -1
-		switch req.Type {
-		case "stranger":
-			StrangerLock.Lock()
-			fmt.Printf("Try disconnect\n")
-			disconnectByID(id)
-			fmt.Printf("disconnect OK\n")
-			// 此時必為無配對
-			if waitingStranger == -1 || waitingStranger == id {
-				waitingStranger = id
-			} else {
-				stranger = waitingStranger
-				waitingStranger = -1
-				globalMatchLock.Lock()
-				onlineUser[id].match = stranger
-				onlineUser[stranger].match = id
-				globalMatchLock.Unlock()
-			}
-			StrangerLock.Unlock()
-			// TODO: 取得對方的簽名
-			if stranger != -1 {
-				fmt.Printf("%d connect to %d\n", id, stranger)
-				sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
-				sendJsonByID(id, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
-			}
-
-		case "L1_FB_friend":
-		case "L2_FB_friend":
-		}
-	} else {
+	if err != nil {
 		fmt.Println("unmarshal connect cmd, %s", err.Error())
+		return
+	}
+	sendJsonByID(id, connectCmdResponse{OK: true, Cmd: "connect"})
+	var stranger = -1
+	switch req.Type {
+	case "stranger":
+		StrangerLock.Lock()
+		disconnectByID(id)
+		// 此時必為無配對
+		if waitingStranger == -1 || waitingStranger == id {
+			waitingStranger = id
+		} else {
+			stranger = waitingStranger
+			waitingStranger = -1
+			globalMatchLock.Lock()
+			onlineUser[id].match = stranger
+			onlineUser[stranger].match = id
+			globalMatchLock.Unlock()
+		}
+		StrangerLock.Unlock()
+		// TODO: 取得對方的簽名
+		if stranger != -1 {
+			fmt.Printf("%d connect to %d\n", id, stranger)
+			sendJsonByID(stranger, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+			sendJsonByID(id, connectSuccess{Cmd: "connected", Sign: "XXXXXXX"})
+		}
+
+	case "L1_FB_friend":
+	case "L2_FB_friend":
 	}
 }
 
@@ -263,7 +256,7 @@ func ChatHandler(id int, c *gin.Context) {
 		fmt.Printf("establish connection, %s\n", err.Error())
 		return
 	}
-	initOnline(id, conn)
+	user := initOnline(id, conn)
 	err = sendInitMsg(id)
 	if err != nil {
 		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
@@ -278,6 +271,7 @@ func ChatHandler(id int, c *gin.Context) {
 				var decodedMsg map[string]interface{}
 				json.Unmarshal(msg, &decodedMsg)
 				switch decodedMsg["Cmd"] {
+				// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能、減少重複（不用鎖了又去拿一次）
 				case "setting":
 					handleUpdateSettings(msg, id)
 				case "change_nick":
@@ -286,7 +280,7 @@ func ChatHandler(id int, c *gin.Context) {
 					fmt.Printf("id %d try connect\n", id)
 					handleConnect(msg, id)
 				case "send":
-					handleSend(msg, id)
+					handleSend(msg, id, user)
 				case "disconnect":
 					handleDisconnect(id)
 				case "bonbon":
