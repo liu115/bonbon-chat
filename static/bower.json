@@ -8,7 +8,8 @@
     "react": "",
     "jquery": "",
     "font-awesome": "",
-    "reset-css": ""
+    "reset-css": "",
+    "react-facebook-login": ""
   },
   "description": "bonbon is a....",
   "license": "MIT",

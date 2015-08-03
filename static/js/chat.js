@@ -1,3 +1,17 @@
+var SignClass = React.createClass({
+
+  render: function() {
+    return (
+      <div>
+      <a className="profile-status">
+        {this.props.sign}
+        <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
+      </a>
+      </div>
+    );
+  }
+});
+
 var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
@@ -11,7 +25,8 @@ var SideBar = React.createClass({
       <nav id="nav">
         <div id="nav-profile">
           <span className="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
-          <a className="profile-status">{this.state.Sign}</a>
+          <SignClass sign={this.state.Sign} />
+
         </div>
         <a id="new-connection">建立新連線</a>
         <ul id="menu">
@@ -99,13 +114,17 @@ var ChatRoom = React.createClass({
     }, function() {
       React.findDOMNode(this.refs.refContent).scrollTop = (this.state.scroll);
     });
-    React.findDOMNode(this.refs.refInput).focus();
+    this.focusInput();
   },
   sendMessageByKeyboard: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
       this.sendMessage();
     }
+  },
+  focusInput: function() {
+    React.findDOMNode(this.refs.refInput).focus();
+
   },
   handleResize: function(e) {
     this.setState({
@@ -185,6 +204,10 @@ var Content = React.createClass({
         header: friends[this.state.who].sign
       });
     }.bind(this));
+
+    this.props.chatSocket.addHandler('send', function(cmd) {
+      /* send message to sb. */
+    }.bind(this));
     return {
       who: 0,
       friends: [{messages: []}],
@@ -199,9 +222,12 @@ var Content = React.createClass({
       friends: this.state.friends,
       header: this.state.friends[selectedFriend].sign
     });
+    this.refs.refChat.focusInput();
+    console.log("aaaaa");
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
+      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}))
       this.state.friends[who].messages.push(message);
     }
     this.setState({
@@ -212,7 +238,7 @@ var Content = React.createClass({
     return (
       <div>
         <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
-        <ChatRoom messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+        <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
   }
