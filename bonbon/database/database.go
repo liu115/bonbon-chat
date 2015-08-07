@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"bonbon/config"
 	"errors"
 	"github.com/jinzhu/gorm"
@@ -9,14 +10,15 @@ import (
 	"math/rand"
 )
 
-func init() {
+// InitDatabase the database package initialization function
+func InitDatabase() error {
 	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
 	if err != nil {
-		log.Fatalf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
-		return
+		return fmt.Errorf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
 	}
 
 	db.AutoMigrate(&Account{}, &Friendship{})
+	return nil
 }
 
 // GetDB start connection to database
@@ -33,7 +35,6 @@ func GetDB() (*gorm.DB, error) {
 func CreateAccountByToken(token string) (*Account, error) {
 	// get Facebook session
 	fbSession := config.GlobalApp.Session(token)
-
 	err := fbSession.Validate()
 	if err != nil {
 		return nil, err
@@ -41,7 +42,6 @@ func CreateAccountByToken(token string) (*Account, error) {
 
 	// get name and id from Facebook
 	res, err := fbSession.Get("/me", nil)
-
 	if err != nil {
 		return nil, err
 	}
@@ -316,5 +316,75 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 
 	friendship.NickName = nickName
 	db.Save(&friendship)
+	return nil
+}
+
+// GetFacebookFriends return a slice of accounts considered as the friends on Facebook
+func GetFacebookFriends(id int) ([]Account, error) {
+	// get account
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	// list friends from Facebook Graph API
+	fbSession := config.GlobalApp.Session(account.AccessToken)
+	res, err := fbSession.Get("/me/friends", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var facebookFriendIDs []string
+
+	paging, err := res.Paging(fbSession)
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		data := paging.Data()
+
+		for _, item := range data {
+			facebookFriendIDs = append(facebookFriendIDs, item["id"].(string))
+		}
+
+		noMore, err := paging.Next()
+		if err != nil {
+			return nil, err
+		} else if noMore {
+			break
+		}
+	}
+
+	// find Facebook friends in database
+	var accountFriends []Account
+	query = db.Where("facebook_id in (?)", facebookFriendIDs).Find(&accountFriends)
+	if query.Error != nil {
+		return nil, err
+	}
+
+	return accountFriends, nil
+}
+
+// AppendActivityLog push a new activity log to database
+func AppendActivityLog(accountID int, action string, description string) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+
+	log := ActivityLog{
+		AccountID: accountID,
+		Action: action,
+		Description: description,
+	}
+
+	db.Create(&log)
 	return nil
 }

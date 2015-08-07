@@ -1,38 +1,44 @@
 package main
 
 import (
-	"bonbon/communicate"
 	"bonbon/config"
+	"bonbon/database"
+	"bonbon/test"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
-	"strconv"
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	// load config file
 	err := config.LoadConfigFile("bonbon.conf")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	// init database
+	err = database.InitDatabase()
+	if err != nil {
+		panic(err.Error())
+	}
 
 	// setup server
 	gin.SetMode(config.Mode)
 
 	// set routes
 	app := gin.Default()
-	app.GET("/test/chat/:id", func(c *gin.Context) {
-		idStr := c.Param("id")
-		id, err := strconv.Atoi(idStr)
-		if err == nil {
-			communicate.ChatHandler(id, c)
-		} else {
-			c.String(404, "not found")
-		}
-	})
-	// app.POST("/login", LoginHandler)
+
+	// add routes for debug mode
+	if config.Mode == "debug" {
+		app.GET("/test/chat/:id", test.HandleTestWebsocket)
+		app.GET("/test/create-account-by-token/:token", test.HandleTestCreateAccountByToken)
+		app.GET("/test/make-friendship/:id1/:id2", test.HandleTestMakeFriendship)
+		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
+	}
+
+	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})

@@ -55,7 +55,7 @@ var LoginPage = React.createClass({
     }.bind(this));
   },
   handleClick: function() {
-    FB.login(this.checkLoginState());
+    FB.login(this.checkLoginState(), {scope: 'public_profile,email,user_friends'});
   },
   render: function() {
     return (
