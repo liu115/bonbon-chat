@@ -13,9 +13,9 @@ type SendCmd struct {
 }
 
 type setNickNameRequest struct {
-	Cmd  string
-	Who  int
-	Sign string
+	Cmd      string
+	Who      int
+	NickName string
 }
 
 type updateSettingsRequest struct {
