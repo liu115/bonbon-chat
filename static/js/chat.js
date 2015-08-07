@@ -1,23 +1,61 @@
 var SignClass = React.createClass({
-
+  getInitialState: function() {
+    return {
+      setting: false,
+      value: ''
+    };
+  },
+  handleClick: function() {
+    this.setState({setting: true});
+  },
+  handleType: function(e) {
+    console.log("type");
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      alert("setting successed");
+      this.props.chatSocket.send(JSON.stringify({"Cmd": "setting", "Setting": {"Sign": this.state.value}}))
+      this.setState({
+        setting: false,
+        value: ''
+      });
+    }
+  },
+  handleChange: function(e) {
+    this.setState({
+      value: e.target.value
+    });
+  },
   render: function() {
-    return (
-      <div>
-      <a className="profile-status">
-        {this.props.sign}
-        <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
-      </a>
-      </div>
-    );
+    if (this.state.setting == true) {
+      return (
+        <div>
+          <input type="text" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div>
+        <a className="profile-status" onClick={this.handleClick}>
+          {this.props.sign}
+          <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
+        </a>
+        </div>
+      );
+    }
   }
 });
 
 var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
-      this.setState({Sign: cmd.Setting.Sign})
-    }.bind(this))
-    return {Sign: "我建超世志，必至無上道"}
+      this.setState({Sign: cmd.Setting.Sign});
+    }.bind(this));
+    this.props.chatSocket.addHandler("setting", function(cmd) {
+      alert("setting triggered");
+      this.setState({Sign: cmd.Setting.Sign});
+    }.bind(this));
+    return {Sign: "我建超世志，必至無上道"};
   },
   render: function() {
     return (
@@ -25,7 +63,7 @@ var SideBar = React.createClass({
       <nav id="nav">
         <div id="nav-profile">
           <span className="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
-          <SignClass sign={this.state.Sign} />
+          <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
 
         </div>
         <a id="new-connection">建立新連線</a>
@@ -223,7 +261,6 @@ var Content = React.createClass({
       header: this.state.friends[selectedFriend].sign
     });
     this.refs.refChat.focusInput();
-    console.log("aaaaa");
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
