@@ -156,20 +156,20 @@ func handleDisconnect(id int) {
 }
 
 func handleBonbon(id int) {
+	fmt.Printf("%d bonbon\n", id)
 	var success = false
-
 	onlineLock.RLock()
 	globalMatchLock.Lock()
 	globalBonbonLock.Lock()
 	var stranger *user
 	strangerID := onlineUser[id].match
 	if strangerID == -1 {
-		// 沒有connect就bonbon
+		fmt.Printf("沒有connect就bonbon\n")
 		goto bonbonUnlock
 	}
 	stranger = onlineUser[strangerID]
 	if stranger == nil {
-		// stranger已經離線或不存在了
+		fmt.Printf("陌生人已經離線或不存在\n")
 		goto bonbonUnlock
 	}
 
@@ -185,12 +185,21 @@ bonbonUnlock:
 	globalMatchLock.Unlock()
 	onlineLock.RUnlock()
 
+	sendJsonByID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
+
 	if success {
 		err := database.MakeFriendship(id, strangerID)
 		if err != nil {
+			return
 		}
 		strangerNick, err := database.GetSignature(strangerID)
+		if err != nil {
+			return
+		}
 		myNick, err := database.GetSignature(strangerID)
+		if err != nil {
+			return
+		}
 		sendJsonByID(id, newFriendFromServer{Cmd: "new_friend", Who: strangerID, Nick: *strangerNick})
 		sendJsonByID(strangerID, newFriendFromServer{Cmd: "new_friend", Who: id, Nick: *myNick})
 	}
