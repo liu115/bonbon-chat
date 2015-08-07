@@ -143,7 +143,7 @@ func handleUpdateSettings(msg []byte, id int) {
 	}
 
 	// update database
-	err = database.SetSignature(id, request.Settings.Signature)
+	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
 		response := simpleResponse{OK: false}
 		sendJsonByID(id, &response)

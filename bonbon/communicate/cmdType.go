@@ -19,9 +19,9 @@ type setNickNameRequest struct {
 }
 
 type updateSettingsRequest struct {
-	Cmd  string
-	Settings struct {
-		Signature string
+	Cmd     string
+	Setting struct {
+		Sign string
 	}
 }
 
