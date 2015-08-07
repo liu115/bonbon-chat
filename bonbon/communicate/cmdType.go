@@ -33,6 +33,21 @@ type updateSettingsResponse struct {
 	Setting Setting
 }
 
+// type bonbonRequest struct {
+// 	Cmd string
+// }
+
+type bonbonResponse struct {
+	Cmd string
+	OK  bool
+}
+
+type newFriendFromServer struct {
+	Cmd  string
+	Who  int
+	Nick string
+}
+
 type simpleResponse struct {
 	OK bool
 }
