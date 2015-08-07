@@ -137,7 +137,7 @@ func handleUpdateSettings(msg []byte, id int) {
 	var request updateSettingsRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonByID(id, &response)
 		return
 	}
@@ -145,13 +145,13 @@ func handleUpdateSettings(msg []byte, id int) {
 	// update database
 	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonByID(id, &response)
 		return
 	}
 
 	// send success response
-	response := simpleResponse{OK: true}
+	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
 	sendJsonByID(id, &response)
 }
 
