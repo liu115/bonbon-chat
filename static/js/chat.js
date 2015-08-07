@@ -7,13 +7,14 @@ var SignClass = React.createClass({
   },
   handleClick: function() {
     this.setState({setting: true});
+    //React.findDOMNode(this.refs.refInput).focus();
   },
   handleType: function(e) {
     console.log("type");
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
       alert("setting successed");
-      this.props.chatSocket.send(JSON.stringify({"Cmd": "setting", "Setting": {"Sign": this.state.value}}))
+      this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
         value: ''
@@ -29,7 +30,7 @@ var SignClass = React.createClass({
     if (this.state.setting == true) {
       return (
         <div>
-          <input type="text" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+          <input type="text" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
         </div>
       );
     }
@@ -98,6 +99,9 @@ var FriendBox = React.createClass({
 });
 var FriendList = React.createClass({
   getInitialState: function() {
+    this.props.chatSocket.addHandler('status', function(cmd) {
+
+    }.bind(this));
     return {
     };
   },
@@ -244,6 +248,7 @@ var Content = React.createClass({
     }.bind(this));
 
     this.props.chatSocket.addHandler('send', function(cmd) {
+      alert("something sent!");
       /* send message to sb. */
     }.bind(this));
     return {
@@ -264,7 +269,7 @@ var Content = React.createClass({
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
-      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}))
+      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}));
       this.state.friends[who].messages.push(message);
     }
     this.setState({
@@ -274,7 +279,7 @@ var Content = React.createClass({
   render: function() {
     return (
       <div>
-        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
+        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
         <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
