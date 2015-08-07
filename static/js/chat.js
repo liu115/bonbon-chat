@@ -14,6 +14,7 @@ var SignClass = React.createClass({
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
       alert("setting successed");
+      console.log(this.state.value);
       this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
@@ -30,7 +31,7 @@ var SignClass = React.createClass({
     if (this.state.setting == true) {
       return (
         <div>
-          <input type="text" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+          <input type="text" className="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
         </div>
       );
     }
