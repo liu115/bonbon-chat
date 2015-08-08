@@ -1,12 +1,71 @@
-//var mySocket = new WebSocket("ws://localhost:8080/chat");
+var SignClass = React.createClass({
+  getInitialState: function() {
+    return {
+      setting: false,
+      value: ''
+    };
+  },
+  handleClick: function() {
+    this.setState({setting: true});
+    //React.findDOMNode(this.refs.refInput).focus();
+  },
+  handleType: function(e) {
+    console.log("type");
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      alert("setting successed");
+      this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
+      this.setState({
+        setting: false,
+        value: ''
+      });
+    }
+  },
+  handleChange: function(e) {
+    this.setState({
+      value: e.target.value
+    });
+  },
+  render: function() {
+    if (this.state.setting == true) {
+      return (
+        <div>
+          <input type="text" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+        </div>
+      );
+    }
+    else {
+      return (
+        <div>
+        <a className="profile-status" onClick={this.handleClick}>
+          {this.props.sign}
+          <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
+        </a>
+        </div>
+      );
+    }
+  }
+});
+
 var SideBar = React.createClass({
+  getInitialState: function() {
+    this.props.chatSocket.addHandler("init", function(cmd) {
+      this.setState({Sign: cmd.Setting.Sign});
+    }.bind(this));
+    this.props.chatSocket.addHandler("setting", function(cmd) {
+      alert("setting triggered");
+      this.setState({Sign: cmd.Setting.Sign});
+    }.bind(this));
+    return {Sign: "我建超世志，必至無上道"};
+  },
   render: function() {
     return (
       //<!-- start of navigation area -->
       <nav id="nav">
         <div id="nav-profile">
           <span className="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
-          <a className="profile-status">這是我的簽名檔（狀態）</a>
+          <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
+
         </div>
         <a id="new-connection">建立新連線</a>
         <ul id="menu">
@@ -21,7 +80,7 @@ var SideBar = React.createClass({
 });
 var FriendBox = React.createClass({
   handleClick: function() {
-    this.props.select(this.props.friend.index);
+    this.props.select(this.props.index);
   },
   render: function() {
     return (
@@ -40,10 +99,17 @@ var FriendBox = React.createClass({
 });
 var FriendList = React.createClass({
   getInitialState: function() {
+    this.props.chatSocket.addHandler('status', function(cmd) {
+
+    }.bind(this));
     return {
     };
   },
   render: function() {
+    var friendBoxs = [];
+    for (var i = 0; i < this.props.friends.length; i++) {
+      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} select={this.props.select}/>);
+    }
     return (
       <div id="friend-area">
         <div id="friend-search">
@@ -51,13 +117,7 @@ var FriendList = React.createClass({
             <input type="text" placeholder="搜尋朋友"/>
           </div>
         </div>
-        {
-          this.props.friends.map(function(friend){
-            return (
-              <FriendBox friend={friend} select={this.props.select}/>
-            );
-          }.bind(this))
-        }
+        { friendBoxs }
       </div>
     );
   }
@@ -95,15 +155,18 @@ var ChatRoom = React.createClass({
       scroll: React.findDOMNode(this.refs.refContent).scrollHeight
     }, function() {
       React.findDOMNode(this.refs.refContent).scrollTop = (this.state.scroll);
-
     });
-    React.findDOMNode(this.refs.refInput).focus();
+    this.focusInput();
   },
   sendMessageByKeyboard: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
       this.sendMessage();
     }
+  },
+  focusInput: function() {
+    React.findDOMNode(this.refs.refInput).focus();
+
   },
   handleResize: function(e) {
     this.setState({
@@ -162,84 +225,36 @@ var ChatRoom = React.createClass({
 
 var Content = React.createClass({
   getInitialState: function() {
+    this.props.chatSocket.addHandler('init', function(cmd) {
+      var friends = [];
+      for (var i = 0; i < cmd.Friends.length; i++) {
+        console.log(cmd.Friends[i])
+        var friend = {
+          index: i,
+          name: cmd.Friends[i].Nick,
+          ID: cmd.Friends[i].ID,
+          online: true,
+          stat: i == 0 ? 'selected' : 'read',
+          img: 'img/friend_' + parseInt(i + 1) + '.jpg',
+          sign: cmd.Friends[i].Sign,
+          messages: [],
+        };
+        friends.push(friend);
+      }
+      this.setState({
+        friends: friends,
+        header: friends[this.state.who].sign
+      });
+    }.bind(this));
+
+    this.props.chatSocket.addHandler('send', function(cmd) {
+      alert("something sent!");
+      /* send message to sb. */
+    }.bind(this));
     return {
-      who: 1,
-      header: 'Its where my demons hide.', /* header need fix */
-      messages: [
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          }
-        ],
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          },
-          {
-            from: 'me',
-            content: 'hihi'
-          },
-          {
-            from: 'others',
-            content: 'abcde'
-          }
-        ],
-        [
-          {
-            from: 'system',
-            content: '已建立連線，開始聊天吧！'
-          }
-        ],
-        [],
-        [],
-        []
-      ],
-      friends: [
-        {
-          index: 0,
-          name: '陌生人',
-          stat: 'read',
-          online: true,
-          img: 'img/friend_0.jpg'
-        },
-        {
-          index: 1,
-          name: 'Apple',
-          stat: 'selected',
-          online: true,
-          img: 'img/friend_1.jpg'
-        },
-        {
-          index: 2,
-          name: 'Banana',
-          stat: 'read',
-          online: true,
-          img: 'img/friend_2.jpg'
-        },
-        {
-          index: 3,
-          name: 'Cake',
-          stat: 'unread',
-          online: true,
-          img: 'img/friend_3.jpg'
-        },
-        {
-          index: 4,
-          name: 'Donut',
-          stat: 'read',
-          online: false,
-          img: 'img/friend_4.jpg'
-        },
-        {
-          index: 5,
-          name: 'Egg',
-          stat: 'unread',
-          online: false,
-          img: 'img/friend_5.jpg'
-        }
-      ]
+      who: 0,
+      friends: [{messages: []}],
+      header: '', /* header need fix */
     };
   },
   selectFriend: function(selectedFriend) {
@@ -247,24 +262,39 @@ var Content = React.createClass({
     this.state.friends[selectedFriend].stat = 'selected';
     this.setState({
       who: selectedFriend,
-      friends: this.state.friends
-      //set header from data base
+      friends: this.state.friends,
+      header: this.state.friends[selectedFriend].sign
     });
+    this.refs.refChat.focusInput();
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
-      this.state.messages[who].push(message);
+      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}));
+      this.state.friends[who].messages.push(message);
     }
     this.setState({
-      messages: this.state.messages
+      friends: this.state.friends
     });
   },
   render: function() {
     return (
       <div>
-        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend}/>
-        <ChatRoom messages={this.state.messages[this.state.who]} target={this.state.who} friends={this.state.friends} header={this.state.header} addMessage={this.addMessage}/>
+        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+        <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
       </div>
     );
   }
 });
+var App = React.createClass({
+  getInitialState: function() {
+    return {chatSocket: createSocket()}
+  },
+  render: function() {
+    return (
+      <div>
+        <SideBar chatSocket={this.state.chatSocket}/>
+        <Content chatSocket={this.state.chatSocket}/>
+      </div>
+    )
+  }
+})

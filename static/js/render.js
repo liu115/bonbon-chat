@@ -12,10 +12,7 @@ var PageAll = React.createClass({
   render: function() {
     if (this.state.login == true) {
       return (
-        <div>
-          <SideBar/>
-          <Content/>
-        </div>
+        <App/>
       );
     }
     else {
