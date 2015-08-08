@@ -10,11 +10,9 @@ var SignClass = React.createClass({
     //React.findDOMNode(this.refs.refInput).focus();
   },
   handleType: function(e) {
-    console.log("type");
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
-      alert("setting successed");
-      console.log(this.state.value);
+      console.log('trying to set ' + this.state.value + ' as Sign.');
       this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
@@ -54,8 +52,13 @@ var SideBar = React.createClass({
       this.setState({Sign: cmd.Setting.Sign});
     }.bind(this));
     this.props.chatSocket.addHandler("setting", function(cmd) {
-      alert("setting triggered");
-      this.setState({Sign: cmd.Setting.Sign});
+      if (cmd.OK == true) {
+        console.log('setting success, new sign is ' + cmd.Setting.Sign);
+        this.setState({Sign: cmd.Setting.Sign});
+      }
+      else {
+        console.log('setting failed!');
+      }
     }.bind(this));
     return {Sign: "我建超世志，必至無上道"};
   },
@@ -249,7 +252,7 @@ var Content = React.createClass({
     }.bind(this));
 
     this.props.chatSocket.addHandler('send', function(cmd) {
-      alert("something sent!");
+      console.log("something sent!");
       /* send message to sb. */
     }.bind(this));
     return {
