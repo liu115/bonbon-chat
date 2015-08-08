@@ -84,6 +84,12 @@ func CreateAccountByToken(token string) (*Account, error) {
 		}
 	}
 
+	// update Facebook friends
+	err = UpdateFacebookFriends(account.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &account, nil
 }
 
@@ -321,8 +327,8 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 	return nil
 }
 
-// GetFacebookFriends return a slice of accounts considered as the friends on Facebook
-func GetFacebookFriends(id int) ([]Account, error) {
+// UpdateFacebookFriends refresh the Facebook friends of an account
+func UpdateFacebookFriends(id int) error {
 	// get account
 	db, err := GetDB()
 	if err != nil {
@@ -368,10 +374,62 @@ func GetFacebookFriends(id int) ([]Account, error) {
 	var accountFriends []Account
 	query = db.Where("facebook_id in (?)", facebookFriendIDs).Find(&accountFriends)
 	if query.Error != nil {
+		return err
+	}
+
+	// var blobFriendIDs []byte
+	bufFriendIDs := new(bytes.Buffer)
+	binary.Write(bufFriendIDs, binary.LittleEndian, int64(len(accountFriends)))
+
+	for _, friend := range accountFriends {
+		binary.Write(bufFriendIDs, binary.LittleEndian, int64(friend.ID))
+	}
+
+	account.FacebookFriends = bufFriendIDs.Bytes()
+	db.Save(&account)
+
+	return nil
+}
+
+// GetFacebookFriends get a list of friends of an account
+func GetFacebookFriends(id int) ([]Account, error) {
+	// get account
+	db, err := GetDB()
+	if err != nil {
 		return nil, err
 	}
 
-	return accountFriends, nil
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	bufFriendIDs := bytes.NewBuffer(account.FacebookFriends)
+
+	var numFacebookFriends int64
+	err = binary.Read(bufFriendIDs, binary.LittleEndian, &numFacebookFriends)
+	if err != nil {
+		return nil, err
+	}
+
+	friendIDs := make([]int, int(numFacebookFriends))
+	for i := 0; i < int(numFacebookFriends); i++ {
+		var currFriendID int64
+		err = binary.Read(bufFriendIDs, binary.LittleEndian, &currFriendID)
+		if err != nil {
+			return nil, err
+		}
+		friendIDs = append(friendIDs, int(currFriendID))
+	}
+
+	var friendAccounts []Account
+	query = db.Where("id in (?)", friendIDs).Find(&friendAccounts)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return friendAccounts, nil
 }
 
 // AppendActivityLog push a new activity log to database

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"strconv"
 	"github.com/gin-gonic/gin"
 	"bonbon/database"
@@ -62,21 +63,59 @@ func HandleTestRemoveFriendship(c *gin.Context) {
 	id1, err := strconv.Atoi(c.Param("id1"))
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	id2, err := strconv.Atoi(c.Param("id2"))
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	if id1 < 1 || id2 < 1 {
 		c.String(404, "illegal id")
+		return
 	}
 
 	err = database.RemoveFriendship(id1, id2)
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	c.String(200, "success")
+}
+
+// HandleTestUpdateFacebookFriends handler for testing database.UpdateFacebookFriends()
+func HandleTestUpdateFacebookFriends(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	err = database.UpdateFacebookFriends(id)
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	c.String(200, "OK")
+}
+
+// HandleTestGetFacebookFriends handler for testing database.GetFacebookFriends()
+func HandleTestGetFacebookFriends(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	friends, err := database.GetFacebookFriends(id)
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	c.String(200, fmt.Sprintf("%v", friends))
 }
