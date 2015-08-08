@@ -20,10 +20,11 @@ func HandleTestWebsocket(c *gin.Context) {
 
 // HandleTestCreateAccountByToken handler for testing database.CreateAccountByToken()
 func HandleTestCreateAccountByToken(c *gin.Context) {
-	token := c.Param(":token")
+	token := c.Param("token")
 	account, err := database.CreateAccountByToken(token)
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	c.String(200, strconv.Itoa(account.ID))
@@ -39,15 +40,18 @@ func HandleTestMakeFriendship(c *gin.Context) {
 	id2, err := strconv.Atoi(c.Param("id2"))
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	if id1 < 1 || id2 < 1 {
 		c.String(404, "illegal id")
+		return
 	}
 
 	err = database.MakeFriendship(id1, id2)
 	if err != nil {
 		c.String(404, err.Error())
+		return
 	}
 
 	c.String(200, "success")

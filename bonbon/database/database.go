@@ -2,12 +2,14 @@ package database
 
 import (
 	"fmt"
-	"bonbon/config"
+	"log"
 	"errors"
+	"bytes"
+	"math/rand"
+	"encoding/binary"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"log"
-	"math/rand"
+	"bonbon/config"
 )
 
 // InitDatabase the database package initialization function
@@ -324,27 +326,27 @@ func GetFacebookFriends(id int) ([]Account, error) {
 	// get account
 	db, err := GetDB()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
 	if query.Error != nil {
-		return nil, query.Error
+		return query.Error
 	}
 
-	// list friends from Facebook Graph API
+	// get friend ids from Facebook Graph API
 	fbSession := config.GlobalApp.Session(account.AccessToken)
 	res, err := fbSession.Get("/me/friends", nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var facebookFriendIDs []string
 
 	paging, err := res.Paging(fbSession)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for {
@@ -356,7 +358,7 @@ func GetFacebookFriends(id int) ([]Account, error) {
 
 		noMore, err := paging.Next()
 		if err != nil {
-			return nil, err
+			return err
 		} else if noMore {
 			break
 		}
