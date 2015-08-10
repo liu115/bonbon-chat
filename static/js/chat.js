@@ -227,7 +227,7 @@ var ChatRoom = React.createClass({
 });
 
 
-var Content = React.createClass({
+var Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
       var friends = [];
@@ -289,6 +289,42 @@ var Content = React.createClass({
     );
   }
 });
+var NewConnection = React.createClass({
+ render: function() {
+   return (
+    <div>
+      <a>FB的好友</a>
+      <a>朋友的朋友</a>
+      <p>陌生人</p>
+    </div>
+  );
+ }
+});
+var Content = React.createClass({
+  getInitialState: function() {
+    return {
+      show: 'chat'
+    };
+  },
+  changeState: function(str) {
+    this.setState({
+      show: str
+    });
+  },
+  render: function() {
+    if (this.state.show == 'chat') {
+      return (
+        <Chat chatSocket={this.props.chatSocket} changeState={this.changeState}/>
+      );
+    }
+    if (this.state.show == 'new_connection') {
+      return (
+        <NewConnection chatSocket={this.props.chatSocket} changeState={this.changeState}/>
+      );
+    }
+  }
+});
+
 var App = React.createClass({
   getInitialState: function() {
     return {chatSocket: createSocket()}
