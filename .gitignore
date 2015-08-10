@@ -4,4 +4,5 @@
 .DS_Store
 _vendor/
 bonbon-server
+!bonbon/bonbon-server/
 node_modules/
