@@ -254,6 +254,15 @@ var Chat = React.createClass({
     this.props.chatSocket.addHandler('send', function(cmd) {
       console.log("something sent!");
       /* send message to sb. */
+      if (cmd.OK == true) {
+        this.state.friends[cmd.Who].messages.push(cmd.Msg);
+      }
+      else {
+        this.state.friends[cmd.Who].messages.push(cmd.Msg + '(send failed)');
+      }
+      this.setState({
+        friends: this.state.friends
+      });
     }.bind(this));
     return {
       who: 0,
@@ -274,11 +283,8 @@ var Chat = React.createClass({
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
       this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}));
-      this.state.friends[who].messages.push(message);
     }
-    this.setState({
-      friends: this.state.friends
-    });
+
   },
   render: function() {
     return (
@@ -290,15 +296,15 @@ var Chat = React.createClass({
   }
 });
 var NewConnection = React.createClass({
- render: function() {
-   return (
-    <div>
-      <a>FB的好友</a>
-      <a>朋友的朋友</a>
-      <p>陌生人</p>
-    </div>
-  );
- }
+  render: function() {
+    return (
+      <div>
+        <a>FB的好友</a>
+        <a>朋友的朋友</a>
+        <p>陌生人</p>
+      </div>
+    );
+  }
 });
 var Content = React.createClass({
   getInitialState: function() {
