@@ -56,6 +56,7 @@ type SendCmdResponse struct {
 	OK    bool
 	Who   int
 	Cmd   string
+	Msg   string
 	Time  int64
 	Order int
 }
@@ -72,6 +73,7 @@ func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {
 		OK:    exist,
 		Who:   req.Who,
 		Cmd:   req.Cmd,
+		Msg:   req.Msg,
 		Time:  now,
 		Order: req.Order,
 	}
