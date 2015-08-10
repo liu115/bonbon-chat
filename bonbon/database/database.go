@@ -2,12 +2,14 @@ package database
 
 import (
 	"fmt"
-	"bonbon/config"
+	"log"
 	"errors"
+	"bytes"
+	"math/rand"
+	"encoding/binary"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"log"
-	"math/rand"
+	"bonbon/config"
 )
 
 // InitDatabase the database package initialization function
@@ -80,6 +82,12 @@ func CreateAccountByToken(token string) (*Account, error) {
 		if query.Error != nil {
 			return nil, query.Error
 		}
+	}
+
+	// update Facebook friends
+	err = UpdateFacebookFriends(account.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	return &account, nil
@@ -319,7 +327,71 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 	return nil
 }
 
-// GetFacebookFriends return a slice of accounts considered as the friends on Facebook
+// UpdateFacebookFriends refresh the Facebook friends of an account
+func UpdateFacebookFriends(id int) error {
+	// get account
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+	if query.Error != nil {
+		return query.Error
+	}
+
+	// get friend ids from Facebook Graph API
+	fbSession := config.GlobalApp.Session(account.AccessToken)
+	res, err := fbSession.Get("/me/friends", nil)
+	if err != nil {
+		return err
+	}
+
+	var facebookFriendIDs []string
+
+	paging, err := res.Paging(fbSession)
+	if err != nil {
+		return err
+	}
+
+	for {
+		data := paging.Data()
+
+		for _, item := range data {
+			facebookFriendIDs = append(facebookFriendIDs, item["id"].(string))
+		}
+
+		noMore, err := paging.Next()
+		if err != nil {
+			return err
+		} else if noMore {
+			break
+		}
+	}
+
+	// find Facebook friends in database
+	var accountFriends []Account
+	query = db.Where("facebook_id in (?)", facebookFriendIDs).Find(&accountFriends)
+	if query.Error != nil {
+		return err
+	}
+
+	// var blobFriendIDs []byte
+	bufFriendIDs := new(bytes.Buffer)
+	binary.Write(bufFriendIDs, binary.LittleEndian, int64(len(accountFriends)))
+
+	for _, friend := range accountFriends {
+		binary.Write(bufFriendIDs, binary.LittleEndian, int64(friend.ID))
+	}
+
+	account.FacebookFriends = bufFriendIDs.Bytes()
+	db.Save(&account)
+
+	return nil
+}
+
+// GetFacebookFriends get a list of friends of an account
 func GetFacebookFriends(id int) ([]Account, error) {
 	// get account
 	db, err := GetDB()
@@ -333,43 +405,31 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
-	// list friends from Facebook Graph API
-	fbSession := config.GlobalApp.Session(account.AccessToken)
-	res, err := fbSession.Get("/me/friends", nil)
+	bufFriendIDs := bytes.NewBuffer(account.FacebookFriends)
+
+	var numFacebookFriends int64
+	err = binary.Read(bufFriendIDs, binary.LittleEndian, &numFacebookFriends)
 	if err != nil {
 		return nil, err
 	}
 
-	var facebookFriendIDs []string
-
-	paging, err := res.Paging(fbSession)
-	if err != nil {
-		return nil, err
-	}
-
-	for {
-		data := paging.Data()
-
-		for _, item := range data {
-			facebookFriendIDs = append(facebookFriendIDs, item["id"].(string))
-		}
-
-		noMore, err := paging.Next()
+	friendIDs := make([]int, int(numFacebookFriends))
+	for i := 0; i < int(numFacebookFriends); i++ {
+		var currFriendID int64
+		err = binary.Read(bufFriendIDs, binary.LittleEndian, &currFriendID)
 		if err != nil {
 			return nil, err
-		} else if noMore {
-			break
 		}
+		friendIDs = append(friendIDs, int(currFriendID))
 	}
 
-	// find Facebook friends in database
-	var accountFriends []Account
-	query = db.Where("facebook_id in (?)", facebookFriendIDs).Find(&accountFriends)
+	var friendAccounts []Account
+	query = db.Where("id in (?)", friendIDs).Find(&friendAccounts)
 	if query.Error != nil {
-		return nil, err
+		return nil, query.Error
 	}
 
-	return accountFriends, nil
+	return friendAccounts, nil
 }
 
 // AppendActivityLog push a new activity log to database

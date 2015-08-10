@@ -36,6 +36,8 @@ func main() {
 		app.GET("/test/create-account-by-token/:token", test.HandleTestCreateAccountByToken)
 		app.GET("/test/make-friendship/:id1/:id2", test.HandleTestMakeFriendship)
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
+		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)
+		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
 	}
 
 	// routes for production puropose
