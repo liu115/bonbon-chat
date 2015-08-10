@@ -40,6 +40,8 @@ func main() {
 		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
 	}
 
+	app.GET("/chat/:token", HandleWebsocket)
+
 	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")

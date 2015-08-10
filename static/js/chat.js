@@ -287,7 +287,7 @@ var Content = React.createClass({
 });
 var App = React.createClass({
   getInitialState: function() {
-    return {chatSocket: createSocket()}
+    return {chatSocket: createSocket(this.props.token)}
   },
   render: function() {
     return (
