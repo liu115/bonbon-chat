@@ -264,6 +264,13 @@ var Chat = React.createClass({
         friends: this.state.friends
       });
     }.bind(this));
+
+    this.props.chatSocket.addHandler('sendFromServer', function(cmd) {
+      this.state.friends[cmd.Who].messages.push(cmd.Msg);
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
     return {
       who: 0,
       friends: [{messages: []}],
@@ -298,10 +305,12 @@ var Chat = React.createClass({
 var NewConnection = React.createClass({
   render: function() {
     return (
-      <div>
-        <a>FB的好友</a>
-        <a>朋友的朋友</a>
-        <p>陌生人</p>
+      <div id="connection">
+        <ul>
+          <li><a>FB的好友</a></li>
+          <li><a>朋友的朋友</a></li>
+          <li><p>陌生人</p></li>
+        </ul>
       </div>
     );
   }
