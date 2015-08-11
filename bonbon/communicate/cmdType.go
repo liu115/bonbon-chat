@@ -33,6 +33,21 @@ type updateSettingsResponse struct {
 	Setting Setting
 }
 
+// type bonbonRequest struct {
+// 	Cmd string
+// }
+
+type bonbonResponse struct {
+	Cmd string
+	OK  bool
+}
+
+type newFriendFromServer struct {
+	Cmd  string
+	Who  int
+	Nick string
+}
+
 type simpleResponse struct {
 	OK bool
 }
@@ -41,6 +56,7 @@ type SendCmdResponse struct {
 	OK    bool
 	Who   int
 	Cmd   string
+	Msg   string
 	Time  int64
 	Order int
 }
@@ -57,6 +73,7 @@ func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {
 		OK:    exist,
 		Who:   req.Who,
 		Cmd:   req.Cmd,
+		Msg:   req.Msg,
 		Time:  now,
 		Order: req.Order,
 	}

@@ -18,9 +18,10 @@ var upgrader = websocket.Upgrader{
 }
 
 type user struct {
-	conns []*websocket.Conn
-	match int         // -1表示無配對
-	lock  *sync.Mutex // lock住conns
+	conns  []*websocket.Conn
+	lock   *sync.Mutex // lock住conns
+	match  int         // -1表示無配對
+	bonbon bool
 }
 
 var onlineUser = make(map[int]*user)
@@ -29,6 +30,8 @@ var onlineLock = new(sync.RWMutex)
 // 粒度高，將降低效能
 // TODO: 改為讀寫鎖或拆分粒度
 var globalMatchLock = new(sync.Mutex)
+
+var globalBonbonLock = new(sync.Mutex)
 
 // -1代表目前無人
 var waitingStranger = -1
@@ -131,6 +134,77 @@ func handleConnect(msg []byte, id int, u *user) {
 	}
 }
 
+func disconnectByID(id int) {
+	var stranger int
+	globalMatchLock.Lock()
+	if stranger = onlineUser[id].match; stranger != -1 {
+		onlineUser[id].match = -1
+		onlineUser[stranger].match = -1
+	}
+	globalMatchLock.Unlock()
+	// 將io取出鎖外操作
+	fmt.Printf("%d disconnect with %d\n", id, stranger)
+	if stranger > 0 {
+		sendJsonByID(stranger, map[string]interface{}{"Cmd": "disconnected"})
+	}
+}
+
+// 實作斷線
+func handleDisconnect(id int) {
+	disconnectByID(id)
+	sendJsonByID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+}
+
+func handleBonbon(id int) {
+	fmt.Printf("%d bonbon\n", id)
+	var success = false
+	onlineLock.RLock()
+	globalMatchLock.Lock()
+	globalBonbonLock.Lock()
+	var stranger *user
+	strangerID := onlineUser[id].match
+	if strangerID == -1 {
+		fmt.Printf("沒有connect就bonbon\n")
+		goto bonbonUnlock
+	}
+	stranger = onlineUser[strangerID]
+	if stranger == nil {
+		fmt.Printf("陌生人已經離線或不存在\n")
+		goto bonbonUnlock
+	}
+
+	if stranger.bonbon == false {
+		fmt.Printf("%d bonbon: 對方未bonbon\n", id)
+		onlineUser[id].bonbon = true
+	} else if stranger.bonbon == true {
+		fmt.Printf("%d bonbon: 成為朋友\n", id)
+		success = true
+	}
+bonbonUnlock:
+	globalBonbonLock.Unlock()
+	globalMatchLock.Unlock()
+	onlineLock.RUnlock()
+
+	sendJsonByID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
+
+	if success {
+		err := database.MakeFriendship(id, strangerID)
+		if err != nil {
+			return
+		}
+		strangerNick, err := database.GetSignature(strangerID)
+		if err != nil {
+			return
+		}
+		myNick, err := database.GetSignature(strangerID)
+		if err != nil {
+			return
+		}
+		sendJsonByID(id, newFriendFromServer{Cmd: "new_friend", Who: strangerID, Nick: *strangerNick})
+		sendJsonByID(strangerID, newFriendFromServer{Cmd: "new_friend", Who: id, Nick: *myNick})
+	}
+}
+
 // handle account settings update
 func handleUpdateSettings(msg []byte, id int) {
 	// decode JSON request
@@ -150,6 +224,7 @@ func handleUpdateSettings(msg []byte, id int) {
 		return
 	}
 
+	// TODO 告訴所有人此人改簽名檔
 	// send success response
 	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
 	sendJsonByID(id, &response)
@@ -157,6 +232,7 @@ func handleUpdateSettings(msg []byte, id int) {
 
 // handle setting nickname of friends
 func handleSetNickName(msg []byte, id int) {
+	// TODO: 修正response
 	// decode JSON request
 	var request setNickNameRequest
 	err := json.Unmarshal(msg, &request)
@@ -179,33 +255,6 @@ func handleSetNickName(msg []byte, id int) {
 	sendJsonByID(id, &response)
 }
 
-func handleBonbon(id int, strangerID int) {
-	// TODO
-	// err := database.MakeFriendship(id, strangerID)
-	// ...
-}
-
-func disconnectByID(id int) {
-	var stranger int
-	globalMatchLock.Lock()
-	if stranger = onlineUser[id].match; stranger != -1 {
-		onlineUser[id].match = -1
-		onlineUser[stranger].match = -1
-	}
-	globalMatchLock.Unlock()
-	// 將io取出鎖外操作
-	fmt.Printf("%d disconnect with %d\n", id, stranger)
-	if stranger > 0 {
-		sendJsonByID(stranger, map[string]interface{}{"Cmd": "disconnected"})
-	}
-}
-
-// 實作斷線
-func handleDisconnect(id int) {
-	disconnectByID(id)
-	sendJsonByID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
-}
-
 func initOnline(id int, conn *websocket.Conn) *user {
 	// check if this account exists
 	_, err := database.GetAccountByID(id)
@@ -217,9 +266,10 @@ func initOnline(id int, conn *websocket.Conn) *user {
 	onlineLock.Lock()
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
-			match: -1,
-			conns: []*websocket.Conn{conn},
-			lock:  new(sync.Mutex),
+			match:  -1,
+			conns:  []*websocket.Conn{conn},
+			lock:   new(sync.Mutex),
+			bonbon: false,
 		}
 	} else {
 		onlineUser[id].lock.Lock()
@@ -301,8 +351,7 @@ func ChatHandler(id int, c *gin.Context) {
 				case "disconnect":
 					handleDisconnect(id)
 				case "bonbon":
-					// TODO get stranger
-					// handleBonbon(id, ...stranger id...)
+					handleBonbon(id)
 				default:
 					fmt.Println("未知的請求")
 				}

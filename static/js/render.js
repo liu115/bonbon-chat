@@ -4,15 +4,16 @@ var PageAll = React.createClass({
       login: false
     };
   },
-  logined: function() {
+  logined: function(token) {
     this.setState({
-      login: true
+      login: true,
+	  token: token
     });
   },
   render: function() {
     if (this.state.login == true) {
       return (
-        <App/>
+        <App token={this.state.token}/>
       );
     }
     else {

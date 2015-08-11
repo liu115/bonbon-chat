@@ -12,6 +12,7 @@ type Account struct {
 	AccessToken     string
 	Signature       string
 	Friends         []Friendship
+	FacebookFriends []byte
 	CreateAt        time.Time    `sql:"DEFAULT:current_timestamp"`
 }
 
