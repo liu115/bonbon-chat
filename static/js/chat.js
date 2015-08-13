@@ -71,7 +71,7 @@ var SideBar = React.createClass({
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
 
         </div>
-        <a id="new-connection">建立新連線</a>
+        <a id="new-connection" onClick={this.props.changeState}>建立新連線</a>
         <ul id="menu">
           <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
           <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
@@ -254,11 +254,19 @@ var Chat = React.createClass({
     this.props.chatSocket.addHandler('send', function(cmd) {
       console.log("something sent!");
       /* send message to sb. */
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      console.log('index is ' + index);
       if (cmd.OK == true) {
-        this.state.friends[cmd.Who].messages.push(cmd.Msg);
+        this.state.friends[index].messages.push({content: cmd.Msg, from: 'me'});
       }
       else {
-        this.state.friends[cmd.Who].messages.push(cmd.Msg + '(send failed)');
+        this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me'});
+        console.log(this.state.friends[cmd.Who].messages);
       }
       this.setState({
         friends: this.state.friends
@@ -266,7 +274,13 @@ var Chat = React.createClass({
     }.bind(this));
 
     this.props.chatSocket.addHandler('sendFromServer', function(cmd) {
-      this.state.friends[cmd.Who].messages.push(cmd.Msg);
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others'});
       this.setState({
         friends: this.state.friends
       });
@@ -289,67 +303,74 @@ var Chat = React.createClass({
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
-      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}));
+      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
     }
 
   },
   render: function() {
-    return (
-      <div>
-        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-        <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
-      </div>
-    );
+    if (this.props.show == 'chat') {
+      return (
+        <div>
+          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+        </div>
+      );
+    }
+    else if (this.props.show == 'new_connection') {
+      return (
+        <div>
+          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState}/>
+        </div>
+      );
+    }
   }
 });
 var NewConnection = React.createClass({
+  handleClick: function(e) {
+    this.props.changeState();
+  },
   render: function() {
     return (
       <div id="connection">
         <ul>
-          <li><a>FB的好友</a></li>
-          <li><a>朋友的朋友</a></li>
-          <li><p>陌生人</p></li>
+          <li><a onClick={this.handleClick}>FB的好友</a></li>
+          <li><a onClick={this.handleClick}>朋友的朋友</a></li>
+          <li><a onClick={this.handleClick}>陌生人</a></li>
         </ul>
       </div>
     );
   }
 });
 var Content = React.createClass({
-  getInitialState: function() {
-    return {
-      show: 'chat'
-    };
-  },
-  changeState: function(str) {
-    this.setState({
-      show: str
-    });
-  },
   render: function() {
-    if (this.state.show == 'chat') {
-      return (
-        <Chat chatSocket={this.props.chatSocket} changeState={this.changeState}/>
-      );
-    }
-    if (this.state.show == 'new_connection') {
-      return (
-        <NewConnection chatSocket={this.props.chatSocket} changeState={this.changeState}/>
-      );
-    }
+    return (
+      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState}/>
+    );
   }
 });
 
 var App = React.createClass({
   getInitialState: function() {
-    return {chatSocket: createSocket(this.props.token)}
+    return {
+      chatSocket: createSocket(this.props.token),
+      show: 'chat'
+    };
+  },
+  changeState: function(e) {
+    var str = this.state.show;
+    if (str == 'chat') str = 'new_connection';
+    else str = 'chat';
+    this.setState({
+      show: str
+    });
   },
   render: function() {
     return (
       <div>
-        <SideBar chatSocket={this.state.chatSocket}/>
-        <Content chatSocket={this.state.chatSocket}/>
+        <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
+        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
       </div>
-    )
+    );
   }
-})
+});
