@@ -277,7 +277,7 @@ func initOnline(id int, conn *websocket.Conn) *user {
 		onlineUser[id].lock.Unlock()
 	}
 	onlineLock.Unlock()
-	return onlineUser[id] //此時必定還存在
+	return onlineUser[id]
 }
 
 func removeFromStrangerQueue(id int) {
@@ -323,7 +323,7 @@ func ChatHandler(id int, c *gin.Context) {
 	}
 	user := initOnline(id, conn)
 	err = sendInitMsg(id)
-	var wg sync.WaitGroup
+	var wg sync.WaitGroup // 因為Go的goto不能跳過變數宣告（這個限制實際上不需要）
 	if err != nil {
 		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
 		goto clear
@@ -331,35 +331,34 @@ func ChatHandler(id int, c *gin.Context) {
 	// TODO 通知所有人此人上線
 	for {
 		_, msg, err := conn.ReadMessage()
-		if err == nil {
-			wg.Add(1)
-			go func() {
-				fmt.Printf("id %d: %s\n", id, msg)
-				var decodedMsg map[string]interface{}
-				json.Unmarshal(msg, &decodedMsg)
-				switch decodedMsg["Cmd"] {
-				// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
-				case "setting":
-					handleUpdateSettings(msg, id)
-				case "change_nick":
-					handleSetNickName(msg, id)
-				case "connect":
-					fmt.Printf("id %d try connect\n", id)
-					handleConnect(msg, id, user)
-				case "send":
-					handleSend(msg, id, user)
-				case "disconnect":
-					handleDisconnect(id)
-				case "bonbon":
-					handleBonbon(id)
-				default:
-					fmt.Println("未知的請求")
-				}
-				wg.Done()
-			}()
-		} else {
+		if err != nil {
 			break
 		}
+		wg.Add(1)
+		go func() {
+			fmt.Printf("id %d: %s\n", id, msg)
+			var decodedMsg map[string]interface{}
+			json.Unmarshal(msg, &decodedMsg)
+			switch decodedMsg["Cmd"] {
+			// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
+			case "setting":
+				handleUpdateSettings(msg, id)
+			case "change_nick":
+				handleSetNickName(msg, id)
+			case "connect":
+				fmt.Printf("id %d try connect\n", id)
+				handleConnect(msg, id, user)
+			case "send":
+				handleSend(msg, id, user)
+			case "disconnect":
+				handleDisconnect(id)
+			case "bonbon":
+				handleBonbon(id)
+			default:
+				fmt.Println("未知的請求")
+			}
+			wg.Done()
+		}()
 	}
 	wg.Wait()
 clear:
