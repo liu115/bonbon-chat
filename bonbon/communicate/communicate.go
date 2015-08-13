@@ -37,19 +37,6 @@ var globalBonbonLock = new(sync.Mutex)
 var waitingStranger = -1
 var StrangerLock = new(sync.Mutex)
 
-// 實作init訊息
-func sendInitMsg(id int) error {
-	msg, err := getInitInfo(id)
-	if err != nil {
-		return err
-	}
-	err = sendJsonByID(id, msg)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
 	var req SendCmd
@@ -255,63 +242,12 @@ func handleSetNickName(msg []byte, id int) {
 	sendJsonByID(id, &response)
 }
 
-func initOnline(id int, conn *websocket.Conn) *user {
-	// check if this account exists
-	_, err := database.GetAccountByID(id)
-	if err != nil {
-		// TODO do error handling if id is illegal
-	}
-
-	fmt.Printf("id %d login\n", id)
-	onlineLock.Lock()
-	if onlineUser[id] == nil {
-		onlineUser[id] = &user{
-			match:  -1,
-			conns:  []*websocket.Conn{conn},
-			lock:   new(sync.Mutex),
-			bonbon: false,
-		}
-	} else {
-		onlineUser[id].lock.Lock()
-		onlineUser[id].conns = append(onlineUser[id].conns, conn)
-		onlineUser[id].lock.Unlock()
-	}
-	onlineLock.Unlock()
-	return onlineUser[id]
-}
-
 func removeFromStrangerQueue(id int) {
 	StrangerLock.Lock()
 	if id == waitingStranger {
 		waitingStranger = -1
 	}
 	StrangerLock.Unlock()
-}
-
-func clearOffline(id int, conn *websocket.Conn) {
-	// 刪除本連線
-	onlineLock.Lock()
-	u := onlineUser[id]
-	u.lock.Lock()
-	conns := u.conns
-	var which int
-	for i := 0; i < len(conns); i++ {
-		if conn == conns[i] {
-			which = i
-			break
-		}
-	}
-	u.conns = append(conns[:which], conns[which+1:]...)
-	if len(conns) == 0 {
-		// 若還在等待陌生人
-		removeFromStrangerQueue(id)
-		// 若還在連線
-		disconnectByID(id)
-		delete(onlineUser, id)
-	}
-	u.lock.Unlock()
-	onlineLock.Unlock()
-	fmt.Printf("id %d 下線了\n", id)
 }
 
 // ChatHandler 一個gin handler，為websocket之入口
