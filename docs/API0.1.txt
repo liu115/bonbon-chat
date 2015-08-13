@@ -39,7 +39,7 @@ API 實體
 	{"Cmd": "init",
 	"OK": true or false
 	"Setting": {"Sign": "XXXXXXX"},
-    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX"}, ...]}
+    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off"}, ...]}
 3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
        {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
