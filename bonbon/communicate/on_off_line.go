@@ -7,13 +7,19 @@ import (
 	"sync"
 )
 
-func initOnline(id int, conn *websocket.Conn) *user {
+func initOnline(id int, conn *websocket.Conn) (*user, error) {
 	_, err := database.GetAccountByID(id)
 	if err != nil {
-		// TODO do error handling if id is illegal
+		return nil, err
 	}
 
 	fmt.Printf("id %d login\n", id)
+
+	friendships, err := database.GetFriendships(id)
+	if err != nil {
+		return nil, err
+	}
+
 	onlineLock.Lock()
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
@@ -22,13 +28,21 @@ func initOnline(id int, conn *websocket.Conn) *user {
 			lock:   new(sync.Mutex),
 			bonbon: false,
 		}
+		for i := 0; i < len(friendships); i++ {
+			fmt.Printf("id %d try notify %d he is onlne\n", id, friendships[i].FriendID)
+			sendJsonByID(friendships[i].FriendID, StatusCmd{Cmd: "Status", Who: id, Status: "on"})
+		}
 	} else {
 		onlineUser[id].lock.Lock()
 		onlineUser[id].conns = append(onlineUser[id].conns, conn)
 		onlineUser[id].lock.Unlock()
 	}
 	onlineLock.Unlock()
-	return onlineUser[id] //此時必定還存在
+	err = sendInitMsg(id)
+	if err != nil {
+		return nil, err
+	}
+	return onlineUser[id], nil //此時必定還存在
 }
 
 func getInitInfo(id int) (*initCmd, error) {
@@ -100,6 +114,13 @@ func clearOffline(id int, conn *websocket.Conn) {
 		removeFromStrangerQueue(id)
 		// 若還在連線
 		disconnectByID(id)
+		// 傳送離線訊息
+		friendships, err := database.GetFriendships(id)
+		if err == nil {
+			for i := 0; i < len(friendships); i++ {
+				sendJsonByIDNoLock(friendships[i].FriendID, StatusCmd{Cmd: "Status", Who: id, Status: "off"})
+			}
+		}
 		delete(onlineUser, id)
 	}
 	u.lock.Unlock()

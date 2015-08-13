@@ -257,9 +257,8 @@ func ChatHandler(id int, c *gin.Context) {
 		fmt.Printf("establish connection, %s\n", err.Error())
 		return
 	}
-	user := initOnline(id, conn)
-	err = sendInitMsg(id)
-	var wg sync.WaitGroup // 因為Go的goto不能跳過變數宣告（這個限制實際上不需要）
+	user, err := initOnline(id, conn)
+	var wg sync.WaitGroup
 	if err != nil {
 		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
 		goto clear

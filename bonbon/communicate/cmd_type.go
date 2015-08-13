@@ -1,5 +1,17 @@
 package communicate
 
+// 命名規則
+// 若為請求：加上Request後綴
+// 若為回應：加上Response後綴
+// 若為伺服器主動行為：加上Cmd後綴
+// TODO: 使結構符合命名規則
+
+type StatusCmd struct {
+	Cmd    string
+	Who    int
+	Status string
+}
+
 // structure for send
 type SendCmd struct {
 	Cmd   string
