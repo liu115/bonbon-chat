@@ -38,6 +38,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 		onlineUser[id].lock.Unlock()
 	}
 	onlineLock.Unlock()
+	// TODO: 在初始化訊息送到前不開放給別人傳送訊息
 	err = sendInitMsg(id)
 	if err != nil {
 		return nil, err
@@ -109,7 +110,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 		}
 	}
 	u.conns = append(conns[:which], conns[which+1:]...)
-	if len(conns) == 0 {
+	if len(u.conns) == 0 {
 		// 若還在等待陌生人
 		removeFromStrangerQueue(id)
 		// 若還在連線
@@ -118,6 +119,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 		friendships, err := database.GetFriendships(id)
 		if err == nil {
 			for i := 0; i < len(friendships); i++ {
+				fmt.Printf("%d try to notify %d he is offline\n", i, friendships[i].FriendID)
 				sendJsonByIDNoLock(friendships[i].FriendID, StatusCmd{Cmd: "Status", Who: id, Status: "off"})
 			}
 		}

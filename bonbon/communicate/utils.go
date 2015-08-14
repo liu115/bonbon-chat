@@ -28,6 +28,9 @@ func sendJsonByUser(user *user, json interface{}) error {
 
 func sendJsonByIDNoLock(id int, json interface{}) error {
 	u := onlineUser[id]
+	if u == nil {
+		return errors.New("sendJsonByIDNoLock: ID is offline")
+	}
 	err := sendJsonByUserNoLock(u, json)
 	if err != nil {
 		return err
