@@ -89,7 +89,7 @@ var FriendBox = React.createClass({
   render: function() {
     return (
       <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
-        <div className="friend-avatar">
+        <div className={(this.props.index == 0) ? "stranger-avatar": "friend-avatar"}>
           <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
@@ -231,14 +231,25 @@ var Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
       var friends = [];
+      var initFriend = {
+        index: 0,
+        name: '陌生人',
+        ID: '00000',
+        online: false,
+        stat: 'read',
+        img: 'img/stranger.png',
+        sign: '猜猜我是誰',
+        messages: [{from: 'system', content: '尚未配對成功'}]
+      };
+      friends.push(initFriend);
       for (var i = 0; i < cmd.Friends.length; i++) {
         console.log(cmd.Friends[i])
         var friend = {
-          index: i,
+          index: i + 1,
           name: cmd.Friends[i].Nick,
           ID: cmd.Friends[i].ID,
-          online: true,
-          stat: i == 0 ? 'selected' : 'read',
+          online: cmd.Friends[i].Status == 'on' ? true : false,
+          stat: i == 1 ? 'selected' : 'read',
           img: 'img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
           messages: [],
@@ -327,6 +338,18 @@ var Chat = React.createClass({
   }
 });
 var NewConnection = React.createClass({
+  L1Friend: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
+    handleClick();
+  },
+  L2Friend: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
+    handleClick();
+  },
+  Stranger: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
+    handleClick();
+  },
   handleClick: function(e) {
     this.props.changeState();
   },
@@ -334,9 +357,10 @@ var NewConnection = React.createClass({
     return (
       <div id="connection">
         <ul>
-          <li><a onClick={this.handleClick}>FB的好友</a></li>
-          <li><a onClick={this.handleClick}>朋友的朋友</a></li>
-          <li><a onClick={this.handleClick}>陌生人</a></li>
+          <li><a onClick={this.L1Friend}>FB的好友</a></li>
+          <li><a onClick={this.L2Friend}>朋友的朋友</a></li>
+          <li><a onClick={this.Stranger}>陌生人</a></li>
+          <li><a onClick={this.handleClick}>取消</a></li>
         </ul>
       </div>
     );
