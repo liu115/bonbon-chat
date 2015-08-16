@@ -4,8 +4,7 @@ import (
 	"errors"
 )
 
-func sendJsonByUser(user *user, json interface{}) error {
-	user.lock.Lock()
+func sendJsonByUserNoLock(user *user, json interface{}) error {
 	l := len(user.conns)
 	errMsg := ""
 	for i := 0; i < l; i++ {
@@ -14,15 +13,36 @@ func sendJsonByUser(user *user, json interface{}) error {
 			errMsg += (err.Error() + " ")
 		}
 	}
-	user.lock.Unlock()
 	if errMsg != "" {
 		return errors.New("sendJsonByUser: " + errMsg)
 	}
 	return nil
 }
 
+func sendJsonByUser(user *user, json interface{}) error {
+	user.lock.Lock()
+	sendJsonByUserNoLock(user, json)
+	user.lock.Unlock()
+	return nil
+}
+
+func sendJsonByIDNoLock(id int, json interface{}) error {
+	u := onlineUser[id]
+	if u == nil {
+		return errors.New("sendJsonByIDNoLock: ID is offline")
+	}
+	err := sendJsonByUserNoLock(u, json)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func sendJsonByID(id int, json interface{}) error {
 	u := onlineUser[id]
+	if u == nil {
+		return errors.New("sendJsonByID: ID is offline")
+	}
 	err := sendJsonByUser(u, json)
 	if err != nil {
 		return err
