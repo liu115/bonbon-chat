@@ -30,7 +30,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 		}
 		for i := 0; i < len(friendships); i++ {
 			fmt.Printf("id %d try notify %d he is onlne\n", id, friendships[i].FriendID)
-			sendJsonByID(friendships[i].FriendID, StatusCmd{Cmd: "Status", Who: id, Status: "on"})
+			sendJsonByID(friendships[i].FriendID, StatusCmd{Cmd: "status", Who: id, Status: "on"})
 		}
 	} else {
 		onlineUser[id].lock.Lock()
@@ -120,7 +120,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 		if err == nil {
 			for i := 0; i < len(friendships); i++ {
 				fmt.Printf("%d try to notify %d he is offline\n", i, friendships[i].FriendID)
-				sendJsonByIDNoLock(friendships[i].FriendID, StatusCmd{Cmd: "Status", Who: id, Status: "off"})
+				sendJsonByIDNoLock(friendships[i].FriendID, StatusCmd{Cmd: "status", Who: id, Status: "off"})
 			}
 		}
 		delete(onlineUser, id)
