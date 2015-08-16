@@ -296,6 +296,19 @@ var Chat = React.createClass({
         friends: this.state.friends
       });
     }.bind(this));
+
+    this.props.chatSocket.addHandler('status', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      this.state.friends[index].online = (cmd.Status == 'on') ? true : false;
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
     return {
       who: 0,
       friends: [{messages: []}],
