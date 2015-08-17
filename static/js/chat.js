@@ -234,7 +234,7 @@ var Chat = React.createClass({
       var initFriend = {
         index: 0,
         name: '陌生人',
-        ID: '00000',
+        ID: 0,
         online: false,
         stat: 'read',
         img: 'img/stranger.png',
@@ -249,7 +249,7 @@ var Chat = React.createClass({
           name: cmd.Friends[i].Nick,
           ID: cmd.Friends[i].ID,
           online: cmd.Friends[i].Status == 'on' ? true : false,
-          stat: i == 1 ? 'selected' : 'read',
+          stat: i == 0 ? 'selected' : 'read',
           img: 'img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
           messages: [],
@@ -258,7 +258,8 @@ var Chat = React.createClass({
       }
       this.setState({
         friends: friends,
-        header: friends[this.state.who].sign
+        header: friends[this.state.who].sign,
+        who: 1
       });
     }.bind(this));
 
@@ -277,7 +278,7 @@ var Chat = React.createClass({
       }
       else {
         this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me'});
-        console.log(this.state.friends[cmd.Who].messages);
+        console.log(this.state.friends[index].messages);
       }
       this.setState({
         friends: this.state.friends
@@ -305,8 +306,19 @@ var Chat = React.createClass({
         }
       }
       this.state.friends[index].online = (cmd.Status == 'on') ? true : false;
+      if (index == 0) {
+        this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      }
       this.setState({
         friends: this.state.friends
+      });
+    }.bind(this));
+
+    this.props.chatSocket.addHandler('connect', function(cmd) {
+      var friends = this.state.friends;
+      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
+      this.setState({
+        friends: friends
       });
     }.bind(this));
     return {
@@ -353,17 +365,17 @@ var Chat = React.createClass({
 var NewConnection = React.createClass({
   L1Friend: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
-    handleClick();
+    this.handleClick();
   },
   L2Friend: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
-    handleClick();
+    this.handleClick();
   },
   Stranger: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
-    handleClick();
+    this.handleClick();
   },
-  handleClick: function(e) {
+  handleClick: function() {
     this.props.changeState();
   },
   render: function() {
