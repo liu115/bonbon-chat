@@ -21,6 +21,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 	}
 
 	onlineLock.Lock()
+
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
 			match:  -1,
@@ -28,21 +29,24 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			lock:   new(sync.Mutex),
 			bonbon: false,
 		}
+		err = sendInitMsg(id)
+		if err != nil {
+			return nil, err
+		}
 		for i := 0; i < len(friendships); i++ {
 			fmt.Printf("id %d try notify %d he is onlne\n", id, friendships[i].FriendID)
 			sendJsonByID(friendships[i].FriendID, StatusCmd{Cmd: "status", Who: id, Status: "on"})
 		}
 	} else {
+		err = sendInitMsg(id)
+		if err != nil {
+			return nil, err
+		}
 		onlineUser[id].lock.Lock()
 		onlineUser[id].conns = append(onlineUser[id].conns, conn)
 		onlineUser[id].lock.Unlock()
 	}
 	onlineLock.Unlock()
-	// TODO: 在初始化訊息送到前不開放給別人傳送訊息
-	err = sendInitMsg(id)
-	if err != nil {
-		return nil, err
-	}
 	return onlineUser[id], nil //此時必定還存在
 }
 
@@ -56,7 +60,6 @@ func getInitInfo(id int) (*initCmd, error) {
 		return &initCmd{Cmd: "init", OK: false}, err
 	}
 	var friends []friend
-	onlineLock.RLock() // 可等資料庫操作結束後再鎖，增進效能
 	for i := 0; i < len(friendships); i++ {
 		// 這邊的檢查可能可以容錯高一點
 		friend_account, err := database.GetAccountByID(friendships[i].FriendID)
@@ -78,7 +81,6 @@ func getInitInfo(id int) (*initCmd, error) {
 			return &initCmd{Cmd: "init", OK: false}, err
 		}
 	}
-	onlineLock.RUnlock()
 	my_setting := setting{Sign: account.Signature}
 	return &initCmd{Cmd: "init", OK: true, Setting: my_setting, Friends: friends}, nil
 }
@@ -89,7 +91,7 @@ func sendInitMsg(id int) error {
 	if err != nil {
 		return err
 	}
-	err = sendJsonByID(id, msg)
+	err = sendJsonByIDNoLock(id, msg)
 	if err != nil {
 		return err
 	}
