@@ -306,9 +306,6 @@ var Chat = React.createClass({
         }
       }
       this.state.friends[index].online = (cmd.Status == 'on') ? true : false;
-      if (index == 0) {
-        this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
-      }
       this.setState({
         friends: this.state.friends
       });
@@ -316,9 +313,31 @@ var Chat = React.createClass({
 
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
+      friends[0].messages = [{from: 'system', content: '建立配對中...'}];
       this.setState({
         friends: friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('connected', function(cmd) {
+      var friends = this.state.friends;
+      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
+      friends[0].online = true;
+      this.setState({
+        friends: friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('disconnect', function(cmd) {
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      friends[0].online = false;
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('disconnected', function(cmd) {
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      friends[0].online = false;
+      this.setState({
+        friends: this.state.friends
       });
     }.bind(this));
     return {
