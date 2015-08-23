@@ -42,13 +42,13 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			)
 		}
 	} else {
+		onlineUser[id].lock.Lock()
+		onlineUser[id].conns = append(onlineUser[id].conns, conn)
+		onlineUser[id].lock.Unlock()
 		err = sendInitMsg(id)
 		if err != nil {
 			return nil, err
 		}
-		onlineUser[id].lock.Lock()
-		onlineUser[id].conns = append(onlineUser[id].conns, conn)
-		onlineUser[id].lock.Unlock()
 	}
 	onlineLock.Unlock()
 	return onlineUser[id], nil //此時必定還存在
