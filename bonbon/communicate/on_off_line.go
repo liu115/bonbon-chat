@@ -38,7 +38,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			sendJsonToUnknownStatusID(
 				friendships[i].FriendID,
 				StatusCmd{Cmd: "status", Who: id, Status: "on"},
-				false,
+				true,
 			)
 		}
 	} else {
