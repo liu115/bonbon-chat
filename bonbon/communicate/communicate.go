@@ -39,7 +39,7 @@ var StrangerLock = new(sync.Mutex)
 
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
-	var req SendCmd
+	var req SendRequest
 	err := json.Unmarshal(msg, &req)
 	// 無法偵測出json格式是否正確
 	if err != nil {
@@ -74,13 +74,13 @@ func handleSend(msg []byte, id int, u *user) {
 // 實作隨機連結(connect) API
 func handleConnect(msg []byte, id int, u *user) {
 	fmt.Printf("start handle Connect\n")
-	var req connectCmd
+	var req connectRequest
 	err := json.Unmarshal(msg, &req)
 	if err != nil {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, connectCmdResponse{OK: true, Cmd: "connect"})
+	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"})
 	var stranger = -1
 	switch req.Type {
 	case "stranger":
@@ -195,10 +195,10 @@ bonbonUnlock:
 		if err != nil {
 			return
 		}
-		sendJsonToOnlineID(id, newFriendFromServer{Cmd: "new_friend", Who: strangerID, Nick: *strangerNick})
+		sendJsonToOnlineID(id, newFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: *strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
-			newFriendFromServer{Cmd: "new_friend", Who: id, Nick: *myNick},
+			newFriendCmd{Cmd: "new_friend", Who: id, Nick: *myNick},
 			false,
 		)
 	}
@@ -229,10 +229,9 @@ func handleUpdateSettings(msg []byte, id int) {
 	sendJsonToOnlineID(id, &response)
 }
 
-// handle setting nickname of friends
+// XXX: 下版功能 handle setting nickname of friends
 func handleSetNickName(msg []byte, id int) {
 	// TODO: 修正response
-	// decode JSON request
 	var request setNickNameRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
@@ -290,8 +289,9 @@ func ChatHandler(id int, c *gin.Context) {
 			// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
 			case "setting":
 				handleUpdateSettings(msg, id)
-			case "change_nick":
-				handleSetNickName(msg, id)
+			// XXX: 誤用API，此為下版功能
+			// case "change_nick":
+			// 	handleSetNickName(msg, id)
 			case "connect":
 				fmt.Printf("id %d try connect\n", id)
 				handleConnect(msg, id, user)

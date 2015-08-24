@@ -6,6 +6,7 @@ package communicate
 // 若為伺服器主動行為：加上Cmd後綴
 // TODO: 使結構符合命名規則
 
+// 告知status
 type StatusCmd struct {
 	Cmd    string
 	Who    int
@@ -13,54 +14,14 @@ type StatusCmd struct {
 }
 
 // structure for send
-type SendCmd struct {
+type SendRequest struct {
 	Cmd   string
 	Who   int
 	Msg   string
 	Order int
 }
 
-type setNickNameRequest struct {
-	Cmd      string
-	Who      int
-	NickName string
-}
-
-type Setting struct {
-	Sign string
-}
-
-type updateSettingsRequest struct {
-	Cmd     string
-	Setting Setting
-}
-
-type updateSettingsResponse struct {
-	OK      bool
-	Cmd     string
-	Setting Setting
-}
-
-// type bonbonRequest struct {
-// 	Cmd string
-// }
-
-type bonbonResponse struct {
-	Cmd string
-	OK  bool
-}
-
-type newFriendFromServer struct {
-	Cmd  string
-	Who  int
-	Nick string
-}
-
-type simpleResponse struct {
-	OK bool
-}
-
-type SendCmdResponse struct {
+type SendResponse struct {
 	OK    bool
 	Who   int
 	Cmd   string
@@ -76,8 +37,8 @@ type SendFromServer struct {
 	Msg  string
 }
 
-func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {
-	res := SendCmdResponse{
+func respondToSend(req SendRequest, now int64, exist bool) SendResponse {
+	res := SendResponse{
 		OK:    exist,
 		Who:   req.Who,
 		Cmd:   req.Cmd,
@@ -88,13 +49,57 @@ func respondToSend(req SendCmd, now int64, exist bool) SendCmdResponse {
 	return res
 }
 
+// structure for set nickname
+type setNickNameRequest struct {
+	Cmd      string
+	Who      int
+	NickName string
+}
+
+// structure for set setting
+type Setting struct {
+	Sign string
+}
+
+type updateSettingsRequest struct {
+	Cmd     string
+	Setting Setting
+}
+
+type updateSettingsResponse struct {
+	OK      bool
+	Cmd     string
+	Setting Setting
+}
+
+// structure for bonbon
+
+// type bonbonRequest struct {
+// 	Cmd string
+// }
+
+type bonbonResponse struct {
+	Cmd string
+	OK  bool
+}
+
+type newFriendCmd struct {
+	Cmd  string
+	Who  int
+	Nick string
+}
+
+type simpleResponse struct {
+	OK bool
+}
+
 // structure for connect
-type connectCmd struct {
+type connectRequest struct {
 	Cmd  string
 	Type string
 }
 
-type connectCmdResponse struct {
+type connectResponse struct {
 	OK  bool
 	Cmd string
 }
