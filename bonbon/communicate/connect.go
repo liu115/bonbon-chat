@@ -6,6 +6,18 @@ import (
 	"fmt"
 )
 
+// -1代表目前無人
+var waitingStranger = -1
+var StrangerLock = new(sync.Mutex)
+
+func removeFromStrangerQueue(id int) {
+	StrangerLock.Lock()
+	if id == waitingStranger {
+		waitingStranger = -1
+	}
+	StrangerLock.Unlock()
+}
+
 // 實作隨機連結(connect) API
 func handleConnect(msg []byte, id int, u *user) {
 	fmt.Printf("start handle Connect\n")

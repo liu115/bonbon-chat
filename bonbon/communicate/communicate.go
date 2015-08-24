@@ -33,10 +33,6 @@ var globalMatchLock = new(sync.Mutex)
 
 var globalBonbonLock = new(sync.Mutex)
 
-// -1代表目前無人
-var waitingStranger = -1
-var StrangerLock = new(sync.Mutex)
-
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
 	var req SendRequest
@@ -172,14 +168,6 @@ func handleSetNickName(msg []byte, id int) {
 	// send success response
 	response := simpleResponse{OK: true}
 	sendJsonToOnlineID(id, &response)
-}
-
-func removeFromStrangerQueue(id int) {
-	StrangerLock.Lock()
-	if id == waitingStranger {
-		waitingStranger = -1
-	}
-	StrangerLock.Unlock()
 }
 
 // ChatHandler 一個gin handler，為websocket之入口
