@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"bytes"
 	"strconv"
 	"github.com/gin-gonic/gin"
 	"bonbon/database"
@@ -118,4 +119,32 @@ func HandleTestGetFacebookFriends(c *gin.Context) {
 	}
 
 	c.String(200, fmt.Sprintf("%v", friends))
+}
+
+// HandleTestGetFacebookFriendsOfFriends handler for testing database.GetFacebookFriendsOfFriends()
+func HandleTestGetFacebookFriendsOfFriends(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	degree, err := strconv.Atoi(c.Param("degree"))
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	var buffer bytes.Buffer
+	friendsOfFriends, err := database.GetFacebookFriendsOfFriends(id, degree)
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	for _, account := range friendsOfFriends {
+		buffer.WriteString(strconv.Itoa(account.ID) + "\n")
+	}
+
+	c.String(200, buffer.String())
 }

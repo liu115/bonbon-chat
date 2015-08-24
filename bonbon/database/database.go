@@ -437,6 +437,54 @@ func GetFacebookFriends(id int) ([]Account, error) {
 	return friendAccounts, nil
 }
 
+// GetFacebookFriendsOfFriends get friends of friends up to N degrees of separation
+func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
+	if degree < 1 {
+		return nil, fmt.Errorf("invalid degree: degree = %d", degree)
+	}
+
+	account, err := GetAccountByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// run BFS
+	openFriends := make(map[int]*Account)
+	closedFriends := make(map[int]*Account)
+
+	openFriends[id] = account
+
+	for i := 0; i <= degree; i++ {
+		newOpenFriends := make(map[int]*Account)
+
+		for friendID, friendAccount := range openFriends {
+			if _, ok := closedFriends[friendID]; !ok {
+				closedFriends[friendID] = friendAccount
+
+				neighborFriends, err := GetFacebookFriends(friendID)
+				if err != nil {
+					return nil, err
+				}
+
+				for _, neighborAccount := range neighborFriends {
+					newOpenFriends[neighborAccount.ID] = &neighborAccount
+				}
+			}
+		}
+
+		openFriends = newOpenFriends
+	}
+
+	delete(closedFriends, id)
+
+	var friendsOfFriends []*Account
+	for _, friendAccount := range closedFriends {
+		friendsOfFriends = append(friendsOfFriends, friendAccount)
+	}
+
+	return friendsOfFriends, nil
+}
+
 // AppendActivityLog push a new activity log to database
 func AppendActivityLog(accountID int, action string, description string) error {
 	db, err := GetDB()
