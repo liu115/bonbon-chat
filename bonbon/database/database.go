@@ -377,7 +377,11 @@ func UpdateFacebookFriends(id int) error {
 		return err
 	}
 
-	// var blobFriendIDs []byte
+	// store friend ids in binary format
+	// friend ids are stored in the form [number of friends] [friend id 1] [friend id 2] ... [friend id n]
+	// each bracket pair [ ] here is a 64-bit little endian integer
+	// e.g. a list of friend ids 1, 5, 6 is formatted as
+	// 0x03 00 00 00 00 00 00 00  0x01 00 00 00 00 00 00 00  0x05 00 00 00 00 00 00 00  0x06 00 00 00 00 00 00 00
 	bufFriendIDs := new(bytes.Buffer)
 	binary.Write(bufFriendIDs, binary.LittleEndian, int64(len(accountFriends)))
 
@@ -405,6 +409,7 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
+	// parse friend ids from blob stored in database
 	bufFriendIDs := bytes.NewBuffer(account.FacebookFriends)
 
 	var numFacebookFriends int64

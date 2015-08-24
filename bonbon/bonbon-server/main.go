@@ -38,9 +38,10 @@ func main() {
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
 		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)
 		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
+		app.GET("/test/get-facebook-friends-of-friends/:id/:degree", test.HandleTestGetFacebookFriendsOfFriends)
 	}
 
-	// routes for production puropose
+	// routes for production purpose
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
