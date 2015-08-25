@@ -123,7 +123,8 @@ func clearOffline(id int, conn *websocket.Conn) {
 	u.conns = append(conns[:which], conns[which+1:]...)
 	if len(u.conns) == 0 {
 		// 若還在等待陌生人
-		removeFromStrangerQueue(id)
+		matchRequestChannel <- matchRequest{Cmd: "out", ID: id, Type: u.matchType}
+		<-matchDoneChannel
 		// 若還在連線
 		disconnectByID(id)
 		// 傳送離線訊息

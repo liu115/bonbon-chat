@@ -18,10 +18,11 @@ var upgrader = websocket.Upgrader{
 }
 
 type user struct {
-	conns  []*websocket.Conn
-	lock   *sync.Mutex // lock住conns
-	match  int         // -1表示無配對
-	bonbon bool
+	conns     []*websocket.Conn
+	lock      *sync.Mutex // lock住conns
+	match     int         // -1表示無配對
+	matchType string
+	bonbon    bool
 }
 
 var onlineUser = make(map[int]*user)

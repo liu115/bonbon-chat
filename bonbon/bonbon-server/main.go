@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bonbon/communicate"
 	"bonbon/config"
 	"bonbon/database"
 	"bonbon/test"
@@ -47,6 +48,9 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
+
+	// run consumer
+	go communicate.MatchConsumer()
 
 	// run server
 	app.Run(config.Address)
