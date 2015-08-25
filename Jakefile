@@ -11,6 +11,17 @@ namespace('build', function () {
     task('all', ['build:build-binary']);
 });
 
+namespace('install', function () {
+    desc('Install everything');
+    task('all', [], function () {
+        var prefix = process.env.prefix;
+        if (prefix == undefined)
+            prefix = '/usr/local';
+        jake.exec("mkdir -p '" + prefix + "/bin'");
+        jake.exec("cp bonbon-server '" + prefix + "/bin/bonbon-server'");
+    });
+});
+
 namespace('clean', function () {
     desc('Clean everything');
     task('all', [], function () {
@@ -26,6 +37,8 @@ namespace('test', function () {
 });
 
 task('build', ['build:all']);
+
+task('install', ['install:all']);
 
 task('clean', ['clean:all']);
 
