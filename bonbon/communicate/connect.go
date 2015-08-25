@@ -33,8 +33,19 @@ func (wq *waitingQueue) match(id int) int {
 	switch wq.Type {
 	case "stranger":
 		wq.accept = func(s int) bool { return true }
-		fmt.Printf("match with stranger, wq.queue length is %d\n", len(wq.queue))
 	case "L1_FB_friend":
+		friendAccounts, err := database.GetFacebookFriends(id)
+		if err != nil {
+			// TODO: handle it
+		}
+		wq.accept = func(s int) bool {
+			for _, friend := range friendAccounts {
+				if friend.ID == s {
+					return true
+				}
+			}
+			return false
+		}
 	case "L2_FB_friend":
 	}
 	disconnectByID(id)
@@ -72,6 +83,9 @@ func MatchConsumer() {
 	waitingQueues["stranger"] = new(waitingQueue)
 	waitingQueues["stranger"].queue = make([]int, 0)
 	waitingQueues["stranger"].Type = "stranger"
+	waitingQueues["L1_FB_friend"] = new(waitingQueue)
+	waitingQueues["L1_FB_friend"].queue = make([]int, 0)
+	waitingQueues["L1_FB_friend"].Type = "L1_FB_friend"
 	for {
 		var ans int
 		req := <-matchRequestChannel
