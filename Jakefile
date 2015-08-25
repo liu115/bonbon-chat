@@ -1,63 +1,38 @@
 namespace('build', function () {
-    desc('Setup build environments');
-    task('setup', [], function () {
-        jake.mkdirP('build/src');
-        jake.exec('ln -s ../../bonbon build/src/bonbon', function () {
-            complete();
-        });
-    });
-
-    desc('Install dependencies');
-    task('install-deps', [], function () {
-        jake.exec('gom install', function () {
-            complete();
-        });
-    });
-
-    desc('Compile binary');
-    task('compile-binary', [], function () {
-        jake.exec('env GOPATH="`pwd`/build" gom build bonbon/bonbon-server', function () {
-            complete();
-        });
-        complete();
+    desc('Build binary');
+    task('build-binary', [], function () {
+        jake.exec('mkdir -p build/src');
+        jake.exec('ln -s ../../bonbon build/src/bonbon');
+        jake.exec('gom install');
+        jake.exec('env GOPATH="`pwd`/build" gom build bonbon/bonbon-server');
     });
 
     desc('Build everything');
-    task('all', ['clean:all', 'build:setup', 'build:install-deps', 'build:compile-binary'], function () {
-    });
+    task('all', ['build:build-binary']);
 });
 
 namespace('clean', function () {
     desc('Clean everything');
     task('all', [], function () {
         // jake.rmRf('_vendor');
-        jake.rmRf('bonbon-server');
-        jake.exec('rm -rf build', function () { // jake.rmRf() follows symlinks and destroy bonbon/ directory. it might be a Jake bug
-            complete();
-        });
+        jake.exec('rm -rf bonbon-server');
+        jake.exec('rm -rf build');
     });
 });
 
 namespace('test', function () {
-    desc('Run sanity tests');
-    task('sanity', [], function () {
-        // TODO
-    });
-
-    desc('Run sanity tests');
-    task('all', ['test:sanity'], function () {
-        // TODO
-    });
+    desc('Run all tests');
+    task('all', []);
 });
 
-task('build', ['build:all'], function () {
-});
+task('build', ['build:all']);
 
-task('clean', ['clean:all'], function () {
-});
+task('clean', ['clean:all']);
 
-task('test', ['test:all'], function () {
-});
+task('test', ['test:all']);
 
-task('default', ['build:all'], function () {
+task('default', [], function () {
+    jake.Task['clean:all'].invoke();
+    jake.Task['build:all'].invoke();
+    jake.Task['test:all'].invoke();
 });
