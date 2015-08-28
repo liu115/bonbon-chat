@@ -396,7 +396,7 @@ func UpdateFacebookFriends(id int) error {
 }
 
 // GetFacebookFriends get a list of friends of an account
-func GetFacebookFriends(id int) ([]Account, error) {
+func GetFacebookFriends(id int) ([]*Account, error) {
 	// get account
 	db, err := GetDB()
 	if err != nil {
@@ -434,7 +434,12 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
-	return friendAccounts, nil
+	var friendPointerAccounts []*Account
+	for _, account := range friendAccounts {
+		friendPointerAccounts = append(friendPointerAccounts, &account)
+	}
+
+	return friendPointerAccounts, nil
 }
 
 // GetFacebookFriendsOfFriends get friends of friends up to N degrees of separation
@@ -467,7 +472,7 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 				}
 
 				for _, neighborAccount := range neighborFriends {
-					newOpenFriends[neighborAccount.ID] = &neighborAccount
+					newOpenFriends[neighborAccount.ID] = neighborAccount
 				}
 			}
 		}

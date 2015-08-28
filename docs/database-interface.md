@@ -10,7 +10,7 @@ In package "bonbon/database", _models.go_ provides object definitions in databas
 * func SetSignature(id int, signature string) error
 * func GetSignature(id int) (\*string, error)
 * func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
-* func GetFacebookFriends(id int) ([]Account, error)
+* func GetFacebookFriends(id int) ([]\*Account, error)
 * func GetFacebookFriendsOfFriends(id int, degree int) ([]Account, error)
 * func AppendActivityLog(accountID int, action string, description string) error
 
