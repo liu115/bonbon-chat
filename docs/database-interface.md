@@ -11,6 +11,7 @@ In package "bonbon/database", _models.go_ provides object definitions in databas
 * func GetSignature(id int) (\*string, error)
 * func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 * func GetFacebookFriends(id int) ([]Account, error)
+* func GetFacebookFriendsOfFriends(id int, degree int) ([]Account, error)
 * func AppendActivityLog(accountID int, action string, description string) error
 
 ## database table schema
@@ -74,10 +75,18 @@ func foo() {
     err = database.AppendActivityLog(id, "message", "Do you think Bonbon is censoring our chatting?")
     if err != nil {...}
 
+    // list friends of an account by id
     friendAccounts, err := database.GetFacebookFriends(id)
     if err != nil {...}
     for _, friend := range friendAccounts {
         fmt.Println(friend.ID)
+    }
+
+    // list friends of friends up to Nth degree
+    fofAccounts, err := database.GetFacebookFriendsOfFriends(id, n
+    if err != nil {...}
+    for _, account := range fofAccounts {
+        fmt.Println(account.ID)
     }
 }
 

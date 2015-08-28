@@ -3,6 +3,7 @@
 *.swp
 .DS_Store
 _vendor/
+build/
 bonbon-server
 !bonbon/bonbon-server/
 node_modules/

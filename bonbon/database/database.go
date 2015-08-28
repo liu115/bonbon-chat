@@ -377,7 +377,11 @@ func UpdateFacebookFriends(id int) error {
 		return err
 	}
 
-	// var blobFriendIDs []byte
+	// store friend ids in binary format
+	// friend ids are stored in the form [number of friends] [friend id 1] [friend id 2] ... [friend id n]
+	// each bracket pair [ ] here is a 64-bit little endian integer
+	// e.g. a list of friend ids 1, 5, 6 is formatted as
+	// 0x03 00 00 00 00 00 00 00  0x01 00 00 00 00 00 00 00  0x05 00 00 00 00 00 00 00  0x06 00 00 00 00 00 00 00
 	bufFriendIDs := new(bytes.Buffer)
 	binary.Write(bufFriendIDs, binary.LittleEndian, int64(len(accountFriends)))
 
@@ -405,6 +409,7 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
+	// parse friend ids from blob stored in database
 	bufFriendIDs := bytes.NewBuffer(account.FacebookFriends)
 
 	var numFacebookFriends int64
@@ -430,6 +435,54 @@ func GetFacebookFriends(id int) ([]Account, error) {
 	}
 
 	return friendAccounts, nil
+}
+
+// GetFacebookFriendsOfFriends get friends of friends up to N degrees of separation
+func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
+	if degree < 1 {
+		return nil, fmt.Errorf("invalid degree: degree = %d", degree)
+	}
+
+	account, err := GetAccountByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// run BFS
+	openFriends := make(map[int]*Account)
+	closedFriends := make(map[int]*Account)
+
+	openFriends[id] = account
+
+	for i := 0; i <= degree; i++ {
+		newOpenFriends := make(map[int]*Account)
+
+		for friendID, friendAccount := range openFriends {
+			if _, ok := closedFriends[friendID]; !ok {
+				closedFriends[friendID] = friendAccount
+
+				neighborFriends, err := GetFacebookFriends(friendID)
+				if err != nil {
+					return nil, err
+				}
+
+				for _, neighborAccount := range neighborFriends {
+					newOpenFriends[neighborAccount.ID] = &neighborAccount
+				}
+			}
+		}
+
+		openFriends = newOpenFriends
+	}
+
+	delete(closedFriends, id)
+
+	var friendsOfFriends []*Account
+	for _, friendAccount := range closedFriends {
+		friendsOfFriends = append(friendsOfFriends, friendAccount)
+	}
+
+	return friendsOfFriends, nil
 }
 
 // AppendActivityLog push a new activity log to database

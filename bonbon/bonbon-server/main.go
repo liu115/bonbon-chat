@@ -39,6 +39,7 @@ func main() {
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
 		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)
 		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
+		app.GET("/test/get-facebook-friends-of-friends/:id/:degree", test.HandleTestGetFacebookFriendsOfFriends)
 	}
 
 	app.GET("/chat/:token", HandleWebsocket)
