@@ -444,8 +444,8 @@ func GetFacebookFriends(id int) ([]*Account, error) {
 
 // GetFacebookFriendsOfFriends get friends of friends up to N degrees of separation
 func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
-	if degree < 1 {
-		return nil, fmt.Errorf("invalid degree: degree = %d", degree)
+	if degree < 2 {
+		return nil, fmt.Errorf("invalid degree: expect degree >= 2 but degree = %d", degree)
 	}
 
 	account, err := GetAccountByID(id)
@@ -456,31 +456,41 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 	// run BFS
 	openFriends := make(map[int]*Account)
 	closedFriends := make(map[int]*Account)
+	blacklistAccounts := make(map[int]*Account)
 
-	openFriends[id] = account
+	friendAccounts, err := GetFacebookFriends(id)
+	if err != nil {
+		return nil, err
+	}
 
-	for i := 0; i <= degree; i++ {
+	blacklistAccounts[id] = account
+	for _, friend := range friendAccounts {
+		openFriends[friend.ID] = friend
+		blacklistAccounts[friend.ID] = friend
+	}
+
+
+	for i := 1; i <= degree; i++ {
 		newOpenFriends := make(map[int]*Account)
 
 		for friendID, friendAccount := range openFriends {
-			if _, ok := closedFriends[friendID]; !ok {
+			_, ok := blacklistAccounts[friendID]
+			if !ok {
 				closedFriends[friendID] = friendAccount
+			}
 
-				neighborFriends, err := GetFacebookFriends(friendID)
-				if err != nil {
-					return nil, err
-				}
+			neighborFriends, err := GetFacebookFriends(friendID)
+			if err != nil {
+				return nil, err
+			}
 
-				for _, neighborAccount := range neighborFriends {
-					newOpenFriends[neighborAccount.ID] = neighborAccount
-				}
+			for _, neighborAccount := range neighborFriends {
+				newOpenFriends[neighborAccount.ID] = neighborAccount
 			}
 		}
 
 		openFriends = newOpenFriends
 	}
-
-	delete(closedFriends, id)
 
 	var friendsOfFriends []*Account
 	for _, friendAccount := range closedFriends {
