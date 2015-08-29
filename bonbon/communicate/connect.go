@@ -28,6 +28,17 @@ type waitingQueue struct {
 	accept func(int) bool
 }
 
+func inAcconts(accounts []*database.Account) func(int) bool {
+	return func(s int) bool {
+		for _, friend := range accounts {
+			if friend.ID == s {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 func (wq *waitingQueue) match(id int) int {
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
@@ -38,15 +49,13 @@ func (wq *waitingQueue) match(id int) int {
 		if err != nil {
 			// TODO: handle it
 		}
-		wq.accept = func(s int) bool {
-			for _, friend := range friendAccounts {
-				if friend.ID == s {
-					return true
-				}
-			}
-			return false
-		}
+		wq.accept = inAcconts(friendAccounts)
 	case "L2_FB_friend":
+		friendAccounts, err := database.GetFacebookFriendsOfFriends(id, 2)
+		if err != nil {
+			// TODO: handle it
+		}
+		wq.accept = inAcconts(friendAccounts)
 	}
 	disconnectByID(id)
 	for i := 0; i < len(wq.queue); i++ {
