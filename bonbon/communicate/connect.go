@@ -95,15 +95,20 @@ func MatchConsumer() {
 	waitingQueues["L1_FB_friend"] = new(waitingQueue)
 	waitingQueues["L1_FB_friend"].queue = make([]int, 0)
 	waitingQueues["L1_FB_friend"].Type = "L1_FB_friend"
+	waitingQueues["L2_FB_friend"] = new(waitingQueue)
+	waitingQueues["L2_FB_friend"].queue = make([]int, 0)
+	waitingQueues["L2_FB_friend"].Type = "L2_FB_friend"
 	for {
 		var ans int
 		req := <-matchRequestChannel
-		switch req.Cmd {
-		case "in":
-			ans = waitingQueues[req.Type].match(req.ID)
-		case "out":
-			waitingQueues[req.Type].remove(req.ID)
-		default:
+		if req.Type != "" {
+			switch req.Cmd {
+			case "in":
+				ans = waitingQueues[req.Type].match(req.ID)
+			case "out":
+				waitingQueues[req.Type].remove(req.ID)
+			default:
+			}
 		}
 		matchDoneChannel <- ans
 	}
