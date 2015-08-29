@@ -57,7 +57,7 @@ func (wq *waitingQueue) match(id int) int {
 		}
 		wq.accept = inAcconts(friendAccounts)
 	}
-	disconnectByID(id)
+	disconnectByID(id, false)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
 			return -1
@@ -149,7 +149,7 @@ func handleConnect(msg []byte, id int, u *user) {
 	}
 }
 
-func disconnectByID(id int) {
+func disconnectByID(id int, lock bool) {
 	var stranger int
 	globalMatchLock.Lock()
 	if stranger = onlineUser[id].match; stranger != -1 {
@@ -163,13 +163,13 @@ func disconnectByID(id int) {
 		sendJsonToUnknownStatusID(
 			stranger,
 			map[string]interface{}{"Cmd": "disconnected"},
-			false,
+			lock,
 		)
 	}
 }
 
 // 實作斷線
 func handleDisconnect(id int) {
-	disconnectByID(id)
+	disconnectByID(id, false)
 	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
 }
