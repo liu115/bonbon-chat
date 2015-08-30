@@ -184,17 +184,15 @@ var ChatRoom = React.createClass({
     });
   },
   componentDidMount: function() {
-    window.addEventListener('resize', this.handleResize);
     window.addEventListener('scroll', this.handleScroll);
     React.findDOMNode(this.refs.refInput).focus();
   },
   componentWillUnmount: function() {
-    window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('scroll', this.handleScroll);
   },
   render: function() {
     return (
-      <div id="message-area" style={{width: (this.state.roomWidth + 'px')}}>
+      <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
         <div id="message-header" ref="header">
           {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
@@ -313,7 +311,7 @@ var Chat = React.createClass({
 
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '建立配對中...'}];
+      friends[0].messages = [{from: 'system', content: '建立配對中...請稍候'}];
       this.setState({
         friends: friends
       });
@@ -367,7 +365,7 @@ var Chat = React.createClass({
       return (
         <div>
           <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage} roomSize={this.props.roomSize}/>
         </div>
       );
     }
@@ -375,13 +373,18 @@ var Chat = React.createClass({
       return (
         <div>
           <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState}/>
+          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
         </div>
       );
     }
   }
 });
 var NewConnection = React.createClass({
+  getInitialState: function() {
+    //name is this.props.name and header take from the name
+    return {
+    };
+  },
   L1Friend: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
     this.handleClick();
@@ -399,12 +402,12 @@ var NewConnection = React.createClass({
   },
   render: function() {
     return (
-      <div id="connection">
-        <ul>
-          <li><a onClick={this.L1Friend}>FB的好友</a></li>
-          <li><a onClick={this.L2Friend}>朋友的朋友</a></li>
-          <li><a onClick={this.Stranger}>陌生人</a></li>
-          <li><a onClick={this.handleClick}>取消</a></li>
+      <div id="connection" style={{width: this.props.roomSize.width - 320 + 'px', height: this.props.roomSize.height + 'px'}}>
+        <ul id="connection-list">
+          <li><a className="connection-button" Click={this.L1Friend}>FB的好友</a></li>
+          <li><a className="connection-button" onClick={this.L2Friend}>朋友的朋友</a></li>
+          <li><a className="connection-button" onClick={this.Stranger}>陌生人</a></li>
+          <li><a className="connection-button" onClick={this.handleClick}>取消</a></li>
         </ul>
       </div>
     );
@@ -413,7 +416,7 @@ var NewConnection = React.createClass({
 var Content = React.createClass({
   render: function() {
     return (
-      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState}/>
+      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
     );
   }
 });
@@ -422,8 +425,22 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       chatSocket: createSocket(this.props.token),
-      show: 'chat'
+      show: 'chat',
+      roomWidth: window.innerWidth - 200,
+      roomHeight: window.innerHeight
     };
+  },
+  handleResize: function(e) {
+    this.setState({
+      roomWidth: window.innerWidth - 200,
+      roomHeight: window.innerHeight
+    });
+  },
+  componentDidMount: function() {
+    window.addEventListener('resize', this.handleResize);
+  },
+  componentWillUnmount: function() {
+    window.removeEventListener('resize', this.handleResize);
   },
   changeState: function(e) {
     var str = this.state.show;
@@ -434,10 +451,11 @@ var App = React.createClass({
     });
   },
   render: function() {
+    var size = {width: this.state.roomWidth, height: this.state.roomHeight};
     return (
       <div>
         <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
-        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
+        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket} roomSize={size}/>
       </div>
     );
   }

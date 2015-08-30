@@ -8,7 +8,10 @@
   background: #D9EDF7;
   padding-top: 15px;
 }
-
+#connection-list {
+  text-align: center;
+  margin: 0 auto;
+}
 .stranger-avatar {
   float:left;
   width: 50px;
@@ -20,5 +23,24 @@
   height: 50px;
   border: 1px solid #B6FA98;
   border-radius: 5px;
-    box-shadow: 0 0 1px black;
+  box-shadow: 0 0 1px black;
+}
+
+.connection-button {
+  display: inline-block;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border: 1px solid #F8F8FF;
+  border-radius: 5px;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.connection-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.connection-button:active {
+  background: rgba(255, 255, 255, 0.1);
 }
