@@ -80,7 +80,7 @@ func handleBonbon(id int, u *user) {
 		fmt.Printf("沒有connect就bonbon\n")
 		goto bonbonUnlock
 	}
-	stranger = getUserByID(strangerID)
+	stranger = onlineUser[strangerID]
 	if stranger == nil {
 		fmt.Printf("陌生人已經離線或不存在\n")
 		goto bonbonUnlock

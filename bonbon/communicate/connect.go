@@ -85,19 +85,20 @@ func (wq *waitingQueue) remove(id int) {
 	}
 }
 
+func createWaitingQueue(Type string) *waitingQueue {
+	w := new(waitingQueue)
+	w.queue = make([]int, 0)
+	w.Type = Type
+	return w
+}
+
 // TODO: 將三種類型分開平行處理
 // MatchConsumer : 專門進行match的routine
 func MatchConsumer() {
 	waitingQueues := make(map[string]*waitingQueue)
-	waitingQueues["stranger"] = new(waitingQueue)
-	waitingQueues["stranger"].queue = make([]int, 0)
-	waitingQueues["stranger"].Type = "stranger"
-	waitingQueues["L1_FB_friend"] = new(waitingQueue)
-	waitingQueues["L1_FB_friend"].queue = make([]int, 0)
-	waitingQueues["L1_FB_friend"].Type = "L1_FB_friend"
-	waitingQueues["L2_FB_friend"] = new(waitingQueue)
-	waitingQueues["L2_FB_friend"].queue = make([]int, 0)
-	waitingQueues["L2_FB_friend"].Type = "L2_FB_friend"
+	waitingQueues["stranger"] = createWaitingQueue("stranger")
+	waitingQueues["L1_FB_friend"] = createWaitingQueue("L1_FB_friend")
+	waitingQueues["L2_FB_friend"] = createWaitingQueue("L2_FB_friend")
 	for {
 		var ans int
 		req := <-matchRequestChannel
