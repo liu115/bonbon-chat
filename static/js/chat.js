@@ -404,10 +404,10 @@ var NewConnection = React.createClass({
     return (
       <div id="connection" style={{width: this.props.roomSize.width - 320 + 'px', height: this.props.roomSize.height + 'px'}}>
         <ul id="connection-list">
-          <li><a className="connection-button" Click={this.L1Friend}>FB的好友</a></li>
-          <li><a className="connection-button" onClick={this.L2Friend}>朋友的朋友</a></li>
-          <li><a className="connection-button" onClick={this.Stranger}>陌生人</a></li>
-          <li><a className="connection-button" onClick={this.handleClick}>取消</a></li>
+          <li className="connection-line"><a className="connection-button" Click={this.L1Friend}>FB的好友</a></li>
+          <li className="connection-line"><a className="connection-button" onClick={this.L2Friend}>朋友的朋友</a></li>
+          <li className="connection-line"><a className="connection-button" onClick={this.Stranger}>陌生人</a></li>
+          <li className="connection-line"><a className="connection-button" onClick={this.handleClick}>取消</a></li>
         </ul>
       </div>
     );

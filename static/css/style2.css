@@ -9,8 +9,12 @@
   padding-top: 15px;
 }
 #connection-list {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   text-align: center;
-  margin: 0 auto;
+  margin-top: -126px;
+  margin-left: -61px;
 }
 .stranger-avatar {
   float:left;
@@ -25,15 +29,18 @@
   border-radius: 5px;
   box-shadow: 0 0 1px black;
 }
-
+.connection-line {
+  margin-bottom: -20px;
+}
 .connection-button {
   display: inline-block;
   color: white;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.15);
   padding: 10px 20px;
-  border: 1px solid #F8F8FF;
+  border: 1px solid #A1B9C1;
   border-radius: 5px;
   margin: 20px 0;
+  width: 80px;
   cursor: pointer;
 }
 

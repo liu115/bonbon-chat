@@ -167,7 +167,8 @@ nav {
   margin-bottom: 4px;
 }
 
-.off-line {
+.off-line img{
+  filter: grayscale(100%);
   opacity: 0.6;
 }
 
