@@ -37,7 +37,7 @@ namespace('test', function () {
 
 desc('Create tar.gz');
 task('package-tar-gz', [], {async: true}, function () { // mark async to avoid task package:docker-image accidentally copying unfinished tar.gz file
-    jake.exec("git archive -o '" + TAR_GZ_FILENAME + "' --prefix '" + PACKAGE_NAME + "/' --format tar.gz database", function () {
+    jake.exec("git archive -o '" + TAR_GZ_FILENAME + "' --prefix '" + PACKAGE_NAME + "/' --format tar.gz master,", function () {
         complete();
     });
 });
