@@ -192,11 +192,11 @@ var ChatRoom = React.createClass({
   },
   render: function() {
     return (
-      <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
+      <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height + 'px')}}>
         <div id="message-header" ref="header">
           {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
-        <div id="message-content" ref="refContent" style={{height: (this.state.roomHeight + 'px')}}>
+        <div id="message-content" ref="refContent" style={{height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
         {
           this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
