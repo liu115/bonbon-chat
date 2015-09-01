@@ -2,6 +2,7 @@ var NAME = 'bonbon';
 var VERSION = '0.1';
 var PACKAGE_NAME = NAME + '-' + VERSION;
 var TAR_GZ_FILENAME = PACKAGE_NAME + '.tar.gz';
+var DOCKER_IMAGE_FILENAME = PACKAGE_NAME + '.docker.tar';
 
 namespace('build', function () {
     desc('Build binary');
@@ -19,11 +20,11 @@ namespace('build', function () {
 namespace('clean', function () {
     desc('Clean everything');
     task('all', [], function () {
-        jake.exec('rm -rf vendor');
         jake.exec('rm -rf bonbon-server');
         jake.exec('rm -rf build');
-        jake.exec('rm -f deployment/bonbon-*.tar.gz');
+        jake.exec("rm -f 'deployment/" + TAR_GZ_FILENAME + "'");
         jake.exec("rm -f '" + TAR_GZ_FILENAME + "'");
+        jake.exec("rm -f '" + DOCKER_IMAGE_FILENAME + "'");
     });
 });
 
@@ -44,7 +45,10 @@ task('package-tar-gz', [], {async: true}, function () { // mark async to avoid t
 desc('Create Docker image');
 task('package-docker-image', ['package-tar-gz'], function () {
     jake.exec('cp "' + TAR_GZ_FILENAME + '" deployment/;' +
-              'cd deployment; docker build .');
+              'cd deployment;' +
+              'docker build -t archlinux/bonbon .;' +
+              "docker save -o '" + DOCKER_IMAGE_FILENAME + "' archlinux/bonbon;" +
+              "mv '" + DOCKER_IMAGE_FILENAME + "' ..");
 });
 
 task('build', ['build:all']);

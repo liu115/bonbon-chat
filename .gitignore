@@ -6,3 +6,4 @@ _vendor/
 build/
 bonbon-server
 bonbon-*.tar.gz
+bonbon-*.docker.tar
