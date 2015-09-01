@@ -39,7 +39,7 @@ API 實體
 	{"Cmd": "init",
 	"OK": true or false
 	"Setting": {"Sign": "XXXXXXX"},
-    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX"}, ...]}
+    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off"}, ...]}
 3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
        {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
@@ -50,7 +50,7 @@ API 實體
 	伺服器主動：{"Cmd": "connected", "Sign": "XXXXXXX"}
 5.
 	a. 請求 {"Cmd": "send", "Who": "對方id or 0(stranger)", "Msg": "XXXXXXX", "Order": XXX}
-	   回應 {"OK": true, "Cmd": "send", "Who": "對方id or 0(stranger)", "Time": XXXXXX, "Order": XX}
+	   回應 {"OK": true, "Cmd": "send", "Who": "對方id or 0(stranger)", "Msg": "XXXXXXX", "Time": XXXXXX, "Order": XX}
 	   伺服器主動 {"Cmd": "sendFromServer", "Who": "原id or 0(stranger)", "Time": XXXXX, "Msg": "XXXXXXXX"}
     說明：
 		Who 為 0 則為陌生人

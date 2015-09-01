@@ -10,10 +10,9 @@ var SignClass = React.createClass({
     //React.findDOMNode(this.refs.refInput).focus();
   },
   handleType: function(e) {
-    console.log("type");
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
-      alert("setting successed");
+      console.log('trying to set ' + this.state.value + ' as Sign.');
       this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
@@ -30,7 +29,7 @@ var SignClass = React.createClass({
     if (this.state.setting == true) {
       return (
         <div>
-          <input type="text" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+          <input type="text" className="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
         </div>
       );
     }
@@ -53,8 +52,13 @@ var SideBar = React.createClass({
       this.setState({Sign: cmd.Setting.Sign});
     }.bind(this));
     this.props.chatSocket.addHandler("setting", function(cmd) {
-      alert("setting triggered");
-      this.setState({Sign: cmd.Setting.Sign});
+      if (cmd.OK == true) {
+        console.log('setting success, new sign is ' + cmd.Setting.Sign);
+        this.setState({Sign: cmd.Setting.Sign});
+      }
+      else {
+        console.log('setting failed!');
+      }
     }.bind(this));
     return {Sign: "我建超世志，必至無上道"};
   },
@@ -67,7 +71,7 @@ var SideBar = React.createClass({
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
 
         </div>
-        <a id="new-connection">建立新連線</a>
+        <a id="new-connection" onClick={this.props.changeState}>建立新連線</a>
         <ul id="menu">
           <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
           <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
@@ -85,7 +89,7 @@ var FriendBox = React.createClass({
   render: function() {
     return (
       <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
-        <div className="friend-avatar">
+        <div className={(this.props.index == 0) ? "stranger-avatar": "friend-avatar"}>
           <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
@@ -223,17 +227,28 @@ var ChatRoom = React.createClass({
 });
 
 
-var Content = React.createClass({
+var Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
       var friends = [];
+      var initFriend = {
+        index: 0,
+        name: '陌生人',
+        ID: 0,
+        online: false,
+        stat: 'read',
+        img: 'img/stranger.png',
+        sign: '猜猜我是誰',
+        messages: [{from: 'system', content: '尚未配對成功'}]
+      };
+      friends.push(initFriend);
       for (var i = 0; i < cmd.Friends.length; i++) {
         console.log(cmd.Friends[i])
         var friend = {
-          index: i,
+          index: i + 1,
           name: cmd.Friends[i].Nick,
           ID: cmd.Friends[i].ID,
-          online: true,
+          online: cmd.Friends[i].Status == 'on' ? true : false,
           stat: i == 0 ? 'selected' : 'read',
           img: 'img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
@@ -243,13 +258,87 @@ var Content = React.createClass({
       }
       this.setState({
         friends: friends,
-        header: friends[this.state.who].sign
+        header: friends[this.state.who].sign,
+        who: 1
       });
     }.bind(this));
 
     this.props.chatSocket.addHandler('send', function(cmd) {
-      alert("something sent!");
+      console.log("something sent!");
       /* send message to sb. */
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      console.log('index is ' + index);
+      if (cmd.OK == true) {
+        this.state.friends[index].messages.push({content: cmd.Msg, from: 'me'});
+      }
+      else {
+        this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me'});
+        console.log(this.state.friends[index].messages);
+      }
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
+
+    this.props.chatSocket.addHandler('sendFromServer', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others'});
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
+
+    this.props.chatSocket.addHandler('status', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+      this.state.friends[index].online = (cmd.Status == 'on') ? true : false;
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
+
+    this.props.chatSocket.addHandler('connect', function(cmd) {
+      var friends = this.state.friends;
+      friends[0].messages = [{from: 'system', content: '建立配對中...'}];
+      this.setState({
+        friends: friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('connected', function(cmd) {
+      var friends = this.state.friends;
+      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
+      friends[0].online = true;
+      this.setState({
+        friends: friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('disconnect', function(cmd) {
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      friends[0].online = false;
+      this.setState({
+        friends: this.state.friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('disconnected', function(cmd) {
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      friends[0].online = false;
+      this.setState({
+        friends: this.state.friends
+      });
     }.bind(this));
     return {
       who: 0,
@@ -269,32 +358,87 @@ var Content = React.createClass({
   },
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
-      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: who, Msg: message.content}));
-      this.state.friends[who].messages.push(message);
+      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
     }
+
+  },
+  render: function() {
+    if (this.props.show == 'chat') {
+      return (
+        <div>
+          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+        </div>
+      );
+    }
+    else if (this.props.show == 'new_connection') {
+      return (
+        <div>
+          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState}/>
+        </div>
+      );
+    }
+  }
+});
+var NewConnection = React.createClass({
+  L1Friend: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
+    this.handleClick();
+  },
+  L2Friend: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
+    this.handleClick();
+  },
+  Stranger: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
+    this.handleClick();
+  },
+  handleClick: function() {
+    this.props.changeState();
+  },
+  render: function() {
+    return (
+      <div id="connection">
+        <ul>
+          <li><a onClick={this.L1Friend}>FB的好友</a></li>
+          <li><a onClick={this.L2Friend}>朋友的朋友</a></li>
+          <li><a onClick={this.Stranger}>陌生人</a></li>
+          <li><a onClick={this.handleClick}>取消</a></li>
+        </ul>
+      </div>
+    );
+  }
+});
+var Content = React.createClass({
+  render: function() {
+    return (
+      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState}/>
+    );
+  }
+});
+
+var App = React.createClass({
+  getInitialState: function() {
+    return {
+      chatSocket: createSocket(this.props.token),
+      show: 'chat'
+    };
+  },
+  changeState: function(e) {
+    var str = this.state.show;
+    if (str == 'chat') str = 'new_connection';
+    else str = 'chat';
     this.setState({
-      friends: this.state.friends
+      show: str
     });
   },
   render: function() {
     return (
       <div>
-        <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-        <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+        <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
+        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
       </div>
     );
   }
 });
-var App = React.createClass({
-  getInitialState: function() {
-    return {chatSocket: createSocket()}
-  },
-  render: function() {
-    return (
-      <div>
-        <SideBar chatSocket={this.state.chatSocket}/>
-        <Content chatSocket={this.state.chatSocket}/>
-      </div>
-    )
-  }
-})

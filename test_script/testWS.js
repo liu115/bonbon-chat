@@ -22,6 +22,9 @@ function createClient(id) {
 	client.connect = function (type) {
 		client.send(JSON.stringify({Cmd: "connect", Type: type}))
 	}
+	client.bonbon = function () {
+		client.send(JSON.stringify({Cmd: "bonbon"}))
+	}
 	client.disconnect = function () {
 		client.send(JSON.stringify({Cmd: "disconnect"}))
 	}

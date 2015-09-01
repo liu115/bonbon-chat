@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bonbon/communicate"
 	"bonbon/config"
 	"bonbon/database"
 	"bonbon/test"
@@ -41,11 +42,16 @@ func main() {
 		app.GET("/test/get-facebook-friends-of-friends/:id/:degree", test.HandleTestGetFacebookFriendsOfFriends)
 	}
 
-	// routes for production purpose
+	app.GET("/chat/:token", HandleWebsocket)
+
+	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
+
+	// run consumer
+	go communicate.MatchConsumer()
 
 	// run server
 	app.Run(config.Address)

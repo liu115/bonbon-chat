@@ -22,7 +22,6 @@ var LoginPage = React.createClass({
   testAPI: function() {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
-      this.props.logined();
       console.log('Successful login for: ' + response.name);
       //document.getElementById('status').innerHTML =
       //'Thanks for logging in, ' + response.name + '!';
@@ -37,7 +36,8 @@ var LoginPage = React.createClass({
   // for FB.getLoginStatus().
     if (response.status === 'connected') {
     // Logged into your app and Facebook.
-      this.testAPI();
+      this.props.logined(response.authResponse.accessToken);
+      // this.testAPI();
     } else if (response.status === 'not_authorized') {
     // The person is logged into Facebook, but not your app.
     //document.getElementById('status').innerHTML = 'Please log ' +
