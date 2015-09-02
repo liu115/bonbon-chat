@@ -1,9 +1,9 @@
-# Example setup
+# Setup (manual method)
 1. Install golang on your system.
 ```
-# apt-get install golang # Ubuntu, Debian, etc
-# yum install golang     # Fedora, CentOS, etc
-# pacman -S go           # ArchLinux
+$ apt-get install golang # Ubuntu, Debian, etc
+$ yum install golang     # Fedora, CentOS, etc
+$ pacman -S go           # ArchLinux
 ```
 
 2. Set environment variable GOPATH.
@@ -11,14 +11,14 @@
 $ export GOPATH=~/.go # "~/.go" for example. Add this line in your .*shrc
 ```
 
-3. Clone git repo from hosting site.
+3. Clone git repo from hosting site and get into the 'bonbon' repository.
 ```
 $ git clone git@git.coding.net:jerry73204/bonbon.git
+$ cd bonbon
 ```
 
 4. Initialize pre-commit GIT hook.
 ```
-$ cd bonbon
 $ ln -s ../../pre-commit.sh .git/hooks/pre-commit
 ```
 
@@ -32,26 +32,56 @@ $ ln -s $PWD ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
 $ go build bonbon # Suceed if no output
 ```
 
-# 執行伺服器
-
-1. 安裝gom
+# Setup (via build automation)
+1. Install golang on your system.
 ```
-$ go get github.com/mattn/gom # 第一次安裝，之後可省略這步驟
-```
-
-2. 安裝依賴
-```
-$ gom install # 假設在本專案跟目錄
+$ apt-get install golang # Ubuntu, Debian, etc
+$ yum install golang     # Fedora, CentOS, etc
+$ pacman -S go           # ArchLinux
 ```
 
-3. 編譯
+2. Install npm and jake
 ```
-$ gom build bonbon/bonbon-server
+$ apt-get install npm # Ubuntu, Debian, etc
+$ yum install npm     # Fedora, CentOS, etc
+$ pacman -S npm       # ArchLinux
+
+$ npm install -g jake
 ```
 
-4. 執行
+3. Clone git repo from hosting site and get into the 'bonbon' repository.
+```
+$ git clone git@git.coding.net:jerry73204/bonbon.git
+$ cd bonbon
+```
+
+4. Initialize pre-commit GIT hook.
+```
+$ ln -s ../../pre-commit.sh .git/hooks/pre-commit
+```
+
+5. Check your setup (by running a build once)
+```
+$ jake            # Suceed if the binary 'bonbon-server' is produced
+$ ./bonbon-server
+```
+
+# Usage
+1. Use -h option to show usage
+```
+$ ./bonbon-server -h
+Usage of ./bonbon-server:
+...
+```
+
+2. By default, server loads the config file "bonbon.conf" in current working directory if running without any options
 ```
 $ ./bonbon-server
+```
+
+3. Use -config option to specify the path to the config file.
+```
+$ ./bonbon-server -config path/to/config_file
 ```
 
 # Advices

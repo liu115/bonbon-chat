@@ -4,7 +4,10 @@ import (
 	"errors"
 )
 
-func sendJsonByUserNoLock(user *user, json interface{}) error {
+// 必須區分是送訊息給確定在線上的人（response）或是送給不知是否在線上的人（cmd）
+// 送給確定在線的人，無須確認是否在線上
+
+func sendJsonByUser(user *user, json interface{}) error {
 	l := len(user.conns)
 	errMsg := ""
 	for i := 0; i < l; i++ {
@@ -19,31 +22,33 @@ func sendJsonByUserNoLock(user *user, json interface{}) error {
 	return nil
 }
 
-func sendJsonByUser(user *user, json interface{}) error {
+func sendJsonByUserWithLock(user *user, json interface{}) error {
 	user.lock.Lock()
-	sendJsonByUserNoLock(user, json)
+	sendJsonByUser(user, json)
 	user.lock.Unlock()
 	return nil
 }
 
-func sendJsonByIDNoLock(id int, json interface{}) error {
-	u := onlineUser[id]
-	if u == nil {
-		return errors.New("sendJsonByIDNoLock: ID is offline")
+func sendJsonToUnknownStatusID(id int, json interface{}, lock bool) error {
+	if !lock {
+		onlineLock.RLock()
 	}
-	err := sendJsonByUserNoLock(u, json)
+	u := onlineUser[id]
+	if !lock {
+		onlineLock.RUnlock()
+	}
+	if u == nil {
+		return errors.New("sendJsonByID: ID is offline")
+	}
+	err := sendJsonByUserWithLock(u, json)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func sendJsonByID(id int, json interface{}) error {
-	u := onlineUser[id]
-	if u == nil {
-		return errors.New("sendJsonByID: ID is offline")
-	}
-	err := sendJsonByUser(u, json)
+func sendJsonToOnlineID(id int, json interface{}) error {
+	err := sendJsonByUserWithLock(onlineUser[id], json)
 	if err != nil {
 		return err
 	}

@@ -377,7 +377,11 @@ func UpdateFacebookFriends(id int) error {
 		return err
 	}
 
-	// var blobFriendIDs []byte
+	// store friend ids in binary format
+	// friend ids are stored in the form [number of friends] [friend id 1] [friend id 2] ... [friend id n]
+	// each bracket pair [ ] here is a 64-bit little endian integer
+	// e.g. a list of friend ids 1, 5, 6 is formatted as
+	// 0x03 00 00 00 00 00 00 00  0x01 00 00 00 00 00 00 00  0x05 00 00 00 00 00 00 00  0x06 00 00 00 00 00 00 00
 	bufFriendIDs := new(bytes.Buffer)
 	binary.Write(bufFriendIDs, binary.LittleEndian, int64(len(accountFriends)))
 
@@ -392,7 +396,7 @@ func UpdateFacebookFriends(id int) error {
 }
 
 // GetFacebookFriends get a list of friends of an account
-func GetFacebookFriends(id int) ([]Account, error) {
+func GetFacebookFriends(id int) ([]*Account, error) {
 	// get account
 	db, err := GetDB()
 	if err != nil {
@@ -405,6 +409,7 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
+	// parse friend ids from blob stored in database
 	bufFriendIDs := bytes.NewBuffer(account.FacebookFriends)
 
 	var numFacebookFriends int64
@@ -429,7 +434,70 @@ func GetFacebookFriends(id int) ([]Account, error) {
 		return nil, query.Error
 	}
 
-	return friendAccounts, nil
+	var friendPointerAccounts []*Account
+	for _, account := range friendAccounts {
+		friendPointerAccounts = append(friendPointerAccounts, &account)
+	}
+
+	return friendPointerAccounts, nil
+}
+
+// GetFacebookFriendsOfFriends get friends of friends up to N degrees of separation
+func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
+	if degree < 2 {
+		return nil, fmt.Errorf("invalid degree: expect degree >= 2 but degree = %d", degree)
+	}
+
+	account, err := GetAccountByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// run BFS
+	openFriends := make(map[int]*Account)
+	closedFriends := make(map[int]*Account)
+	blacklistAccounts := make(map[int]*Account)
+
+	friendAccounts, err := GetFacebookFriends(id)
+	if err != nil {
+		return nil, err
+	}
+
+	blacklistAccounts[id] = account
+	for _, friend := range friendAccounts {
+		openFriends[friend.ID] = friend
+		blacklistAccounts[friend.ID] = friend
+	}
+
+
+	for i := 1; i <= degree; i++ {
+		newOpenFriends := make(map[int]*Account)
+
+		for friendID, friendAccount := range openFriends {
+			_, ok := blacklistAccounts[friendID]
+			if !ok {
+				closedFriends[friendID] = friendAccount
+			}
+
+			neighborFriends, err := GetFacebookFriends(friendID)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, neighborAccount := range neighborFriends {
+				newOpenFriends[neighborAccount.ID] = neighborAccount
+			}
+		}
+
+		openFriends = newOpenFriends
+	}
+
+	var friendsOfFriends []*Account
+	for _, friendAccount := range closedFriends {
+		friendsOfFriends = append(friendsOfFriends, friendAccount)
+	}
+
+	return friendsOfFriends, nil
 }
 
 // AppendActivityLog push a new activity log to database

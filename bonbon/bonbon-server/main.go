@@ -1,20 +1,29 @@
 package main
 
 import (
+	"bonbon/communicate"
 	"bonbon/config"
 	"bonbon/database"
 	"bonbon/test"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
+	"flag"
+	"log"
 )
 
 func main() {
+	log.SetPrefix("[bonbon] ")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	// parse arguments
+	var configPath = flag.String("config", "bonbon.conf", "the path of server configuration file")
+	flag.Parse()
+
 	// load config file
-	err := config.LoadConfigFile("bonbon.conf")
+	err := config.LoadConfigFile(*configPath)
 	if err != nil {
+		log.Printf("error: cannot load config file \"%v\"", configPath)
 		panic(err.Error())
 	}
 
@@ -38,6 +47,7 @@ func main() {
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
 		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)
 		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
+		app.GET("/test/get-facebook-friends-of-friends/:id/:degree", test.HandleTestGetFacebookFriendsOfFriends)
 	}
 
 	app.GET("/chat/:token", HandleWebsocket)
@@ -47,6 +57,9 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
+
+	// run consumer
+	go communicate.MatchConsumer()
 
 	// run server
 	app.Run(config.Address)
