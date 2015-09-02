@@ -7,7 +7,7 @@ var PageAll = React.createClass({
   logined: function(token) {
     this.setState({
       login: true,
-	  token: token
+      token: token
     });
   },
   render: function() {
