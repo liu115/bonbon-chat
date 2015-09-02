@@ -66,26 +66,22 @@ $ jake            # Suceed if the binary 'bonbon-server' is produced
 $ ./bonbon-server
 ```
 
-# 執行伺服器
-
-1. 安裝gom
+# Usage
+1. Use -h option to show usage
 ```
-$ go get github.com/mattn/gom # 第一次安裝，之後可省略這步驟
-```
-
-2. 安裝依賴
-```
-$ gom install # 假設在本專案跟目錄
+$ ./bonbon-server -h
+Usage of ./bonbon-server:
+...
 ```
 
-3. 編譯
-```
-$ gom build bonbon/bonbon-server
-```
-
-4. 執行
+2. By default, server loads the config file "bonbon.conf" in current working directory if running without any options
 ```
 $ ./bonbon-server
+```
+
+3. Use -config option to specify the path to the config file.
+```
+$ ./bonbon-server -config path/to/config_file
 ```
 
 # Advices
