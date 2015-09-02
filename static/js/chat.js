@@ -71,7 +71,7 @@ var SideBar = React.createClass({
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
 
         </div>
-        <a id="new-connection" onClick={this.props.changeState}>建立新連線</a>
+        <a id="new-connection" onClick={this.props.changeState.bind(null, 'new_connection')}>建立新連線</a>
         <ul id="menu">
           <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
           <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
@@ -85,6 +85,7 @@ var SideBar = React.createClass({
 var FriendBox = React.createClass({
   handleClick: function() {
     this.props.select(this.props.index);
+    this.props.changeState('chat');
   },
   render: function() {
     return (
@@ -112,7 +113,7 @@ var FriendList = React.createClass({
   render: function() {
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
-      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} select={this.props.select}/>);
+      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
     }
     return (
       <div id="friend-area">
@@ -364,7 +365,7 @@ var Chat = React.createClass({
     if (this.props.show == 'chat') {
       return (
         <div>
-          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
           <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage} roomSize={this.props.roomSize}/>
         </div>
       );
@@ -372,7 +373,7 @@ var Chat = React.createClass({
     else if (this.props.show == 'new_connection') {
       return (
         <div>
-          <FriendList friends={this.state.friends} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+          <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
           <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
         </div>
       );
@@ -398,7 +399,7 @@ var NewConnection = React.createClass({
     this.handleClick();
   },
   handleClick: function() {
-    this.props.changeState();
+    this.props.changeState('chat');
   },
   render: function() {
     return (
@@ -442,10 +443,10 @@ var App = React.createClass({
   componentWillUnmount: function() {
     window.removeEventListener('resize', this.handleResize);
   },
-  changeState: function(e) {
-    var str = this.state.show;
-    if (str == 'chat') str = 'new_connection';
-    else str = 'chat';
+  changeState: function(str) {
+    //var str = this.state.show;
+    //if (str == 'chat') str = 'new_connection';
+    //else str = 'chat';
     this.setState({
       show: str
     });
