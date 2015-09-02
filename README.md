@@ -1,9 +1,9 @@
-# Example setup
+# Setup (manual method)
 1. Install golang on your system.
 ```
-# apt-get install golang # Ubuntu, Debian, etc
-# yum install golang     # Fedora, CentOS, etc
-# pacman -S go           # ArchLinux
+$ apt-get install golang # Ubuntu, Debian, etc
+$ yum install golang     # Fedora, CentOS, etc
+$ pacman -S go           # ArchLinux
 ```
 
 2. Set environment variable GOPATH.
@@ -11,14 +11,14 @@
 $ export GOPATH=~/.go # "~/.go" for example. Add this line in your .*shrc
 ```
 
-3. Clone git repo from hosting site.
+3. Clone git repo from hosting site and get into the 'bonbon' repository.
 ```
 $ git clone git@git.coding.net:jerry73204/bonbon.git
+$ cd bonbon
 ```
 
 4. Initialize pre-commit GIT hook.
 ```
-$ cd bonbon
 $ ln -s ../../pre-commit.sh .git/hooks/pre-commit
 ```
 
@@ -30,6 +30,40 @@ $ ln -s $PWD ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
 6. Check your setup
 ```
 $ go build bonbon # Suceed if no output
+```
+
+# Setup (via build automation)
+1. Install golang on your system.
+```
+$ apt-get install golang # Ubuntu, Debian, etc
+$ yum install golang     # Fedora, CentOS, etc
+$ pacman -S go           # ArchLinux
+```
+
+2. Install npm and jake
+```
+$ apt-get install npm # Ubuntu, Debian, etc
+$ yum install npm     # Fedora, CentOS, etc
+$ pacman -S npm       # ArchLinux
+
+$ npm install -g jake
+```
+
+3. Clone git repo from hosting site and get into the 'bonbon' repository.
+```
+$ git clone git@git.coding.net:jerry73204/bonbon.git
+$ cd bonbon
+```
+
+4. Initialize pre-commit GIT hook.
+```
+$ ln -s ../../pre-commit.sh .git/hooks/pre-commit
+```
+
+5. Check your setup (by running a build once)
+```
+$ jake            # Suceed if the binary 'bonbon-server' is produced
+$ ./bonbon-server
 ```
 
 # 執行伺服器

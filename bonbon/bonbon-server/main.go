@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bonbon/communicate"
 	"bonbon/config"
 	"bonbon/database"
 	"bonbon/test"
@@ -38,6 +39,7 @@ func main() {
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
 		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)
 		app.GET("/test/get-facebook-friends/:id", test.HandleTestGetFacebookFriends)
+		app.GET("/test/get-facebook-friends-of-friends/:id/:degree", test.HandleTestGetFacebookFriendsOfFriends)
 	}
 
 	app.GET("/chat/:token", HandleWebsocket)
@@ -47,6 +49,9 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
 	app.Static("/static/", "./static")
+
+	// run consumer
+	go communicate.MatchConsumer()
 
 	// run server
 	app.Run(config.Address)

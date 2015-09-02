@@ -3,6 +3,9 @@
 *.swp
 .DS_Store
 _vendor/
+build/
 bonbon-server
+bonbon-*.tar.gz
+bonbon-*.docker.tar
 !bonbon/bonbon-server/
 node_modules/
