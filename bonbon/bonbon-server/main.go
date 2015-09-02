@@ -8,14 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"runtime"
+	"flag"
+	"log"
 )
 
 func main() {
+	log.SetPrefix("[bonbon] ")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	// parse arguments
+	var configPath = flag.String("config", "bonbon.conf", "the path of server configuration file")
+	flag.Parse()
+
 	// load config file
-	err := config.LoadConfigFile("bonbon.conf")
+	err := config.LoadConfigFile(*configPath)
 	if err != nil {
+		log.Printf("error: cannot load config file \"%v\"", configPath)
 		panic(err.Error())
 	}
 
