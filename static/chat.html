@@ -1,57 +1,58 @@
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="bower/reset-css/reset.css">
-  <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/style2.css">
-  <script src="bower/jquery/dist/jquery.min.js"></script>
-  <script src="bower/react/react.js"></script>
-  <script src="bower/react/JSXTransformer.js"></script>
-  <script src="js/jquery.tagcloud.js"></script>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="bower/reset-css/reset.css">
+    <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style2.css">
+    <script src="bower/jquery/dist/jquery.min.js"></script>
+    <script src="bower/react/react.js"></script>
+    <script src="bower/react/JSXTransformer.js"></script>
+    <script src="js/jquery.tagcloud.js"></script>
 
-  <!--[if lt IE 9]>
-  <script type="text/javascript" src="js/excanvas.js"></script>
-  <![endif]-->
-  <script src="js/tagcanvas.min.js" type="text/javascript"></script>
-  <title>ChatPage</title>
-</head>
-<body>
-  <div id="all"></div>
-  <script src="js/websocket.js" type="text/javascript"></script>
-  <script src="js/login.js" type="text/jsx"></script>
-  <script src="js/chat.js" type="text/jsx"></script>
-  <script src="js/render.js" type="text/jsx"></script>
+    <!--[if lt IE 9]>
+      <script type="text/javascript" src="js/excanvas.js"></script>
+    <![endif]-->
+    <script src="js/tagcanvas.min.js" type="text/javascript"></script>
+    <title>ChatPage</title>
+  </head>
+  <body>
+    <div id="all"></div>
+    <script src="js/websocket.js" type="text/javascript"></script>
+    <script src="js/login.js" type="text/jsx"></script>
+    <script src="js/chat.js" type="text/jsx"></script>
+    <script src="js/render.js" type="text/jsx"></script>
 
-  <!-- start of friend list area -->
+    <!-- start of friend list area -->
 
-  <!-- end of friend list area -->
+    <!-- end of friend list area -->
 
-  <!-- start of message area -->
+    <!-- start of message area -->
 
-  <!-- end of message area -->
+    <!-- end of message area -->
 
-  <!-- start of all-friend list -->
-  <div id="all-friend-area">
-    <div id="all-friend-header">朋友列表（5/50）</div>
-    <div id="all-friend-content">
-      <ul>
-        <li><img src="img/friend_1.jpg"><span>Apple</span></li>
-        <li><img src="img/friend_2.jpg"><span>Banana</span></li>
-        <li><img src="img/friend_3.jpg"><span>Cake</span></li>
-        <li><img src="img/friend_4.jpg"><span>Donut</span></li>
-        <li><img src="img/friend_5.jpg"><span>Egg</span></li>
-      </ul>
+    <!-- start of all-friend list -->
+    <div id="all-friend-area">
+      <div id="all-friend-header">朋友列表（5/50）</div>
+      <div id="all-friend-content">
+        <ul>
+          <li><img src="img/friend_1.jpg"><span>Apple</span></li>
+          <li><img src="img/friend_2.jpg"><span>Banana</span></li>
+          <li><img src="img/friend_3.jpg"><span>Cake</span></li>
+          <li><img src="img/friend_4.jpg"><span>Donut</span></li>
+          <li><img src="img/friend_5.jpg"><span>Egg</span></li>
+        </ul>
+      </div>
     </div>
-  </div>
-  <!-- end of all-friend list -->
-  <!-- start of tag setting -->
-  <div id="setting-tag-area">
-    <div id="setting-tag-header">
-      標籤設定
-    </div>
-    <div id="setting-tag-content">
-      <div id="login-area">
+    <!-- end of all-friend list -->
+    <!-- start of tag setting -->
+    <div id="setting-tag-area">
+      <div id="setting-tag-header">
+        標籤設定
+      </div>
+      <div id="setting-tag-content">
+        <div id="login-area">
           <span class="subtitle">熱門標籤</span>
           <div class="side-content">
             <div id="tag_cloud">
@@ -66,76 +67,16 @@
                 <li><a href="#">Array</a></li>
                 <li><a href="#">Binomial Distribution</a></li>
                 <li><a href="#">Correlation Coefficient</a></li>
-             </ul>
-          </div>
+              </ul>
+            </div>
           </div>
           <span class="subtitle" style="border-top: 1px solid #DDD;">新增標籤</span>
           <div class="side-content">
             新增
           </div>
         </div>
+      </div>
     </div>
-  </div>
-  <!-- end of all-friend list -->
-
-  <!--script>
-  /* pageID(0, 1, 2) = (chat page, friend list page , tag setting page) */
-  var page_displaying = 0;
-  var pageArray = ["message", "all-friend", "setting-tag"];
-
-  resize();
-  function resize(target) {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    if(page_displaying == 0) {
-      document.getElementById("message-area").style.width = width - 521;
-      document.getElementById("message-content").style.height = height - document.getElementById("message-header").offsetHeight - document.getElementById("message-panel").offsetHeight - 15;//15 for padding-top
-    } else {
-      if(target == 0) target = page_displaying;
-      document.getElementById(pageArray[target] + "-area").style.width = width - 521;
-      document.getElementById(pageArray[target] + "-content").style.height = height - document.getElementById(pageArray[target] + "-header").offsetHeight - 15;//15 for padding-top
-    }
-  }
-
-  function showPage(pageID) {
-    if(pageID != page_displaying) makeVisible(page_displaying, false);
-    makeVisible(pageID, true);
-    page_displaying = pageID;
-    resize(page_displaying);
-  }
-
-  function makeVisible(target, show) {
-    if(show) document.getElementById(pageArray[target] + "-area").style.display = "block";
-    else document.getElementById(pageArray[target] + "-area").style.display = "none";
-  }
-</script>
-  <script>
-  var t;
-  function animate_bubble () {
-    if(!$(".friend-unread img").is(":animated")) {
-      $(".friend-unread img").animate({top:'-4px'},210).animate({top:0},150)
-        .animate({top:'-2px'},150).animate({top:0},100)
-        .animate({top:'-1px'},100).animate({top:0},50);
-    }
-    t = setTimeout("animate_bubble()", 2000);
-  }
-  animate_bubble();
-  </script>
-  <script>
-  $.fn.tagcloud.defaults = {
-    size: {start: 14, end: 64, unit: "pt"},
-    color: {start: "#630", end: "#F96"}
-  };
-
-  $(function () {
-    $("#tag_cloud a").tagcloud();
-  });
-</script-->
-</body>
+    <!-- end of all-friend list -->
+  </body>
 </html>
-<!--
-function sendBonBon() {
-  document.getElementById("button-bonbon").innerHTML = "已送出Bonbon";
-  return false;
-}
--->
