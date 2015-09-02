@@ -28,6 +28,17 @@ type waitingQueue struct {
 	accept func(int) bool
 }
 
+func inAcconts(accounts []*database.Account) func(int) bool {
+	return func(s int) bool {
+		for _, friend := range accounts {
+			if friend.ID == s {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 func (wq *waitingQueue) match(id int) int {
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
@@ -38,17 +49,15 @@ func (wq *waitingQueue) match(id int) int {
 		if err != nil {
 			// TODO: handle it
 		}
-		wq.accept = func(s int) bool {
-			for _, friend := range friendAccounts {
-				if friend.ID == s {
-					return true
-				}
-			}
-			return false
-		}
+		wq.accept = inAcconts(friendAccounts)
 	case "L2_FB_friend":
+		friendAccounts, err := database.GetFacebookFriendsOfFriends(id, 2)
+		if err != nil {
+			// TODO: handle it
+		}
+		wq.accept = inAcconts(friendAccounts)
 	}
-	disconnectByID(id)
+	disconnectByID(id, false)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
 			return -1
@@ -76,25 +85,31 @@ func (wq *waitingQueue) remove(id int) {
 	}
 }
 
+func createWaitingQueue(Type string) *waitingQueue {
+	w := new(waitingQueue)
+	w.queue = make([]int, 0)
+	w.Type = Type
+	return w
+}
+
 // TODO: 將三種類型分開平行處理
 // MatchConsumer : 專門進行match的routine
 func MatchConsumer() {
 	waitingQueues := make(map[string]*waitingQueue)
-	waitingQueues["stranger"] = new(waitingQueue)
-	waitingQueues["stranger"].queue = make([]int, 0)
-	waitingQueues["stranger"].Type = "stranger"
-	waitingQueues["L1_FB_friend"] = new(waitingQueue)
-	waitingQueues["L1_FB_friend"].queue = make([]int, 0)
-	waitingQueues["L1_FB_friend"].Type = "L1_FB_friend"
+	waitingQueues["stranger"] = createWaitingQueue("stranger")
+	waitingQueues["L1_FB_friend"] = createWaitingQueue("L1_FB_friend")
+	waitingQueues["L2_FB_friend"] = createWaitingQueue("L2_FB_friend")
 	for {
 		var ans int
 		req := <-matchRequestChannel
-		switch req.Cmd {
-		case "in":
-			ans = waitingQueues[req.Type].match(req.ID)
-		case "out":
-			waitingQueues[req.Type].remove(req.ID)
-		default:
+		if req.Type != "" {
+			switch req.Cmd {
+			case "in":
+				ans = waitingQueues[req.Type].match(req.ID)
+			case "out":
+				waitingQueues[req.Type].remove(req.ID)
+			default:
+			}
 		}
 		matchDoneChannel <- ans
 	}
@@ -135,7 +150,7 @@ func handleConnect(msg []byte, id int, u *user) {
 	}
 }
 
-func disconnectByID(id int) {
+func disconnectByID(id int, lock bool) {
 	var stranger int
 	globalMatchLock.Lock()
 	if stranger = onlineUser[id].match; stranger != -1 {
@@ -149,13 +164,13 @@ func disconnectByID(id int) {
 		sendJsonToUnknownStatusID(
 			stranger,
 			map[string]interface{}{"Cmd": "disconnected"},
-			false,
+			lock,
 		)
 	}
 }
 
 // 實作斷線
 func handleDisconnect(id int) {
-	disconnectByID(id)
+	disconnectByID(id, false)
 	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
 }

@@ -126,7 +126,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 		matchRequestChannel <- matchRequest{Cmd: "out", ID: id, Type: u.matchType}
 		<-matchDoneChannel
 		// 若還在連線
-		disconnectByID(id)
+		disconnectByID(id, true)
 		// 傳送離線訊息
 		friendships, err := database.GetFriendships(id)
 		if err == nil {

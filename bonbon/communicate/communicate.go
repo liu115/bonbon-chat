@@ -68,14 +68,14 @@ func handleSend(msg []byte, id int, u *user) {
 	}
 }
 
-func handleBonbon(id int) {
+func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
 	var success = false
 	onlineLock.RLock()
 	globalMatchLock.Lock()
 	globalBonbonLock.Lock()
 	var stranger *user
-	strangerID := onlineUser[id].match
+	strangerID := u.match
 	if strangerID == -1 {
 		fmt.Printf("沒有connect就bonbon\n")
 		goto bonbonUnlock
@@ -88,7 +88,7 @@ func handleBonbon(id int) {
 
 	if stranger.bonbon == false {
 		fmt.Printf("%d bonbon: 對方未bonbon\n", id)
-		onlineUser[id].bonbon = true
+		u.bonbon = true
 	} else if stranger.bonbon == true {
 		fmt.Printf("%d bonbon: 成為朋友\n", id)
 		success = true
@@ -210,7 +210,7 @@ func ChatHandler(id int, c *gin.Context) {
 			case "disconnect":
 				handleDisconnect(id)
 			case "bonbon":
-				handleBonbon(id)
+				handleBonbon(id, user)
 			default:
 				fmt.Println("未知的請求")
 			}
