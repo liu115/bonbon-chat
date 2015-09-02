@@ -4,8 +4,12 @@ import (
 	"errors"
 )
 
-// 必須區分是送訊息給確定在線上的人（response）或是送給不知是否在線上的人（cmd）
-// 送給確定在線的人，無須確認是否在線上
+func getUserByID(id int) *user {
+	onlineLock.RLock()
+	u := onlineUser[id]
+	onlineLock.RUnlock()
+	return u
+}
 
 func sendJsonByUser(user *user, json interface{}) error {
 	l := len(user.conns)
