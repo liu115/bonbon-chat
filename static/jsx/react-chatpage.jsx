@@ -5,10 +5,12 @@ var SignClass = React.createClass({
       value: ''
     };
   },
+
   handleClick: function() {
     this.setState({setting: true});
     //React.findDOMNode(this.refs.refInput).focus();
   },
+
   handleType: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
@@ -20,16 +22,18 @@ var SignClass = React.createClass({
       });
     }
   },
+
   handleChange: function(e) {
     this.setState({
       value: e.target.value
     });
   },
+
   render: function() {
     if (this.state.setting == true) {
       return (
         <div>
-          <input type="text" className="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
+          <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
         </div>
       );
     }
@@ -62,6 +66,7 @@ var SideBar = React.createClass({
     }.bind(this));
     return {Sign: "我建超世志，必至無上道"};
   },
+
   render: function() {
     return (
       //<!-- start of navigation area -->
@@ -73,8 +78,6 @@ var SideBar = React.createClass({
         </div>
         <a id="new-connection" onClick={this.props.changeState.bind(null, 'new_connection')}>建立新連線</a>
         <ul id="menu">
-          <li><a><span><i className="fa fa-comment"></i><span style={{margin: '0px'}}>朋友列表</span></span></a></li>
-          <li><a><span><i className="fa fa-cog"></i><span style={{margin: '0px'}}>標籤設定</span></span></a></li>
           <li><a><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
         </ul>
       </nav>
@@ -82,11 +85,13 @@ var SideBar = React.createClass({
     );
   }
 });
+
 var FriendBox = React.createClass({
   handleClick: function() {
     this.props.select(this.props.index);
     this.props.changeState('chat');
   },
+
   render: function() {
     return (
       <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
@@ -102,6 +107,7 @@ var FriendBox = React.createClass({
     );
   }
 });
+
 var FriendList = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('status', function(cmd) {
@@ -110,6 +116,7 @@ var FriendList = React.createClass({
     return {
     };
   },
+
   render: function() {
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
@@ -138,11 +145,13 @@ var ChatRoom = React.createClass({
       roomHeight: window.innerHeight - 51 - 91 - 15
     };
   },
+
   handleChange: function(e) {
     this.setState({
       userInput: e.target.value
     });
   },
+
   sendMessage: function(e) {
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
@@ -163,34 +172,41 @@ var ChatRoom = React.createClass({
     });
     this.focusInput();
   },
+
   sendMessageByKeyboard: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13) {
       this.sendMessage();
     }
   },
+
   focusInput: function() {
     React.findDOMNode(this.refs.refInput).focus();
 
   },
+
   handleResize: function(e) {
     this.setState({
       roomWidth: window.innerWidth - 521,
       roomHeight: window.innerHeight - React.findDOMNode(this.refs.header).offsetHeight - React.findDOMNode(this.refs.panel).offsetHeight - 15
     });
   },
+
   handleScroll: function() {
     this.setState({
       scroll: React.findDOMNode(this.refs.refContent).scrollTop
     });
   },
+
   componentDidMount: function() {
     window.addEventListener('scroll', this.handleScroll);
     React.findDOMNode(this.refs.refInput).focus();
   },
+
   componentWillUnmount: function() {
     window.removeEventListener('scroll', this.handleScroll);
   },
+
   render: function() {
     return (
       <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height + 'px')}}>
@@ -203,24 +219,24 @@ var ChatRoom = React.createClass({
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
           })
         }
-    		</div>
-    		<div id="message-panel" ref="panel">
-    			<div id="message-box">
-    				<div id="wrapper-message-box" className="wrapper-input">
-    					<input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
-    				</div>
-    			</div>
-    			<div className="pull-left">
-    				<a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
-    				<a id="button-report" className="message-button" onclick="return false">離開</a>
-    			</div>
-    			<div className="pull-right">
-    				<a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
-    				<a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
-    			</div>
-    			<div style={{clear: "both"}}></div>
-    		</div>
-    	</div>
+        </div>
+        <div id="message-panel" ref="panel">
+          <div id="message-box">
+            <div id="wrapper-message-box" className="wrapper-input">
+              <input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
+            </div>
+          </div>
+        <div className="pull-left">
+          <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
+          <a id="button-report" className="message-button" onclick="return false">離開</a>
+        </div>
+        <div className="pull-right">
+          <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
+          <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
+        </div>
+        <div style={{clear: "both"}}></div>
+        </div>
+      </div>
     );
   }
 });
@@ -345,6 +361,7 @@ var Chat = React.createClass({
       header: '', /* header need fix */
     };
   },
+
   selectFriend: function(selectedFriend) {
     this.state.friends[this.state.who].stat = 'read';
     this.state.friends[selectedFriend].stat = 'selected';
@@ -355,12 +372,14 @@ var Chat = React.createClass({
     });
     this.refs.refChat.focusInput();
   },
+
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
       this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
     }
 
   },
+
   render: function() {
     if (this.props.show == 'chat') {
       return (
@@ -380,27 +399,33 @@ var Chat = React.createClass({
     }
   }
 });
+
 var NewConnection = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
     };
   },
+
   L1Friend: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
     this.handleClick();
   },
+
   L2Friend: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
     this.handleClick();
   },
+
   Stranger: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
     this.handleClick();
   },
+
   handleClick: function() {
     this.props.changeState('chat');
   },
+
   render: function() {
     return (
       <div id="connection" style={{width: this.props.roomSize.width - 320 + 'px', height: this.props.roomSize.height + 'px'}}>
@@ -414,6 +439,7 @@ var NewConnection = React.createClass({
     );
   }
 });
+
 var Content = React.createClass({
   render: function() {
     return (
@@ -431,26 +457,28 @@ var App = React.createClass({
       roomHeight: window.innerHeight
     };
   },
+
   handleResize: function(e) {
     this.setState({
       roomWidth: window.innerWidth - 200,
       roomHeight: window.innerHeight
     });
   },
+
   componentDidMount: function() {
     window.addEventListener('resize', this.handleResize);
   },
+
   componentWillUnmount: function() {
     window.removeEventListener('resize', this.handleResize);
   },
+
   changeState: function(str) {
-    //var str = this.state.show;
-    //if (str == 'chat') str = 'new_connection';
-    //else str = 'chat';
     this.setState({
       show: str
     });
   },
+
   render: function() {
     var size = {width: this.state.roomWidth, height: this.state.roomHeight};
     return (
