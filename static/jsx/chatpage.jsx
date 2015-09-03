@@ -210,10 +210,10 @@ var ChatRoom = React.createClass({
   render: function() {
     return (
       <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height + 'px')}}>
-        <div id="message-header" ref="header">
+        <div id="message-header" className="area-header"r ref="header">
           {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
-        <div id="message-content" ref="refContent" style={{height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
+        <div id="message-content" className="area-content" ref="refContent" style={{height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
         {
           this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
@@ -226,21 +226,21 @@ var ChatRoom = React.createClass({
               <input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
             </div>
           </div>
-        <div className="pull-left">
-          <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
-          <a id="button-report" className="message-button" onclick="return false">離開</a>
-        </div>
-        <div className="pull-right">
-          <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
-          <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
-        </div>
-        <div style={{clear: "both"}}></div>
+          <div className="pull-left">
+            <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
+            <a id="button-report" className="message-button" onclick="return false">離開</a>
+          </div>
+          <div className="pull-right">
+            <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
+            <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
+          </div>
+          <div style={{clear: "both"}}>
+          </div>
         </div>
       </div>
     );
   }
 });
-
 
 var Chat = React.createClass({
   getInitialState: function() {
@@ -257,6 +257,7 @@ var Chat = React.createClass({
         messages: [{from: 'system', content: '尚未配對成功'}]
       };
       friends.push(initFriend);
+      // BUG cmd.Friends may be null
       for (var i = 0; i < cmd.Friends.length; i++) {
         console.log(cmd.Friends[i])
         var friend = {

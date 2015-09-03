@@ -6,13 +6,13 @@
 
     <link rel="stylesheet" href="bower/reset-css/reset.css">
     <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/style2.css">
+    <link rel="stylesheet" href="css/style.css"><!-- obsolete link. use less/style.less instead -->
+    <link rel="stylesheet/less" type="text/css" href="less/style.less">
 
     <script type="text/javascript" src="bower/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="bower/react/react.js"></script>
+    <script type="text/javascript" src="bower/react/react.min.js"></script>
     <script type="text/javascript" src="bower/react/JSXTransformer.js"></script>
-    <script type="text/javascript" src="less.js"></script>
+    <script type="text/javascript" src="bower/less/dist/less.min.js"></script>
     <script type="text/javascript" src="js/websocket.js"></script>
     <!--[if lt IE 9]>
       <script type="text/javascript" src="js/excanvas.js"></script>
@@ -29,9 +29,9 @@
     <!-- end of message area -->
 
     <!-- start of all-friend list -->
-    <div id="all-friend-area">
-      <div id="all-friend-header">朋友列表（5/50）</div>
-      <div id="all-friend-content">
+    <div id="all-friend-area" class="area">
+      <div id="all-friend-header" class="area-header">朋友列表（5/50）</div>
+      <div id="all-friend-content" class="area-content">
         <ul>
           <li><img src="img/friend_1.jpg"><span>Apple</span></li>
           <li><img src="img/friend_2.jpg"><span>Banana</span></li>
@@ -43,11 +43,11 @@
     </div>
     <!-- end of all-friend list -->
     <!-- start of tag setting -->
-    <div id="setting-tag-area">
+    <div id="setting-tag-area" class="area">
       <div id="setting-tag-header">
         標籤設定
       </div>
-      <div id="setting-tag-content">
+      <div id="setting-tag-content" class="area-content">
         <div id="login-area">
           <span class="subtitle">熱門標籤</span>
           <div class="side-content">
