@@ -4437,7 +4437,7 @@ if (WebComponents.flags.shadow) {
         if (cssRules) {
           Array.prototype.forEach.call(cssRules, function(rule) {
             if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
-              cssText += this.scopeSelector(rule.selectorText, scopeSelector, this.strictStyling) + " {\n  ";
+              cssText += this.scopeSelector(rule.selectorText, scopeSelector, this.strictStyling) + " {\n	";
               cssText += this.propertiesFromRule(rule) + "\n}\n\n";
             } else if (rule.type === CSSRule.MEDIA_RULE) {
               cssText += "@media " + rule.media.mediaText + " {\n";
