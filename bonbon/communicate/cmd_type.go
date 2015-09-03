@@ -121,7 +121,7 @@ type setting struct {
 	Sign string
 }
 
-type initCmd struct {
+type InitCmd struct {
 	Cmd     string
 	OK      bool
 	Setting setting

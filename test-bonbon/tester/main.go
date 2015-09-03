@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bonbon/communicate"
+	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
 	"net"
 	"net/http"
@@ -19,12 +22,21 @@ func createConn(id int) *websocket.Conn {
 	return conn
 }
 
-func main() {
-	fmt.Println("test")
+func testInit() {
 	conn := createConn(1)
 	_, msg, err := conn.ReadMessage()
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
-	fmt.Printf("%s\n", msg)
+	var req communicate.InitCmd
+	json.Unmarshal(msg, &req)
+	if req.Cmd == "init" {
+		color.Green("✓ 初始回傳Cmd: init")
+	} else {
+		color.Red("✗ 初始回傳Cmd: init")
+	}
+}
+
+func main() {
+	testInit()
 }

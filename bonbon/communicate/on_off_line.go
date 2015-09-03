@@ -54,14 +54,14 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 	return onlineUser[id], nil //此時必定還存在
 }
 
-func getInitInfo(id int) (*initCmd, error) {
+func getInitInfo(id int) (*InitCmd, error) {
 	account, err := database.GetAccountByID(id)
 	if err != nil {
-		return &initCmd{Cmd: "init", OK: false}, err
+		return &InitCmd{Cmd: "init", OK: false}, err
 	}
 	friendships, err := database.GetFriendships(id)
 	if err != nil {
-		return &initCmd{Cmd: "init", OK: false}, err
+		return &InitCmd{Cmd: "init", OK: false}, err
 	}
 	var friends []friend
 	for i := 0; i < len(friendships); i++ {
@@ -82,11 +82,11 @@ func getInitInfo(id int) (*initCmd, error) {
 			}
 			friends = append(friends, new_firiend)
 		} else {
-			return &initCmd{Cmd: "init", OK: false}, err
+			return &InitCmd{Cmd: "init", OK: false}, err
 		}
 	}
 	my_setting := setting{Sign: account.Signature}
-	return &initCmd{Cmd: "init", OK: true, Setting: my_setting, Friends: friends}, nil
+	return &InitCmd{Cmd: "init", OK: true, Setting: my_setting, Friends: friends}, nil
 }
 
 // 實作init訊息
