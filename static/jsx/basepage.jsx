@@ -1,34 +1,32 @@
-var PageAll = React.createClass({
+PageAll = React.createClass({
   getInitialState: function() {
     return {
       login: false
     };
   },
+
   logined: function(token) {
     this.setState({
       login: true,
       token: token
     });
   },
+
   render: function() {
     if (this.state.login == true) {
       return (
-        <App token={this.state.token}/>
+        <ChatPage token={this.state.token}/>
       );
     }
     else {
       return (
-        <div>
-          <LoginPage logined={this.logined}/>
-        </div>
+        <LoginPage logined={this.logined}/>
       );
     }
   }
 });
 
 React.render(
-  <div>
-    <PageAll/>
-  </div>,
-  document.getElementById('all')
+  <PageAll/>,
+  document.getElementsByTagName('body')[0]
 );

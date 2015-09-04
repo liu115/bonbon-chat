@@ -1,4 +1,4 @@
-var LoginPage = React.createClass({
+LoginPage = React.createClass({
   componentDidMount: function() {
     // define Facebook app data and try auto login
     window.fbAsyncInit = function() {
@@ -41,17 +41,9 @@ var LoginPage = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <div id="login-page">
         <a href="#" onClick={this.handleClick}>Login</a>
       </div>
     );
   }
 });
-
-// render react LoginPage component
-React.render(
-  <div>
-    <LoginPage />
-  </div>,
-  document.getElementById('all')
-);

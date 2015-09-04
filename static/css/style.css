@@ -1,3 +1,5 @@
+/* unused CSS rules */
+
 /* friend list area */
 .friend-info-chat {
   color: #333;
@@ -61,34 +63,6 @@
 
 .message-from-system {
   background: #D9534F;
-}
-
-/*
-  styles for different media types
-  tablets: >= 768px
-  desktops: >= 992px
-*/
-#media-type {
-  position: fixed;
-  top: 0;
-  right: 0;
-}
-
-/* phones */
-#media-type-tablets, #media-type-desktops {
-  display: none;
-}
-
-nav {
-  width: 200px;
-}
-
-#friend-area {
-  width: 320px;
-  left: 200px;
-}
-
-#message-area {
 }
 
 /* tablets */

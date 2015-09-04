@@ -1,4 +1,4 @@
-var SignClass = React.createClass({
+SignClass = React.createClass({
   getInitialState: function() {
     return {
       setting: false,
@@ -40,17 +40,17 @@ var SignClass = React.createClass({
     else {
       return (
         <div>
-        <a className="profile-status" onClick={this.handleClick}>
-          {this.props.sign}
-          <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
-        </a>
+          <a id="profile-status" onClick={this.handleClick}>
+            {this.props.sign}
+            <i style={{margin: '5px'}} className="fa fa-pencil fa-lg"></i>
+          </a>
         </div>
       );
     }
   }
 });
 
-var SideBar = React.createClass({
+SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
       this.setState({Sign: cmd.Setting.Sign});
@@ -72,7 +72,7 @@ var SideBar = React.createClass({
       //<!-- start of navigation area -->
       <nav id="nav">
         <div id="nav-profile">
-          <span className="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
+          <span id="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
 
         </div>
@@ -86,7 +86,7 @@ var SideBar = React.createClass({
   }
 });
 
-var FriendBox = React.createClass({
+FriendBox = React.createClass({
   handleClick: function() {
     this.props.select(this.props.index);
     this.props.changeState('chat');
@@ -108,7 +108,7 @@ var FriendBox = React.createClass({
   }
 });
 
-var FriendList = React.createClass({
+FriendList = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('status', function(cmd) {
 
@@ -135,7 +135,7 @@ var FriendList = React.createClass({
   }
 });
 
-var ChatRoom = React.createClass({
+ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
@@ -242,7 +242,7 @@ var ChatRoom = React.createClass({
   }
 });
 
-var Chat = React.createClass({
+Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
       var friends = [];
@@ -401,7 +401,7 @@ var Chat = React.createClass({
   }
 });
 
-var NewConnection = React.createClass({
+NewConnection = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
@@ -441,7 +441,7 @@ var NewConnection = React.createClass({
   }
 });
 
-var Content = React.createClass({
+Content = React.createClass({
   render: function() {
     return (
       <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
@@ -449,7 +449,7 @@ var Content = React.createClass({
   }
 });
 
-var App = React.createClass({
+ChatPage = React.createClass({
   getInitialState: function() {
     return {
       chatSocket: createSocket(this.props.token),
@@ -483,7 +483,7 @@ var App = React.createClass({
   render: function() {
     var size = {width: this.state.roomWidth, height: this.state.roomHeight};
     return (
-      <div>
+      <div id="chat-page">
         <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
         <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket} roomSize={size}/>
       </div>
