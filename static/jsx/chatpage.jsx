@@ -213,7 +213,7 @@ ChatRoom = React.createClass({
         <div id="message-content" className="area-content" ref="refContent">
         {
           this.props.messages.map(function(msg) {
-            return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
+            return <p><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
           })
         }
         </div>
@@ -426,7 +426,7 @@ NewConnection = React.createClass({
 
   render: function() {
     return (
-      <div id="connection" style={{width: this.props.roomSize.width - 320 + 'px', height: this.props.roomSize.height + 'px'}}>
+      <div id="connection">
         <ul id="connection-list">
           <li className="connection-line"><a className="connection-button" Click={this.L1Friend}>FB的好友</a></li>
           <li className="connection-line"><a className="connection-button" onClick={this.L2Friend}>朋友的朋友</a></li>
