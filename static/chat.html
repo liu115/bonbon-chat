@@ -7,7 +7,8 @@
     <!--stylesheets -->
     <link rel="stylesheet" href="bower/reset-css/reset.css">
     <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet/less" type="text/css" href="less/style.less">
+    <link rel="stylesheet/less" type="text/css" href="less/loginpage.less">
+    <link rel="stylesheet/less" type="text/css" href="less/chatpage.less">
 
     <!-- js libraries -->
     <script type="text/javascript" src="bower/jquery/dist/jquery.min.js"></script>
@@ -19,8 +20,12 @@
   </head>
   <body>
     <!-- jsx scripts -->
+    <!-- NOTE: i did some hack to import jsx/basepage.jsx twice in order to make both firefox and chrome happy
+         either placing basepage.jsx before or after another jsx scripts causes exceptions on firefox or chrome
+         the reason is still a mystery-->
     <script type="text/jsx" src="jsx/basepage.jsx"></script>
     <Script type="text/jsx" src="jsx/loginpage.jsx"></script>
     <script type="text/jsx" src="jsx/chatpage.jsx"></script>
+    <script type="text/jsx" src="jsx/basepage.jsx"></script>
   </body>
 </html>

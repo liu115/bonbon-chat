@@ -70,11 +70,10 @@ SideBar = React.createClass({
   render: function() {
     return (
       //<!-- start of navigation area -->
-      <nav id="nav">
-        <div id="nav-profile">
+      <nav id="sidebar-panel">
+        <div id="sidebar-profile">
           <span id="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
-
         </div>
         <a id="new-connection" onClick={this.props.changeState.bind(null, 'new_connection')}>建立新連線</a>
         <ul id="menu">
@@ -111,10 +110,8 @@ FriendBox = React.createClass({
 FriendList = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('status', function(cmd) {
-
     }.bind(this));
-    return {
-    };
+    return {};
   },
 
   render: function() {
@@ -209,18 +206,18 @@ ChatRoom = React.createClass({
 
   render: function() {
     return (
-      <div id="message-area" style={{width: (this.props.roomSize.width - 320 + 'px'), height: (this.props.roomSize.height + 'px')}}>
+      <div id="message-area">
         <div id="message-header" className="area-header"r ref="header">
           {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
         </div>
-        <div id="message-content" className="area-content" ref="refContent" style={{height: (this.props.roomSize.height - 51 - 91 - 15 + 'px')}}>
+        <div id="message-content" className="area-content" ref="refContent">
         {
           this.props.messages.map(function(msg) {
             return <p><span className={"message-" + msg.from}>{msg.content}</span></p>
           })
         }
         </div>
-        <div id="message-panel" ref="panel">
+        <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
               <input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
@@ -384,7 +381,7 @@ Chat = React.createClass({
   render: function() {
     if (this.props.show == 'chat') {
       return (
-        <div>
+        <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
           <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage} roomSize={this.props.roomSize}/>
         </div>
@@ -392,7 +389,7 @@ Chat = React.createClass({
     }
     else if (this.props.show == 'new_connection') {
       return (
-        <div>
+        <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
           <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
         </div>

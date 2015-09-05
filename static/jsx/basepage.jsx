@@ -1,4 +1,4 @@
-PageAll = React.createClass({
+BasePage = React.createClass({
   getInitialState: function() {
     return {
       login: false
@@ -27,6 +27,6 @@ PageAll = React.createClass({
 });
 
 React.render(
-  <PageAll/>,
+  <BasePage/>,
   document.getElementsByTagName('body')[0]
 );
