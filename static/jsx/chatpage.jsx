@@ -138,8 +138,6 @@ ChatRoom = React.createClass({
     return {
       userInput: '',
       scroll: 0,
-      roomWidth: window.innerWidth - 521,
-      roomHeight: window.innerHeight - 51 - 91 - 15
     };
   },
 
@@ -180,13 +178,6 @@ ChatRoom = React.createClass({
   focusInput: function() {
     React.findDOMNode(this.refs.refInput).focus();
 
-  },
-
-  handleResize: function(e) {
-    this.setState({
-      roomWidth: window.innerWidth - 521,
-      roomHeight: window.innerHeight - React.findDOMNode(this.refs.header).offsetHeight - React.findDOMNode(this.refs.panel).offsetHeight - 15
-    });
   },
 
   handleScroll: function() {
@@ -375,7 +366,6 @@ Chat = React.createClass({
     if (where == 'buttom') {
       this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
     }
-
   },
 
   render: function() {
@@ -383,7 +373,7 @@ Chat = React.createClass({
       return (
         <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage} roomSize={this.props.roomSize}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
         </div>
       );
     }
@@ -391,7 +381,7 @@ Chat = React.createClass({
       return (
         <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
+          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState}/>
         </div>
       );
     }
@@ -441,7 +431,7 @@ NewConnection = React.createClass({
 Content = React.createClass({
   render: function() {
     return (
-      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState} roomSize={this.props.roomSize}/>
+      <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState}/>
     );
   }
 });
@@ -451,24 +441,13 @@ ChatPage = React.createClass({
     return {
       chatSocket: createSocket(this.props.token),
       show: 'chat',
-      roomWidth: window.innerWidth - 200,
-      roomHeight: window.innerHeight
     };
   },
 
-  handleResize: function(e) {
-    this.setState({
-      roomWidth: window.innerWidth - 200,
-      roomHeight: window.innerHeight
-    });
-  },
-
   componentDidMount: function() {
-    window.addEventListener('resize', this.handleResize);
   },
 
   componentWillUnmount: function() {
-    window.removeEventListener('resize', this.handleResize);
   },
 
   changeState: function(str) {
@@ -478,11 +457,10 @@ ChatPage = React.createClass({
   },
 
   render: function() {
-    var size = {width: this.state.roomWidth, height: this.state.roomHeight};
     return (
       <div id="chat-page">
         <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
-        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket} roomSize={size}/>
+        <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
       </div>
     );
   }
