@@ -4,7 +4,7 @@
 @friendlist-area-width: 320px;
 @message-header-height: 50px;
 @message-control-panel-height: 100px;
-
+@message-content-color: #8DAAC9;
 
 .friend-unit {
   background: #F6F6F6;
@@ -117,7 +117,6 @@
     top: 0;
     bottom: 0;
     width: @sidebar-panel-width;
-    box-sizing: border-box;
     text-align: center;
     background: #415E7D;
 
@@ -135,7 +134,7 @@
           box-shadow: 0 0 1px black;
         }
       }
-      
+
       #sign-input-wrapper {
         width: 120px;
         margin: 20px auto 5px;
@@ -223,7 +222,6 @@
     right: 0;
     top: 0;
     bottom: 0;
-    box-sizing: border-box;
 
     #friend-area {
       position: absolute;
@@ -231,7 +229,6 @@
       top: 0;
       bottom: 0;
       width: @friendlist-area-width;
-      box-sizing: border-box;
       border-right: 1px solid #BBB;
       overflow: auto;
 
@@ -251,7 +248,6 @@
       right: 0;
       top: 0;
       bottom: 0;
-      box-sizing: border-box;
 
       #message-header {
         position: absolute;
@@ -259,7 +255,6 @@
         left: 0;
         right: 0;
         height: @message-header-height;
-        box-sizing: border-box;
 
         #message-header-sign {
           color: #286090;
@@ -267,7 +262,6 @@
       }
 
       #message-content {
-        box-sizing: border-box;
         position: absolute;
         top: @message-header-height;
         bottom: @message-control-panel-height;
@@ -276,6 +270,7 @@
         padding: 10px 10px 10px 10px;
         overflow-y: scroll;
         overflow-x: hidden;
+        background: @message-content-color;
 
         .message-balloon {
           display: inline-block;
@@ -311,7 +306,6 @@
         left: 0;
         right: 0;
         height: @message-control-panel-height;
-        box-sizing: border-box;
         background: #F6F6F6;
         border-top: 1px solid #BBB;
 
