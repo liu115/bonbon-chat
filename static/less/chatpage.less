@@ -6,6 +6,11 @@
 @message-control-panel-height: 100px;
 @message-content-color: #8DAAC9;
 
+
+//color of the message-block
+@message-me-color: #BBCCDE;
+@message-others-color: #337AB7;
+@message-system-color: #FFFE99;
 .friend-unit {
   background: #F6F6F6;
   padding: 18px 0;
@@ -21,7 +26,7 @@
   }
 
   .friend-avatar {
-    float:left;
+    float: left;
     width: 50px;
     margin-left: 15px;
 
@@ -274,7 +279,7 @@
 
         .message-balloon {
           display: inline-block;
-          color: #394B51;
+          font-weight: bold;
           line-height: 140%;
           padding: 8px 14px;
           margin: 0 18px 12px 18px;
@@ -286,7 +291,7 @@
           text-align: right;
 
           .message-me {
-            background: #BBCCDE;
+            background: @message-me-color;
           }
         }
 
@@ -294,7 +299,7 @@
           text-align: left;
 
           .message-others {
-            background: #337AB7;
+            background: @message-others-color;
           }
         }
 
@@ -303,7 +308,7 @@
 
           .message-system {
             &:extend(.message-balloon);
-            background: #FFFE99;
+            background: @message-system-color;
           }
         }
 
