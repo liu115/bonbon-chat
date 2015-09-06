@@ -204,7 +204,7 @@ ChatRoom = React.createClass({
         <div id="message-content" className="area-content" ref="refContent">
         {
           this.props.messages.map(function(msg) {
-            return <p><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
+            return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
           })
         }
         </div>
