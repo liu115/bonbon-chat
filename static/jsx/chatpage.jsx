@@ -32,7 +32,7 @@ SignClass = React.createClass({
   render: function() {
     if (this.state.setting == true) {
       return (
-        <div>
+        <div id="sign-input-wrapper">
           <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
         </div>
       );
