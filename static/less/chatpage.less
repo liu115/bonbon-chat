@@ -8,6 +8,7 @@
 
 
 //color of the message-block
+@message-font-color: white;
 @message-me-color: #BBCCDE;
 @message-others-color: #337AB7;
 @message-system-color: #FFFE99;
@@ -278,6 +279,7 @@
         background: @message-content-color;
 
         .message-balloon {
+          color: @message-font-color;
           display: inline-block;
           font-weight: bold;
           line-height: 140%;
@@ -382,7 +384,7 @@
       top: 0;
       bottom: 0;
       overflow: none;
-      background: #D9EDF7;
+      background: @message-content-color;
 
       #connection-list {
         position: absolute;
@@ -397,13 +399,13 @@
 
           .connection-button {
             display: inline-block;
+            width: 144px;
             color: white;
             background: rgba(0, 0, 0, 0.15);
             padding: 10px 20px;
-            border: 1px solid #A1B9C1;
+            border: 1px solid #E3E3E3;
             border-radius: 5px;
             margin: 20px 0;
-            width: 80px;
             cursor: pointer;
 
             &:hover {
