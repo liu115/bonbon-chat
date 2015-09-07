@@ -217,10 +217,18 @@ ChatRoom = React.createClass({
               <input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
             </div>
           </div>
-          <div className="pull-left">
-            <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
-            <a id="button-report" className="message-button" onclick="return false">離開</a>
-          </div>
+          {(() => {
+            switch (this.props.target) {
+              case 0:
+                return (
+                <div className="pull-left">
+                  <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
+                  <a id="button-report" className="message-button" onclick="return false">離開</a>
+                </div>);
+              //default:
+                //return ();
+            }
+          })()}
           <div className="pull-right">
             <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
             <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
