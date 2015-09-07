@@ -330,7 +330,8 @@ Chat = React.createClass({
       var friends = this.state.friends;
       friends[0].messages = [{from: 'system', content: '建立配對中...請稍候'}];
       this.setState({
-        friends: friends
+        friends: friends,
+        who: 0
       });
     }.bind(this));
     this.props.chatSocket.addHandler('connected', function(cmd) {
@@ -338,7 +339,8 @@ Chat = React.createClass({
       friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
       friends[0].online = true;
       this.setState({
-        friends: friends
+        friends: friends,
+        who: 0
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
