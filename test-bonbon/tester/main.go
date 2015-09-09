@@ -22,6 +22,14 @@ func createConn(id int) *websocket.Conn {
 	return conn
 }
 
+func judge(b bool, describe string) {
+	if b {
+		color.Green("✓ " + describe)
+	} else {
+		color.Red("✗ " + describe)
+	}
+}
+
 func testInit() {
 	conn := createConn(1)
 	_, msg, err := conn.ReadMessage()
@@ -30,11 +38,7 @@ func testInit() {
 	}
 	var req communicate.InitCmd
 	json.Unmarshal(msg, &req)
-	if req.Cmd == "init" {
-		color.Green("✓ 初始回傳Cmd: init")
-	} else {
-		color.Red("✗ 初始回傳Cmd: init")
-	}
+	judge(req.Cmd == "init", "初始回傳Cmd: init")
 }
 
 func main() {
