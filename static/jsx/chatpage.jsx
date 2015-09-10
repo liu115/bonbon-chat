@@ -170,8 +170,9 @@ ChatRoom = React.createClass({
 
   sendMessageByKeyboard: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
-    if (keyInput == 13) {
+    if (keyInput == 13 && !e.shiftKey) {
       this.sendMessage();
+      e.preventDefault();
     }
   },
 
@@ -214,7 +215,7 @@ ChatRoom = React.createClass({
         <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
-              <input ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"/>
+              <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
             </div>
           </div>
           {(() => {
