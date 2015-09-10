@@ -71,82 +71,84 @@ var signatures = [...]string{
 	"讓你難過的事情，有一天，你一定會笑著說出來",
 }
 
-func testInitCmdSign() {
-	describe(`
+var testsuite = [...]func(){
+	func() {
+		describe(`
 一個使用者登入
 測試API: init
-	`)
-	clearDB()
+		`)
+		clearDB()
 
-	createAccount(1, signatures[1])
+		createAccount(1, signatures[1])
 
-	conn := createConn(1)
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
-	var req communicate.InitCmd
-	json.Unmarshal(msg, &req)
+		conn := createConn(1)
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var req communicate.InitCmd
+		json.Unmarshal(msg, &req)
 
-	ok := true
-	ok = ok && req.Cmd == "init"
-	ok = ok && req.Setting.Sign == signatures[1]
-	judge(ok, "初始回傳正確Cmd、簽名檔")
-}
-
-func testInitCmdFriend() {
-	describe(`
+		ok := true
+		ok = ok && req.Cmd == "init"
+		ok = ok && req.Setting.Sign == signatures[1]
+		judge(ok, "初始回傳正確Cmd、簽名檔")
+	},
+	func() {
+		describe(`
 兩個互為好友者登入
 測試API: init, status
-	`)
+		`)
 
-	clearDB()
+		clearDB()
 
-	createAccount(1, signatures[1])
-	createAccount(2, signatures[2])
-	database.MakeFriendship(1, 2)
+		createAccount(1, signatures[1])
+		createAccount(2, signatures[2])
+		database.MakeFriendship(1, 2)
 
-	conn := createConn(1)
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
-	var req communicate.InitCmd
-	json.Unmarshal(msg, &req)
-	ok := true
-	ok = ok && (req.Friends[0].ID == 2)
-	ok = ok && (req.Friends[0].Sign == signatures[2])
-	ok = ok && (req.Friends[0].Status == "off")
-	judge(ok, "id1回傳正確朋友名單及狀態")
+		conn := createConn(1)
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var req communicate.InitCmd
+		json.Unmarshal(msg, &req)
+		ok := true
+		ok = ok && (req.Friends[0].ID == 2)
+		ok = ok && (req.Friends[0].Sign == signatures[2])
+		ok = ok && (req.Friends[0].Status == "off")
+		judge(ok, "id1回傳正確朋友名單及狀態")
 
-	conn2 := createConn(2)
-	_, msg, err = conn2.ReadMessage()
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
-	json.Unmarshal(msg, &req)
-	ok = true
-	ok = ok && (req.Friends[0].ID == 1)
-	ok = ok && (req.Friends[0].Sign == signatures[1])
-	ok = ok && (req.Friends[0].Status == "on")
-	judge(ok, "id2回傳正確朋友名單及狀態")
+		conn2 := createConn(2)
+		_, msg, err = conn2.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		json.Unmarshal(msg, &req)
+		ok = true
+		ok = ok && (req.Friends[0].ID == 1)
+		ok = ok && (req.Friends[0].Sign == signatures[1])
+		ok = ok && (req.Friends[0].Status == "on")
+		judge(ok, "id2回傳正確朋友名單及狀態")
 
-	_, msg, err = conn.ReadMessage()
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
-	var statusReq communicate.StatusCmd
-	json.Unmarshal(msg, &statusReq)
-	ok = true
-	ok = ok && (statusReq == communicate.StatusCmd{
-		Cmd:    "status",
-		Who:    2,
-		Status: "on",
-	})
-	judge(ok, "id2上線主動通知")
+		_, msg, err = conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var statusReq communicate.StatusCmd
+		json.Unmarshal(msg, &statusReq)
+		ok = true
+		ok = ok && (statusReq == communicate.StatusCmd{
+			Cmd:    "status",
+			Who:    2,
+			Status: "on",
+		})
+		judge(ok, "id2上線主動通知")
+	},
 }
 
 func main() {
-	testInitCmdSign()
-	testInitCmdFriend()
+	for _, test := range testsuite {
+		test()
+	}
 }
