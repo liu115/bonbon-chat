@@ -63,7 +63,7 @@ func getInitInfo(id int) (*InitCmd, error) {
 	if err != nil {
 		return &InitCmd{Cmd: "init", OK: false}, err
 	}
-	var friends []friend
+	var friends []Friend
 	for i := 0; i < len(friendships); i++ {
 		// 這邊的檢查可能可以容錯高一點
 		friend_account, err := database.GetAccountByID(friendships[i].FriendID)
@@ -74,7 +74,7 @@ func getInitInfo(id int) (*InitCmd, error) {
 			status = "on"
 		}
 		if err == nil {
-			new_firiend := friend{
+			new_firiend := Friend{
 				ID:     friendships[i].FriendID,
 				Sign:   friend_account.Signature,
 				Nick:   friendships[i].NickName,
