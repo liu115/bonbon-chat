@@ -2,15 +2,43 @@ package main
 
 import (
 	"bonbon/communicate"
+	"bonbon/config"
+	"bonbon/database"
 	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/gorilla/websocket"
+	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
 	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 )
+
+func clearDB() error {
+	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
+	if err != nil {
+		return fmt.Errorf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
+	}
+
+	db.DropTable(&database.Account{})
+	db.DropTable(&database.Friendship{})
+	database.InitDatabase()
+	return nil
+}
+
+func createAccount(ID int, signature string) error {
+	user := database.Account{ID: ID, Signature: signature}
+
+	db, err := database.GetDB()
+	if err != nil {
+		return err
+	}
+
+	db.Create(&user)
+	return nil
+}
 
 func createConn(id int) *websocket.Conn {
 	u, err := url.Parse("http://localhost:8080/test/chat/" + strconv.Itoa(id))
@@ -42,5 +70,7 @@ func testInit() {
 }
 
 func main() {
-	testInit()
+	clearDB()
+	createAccount(1, "我們的征途是星辰大海")
+	// testInit()
 }
