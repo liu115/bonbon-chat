@@ -1,16 +1,18 @@
 package database
 
 import (
-	"fmt"
-	"log"
-	"errors"
+	"bonbon/config"
 	"bytes"
-	"math/rand"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"bonbon/config"
+	"log"
+	"math/rand"
 )
+
+// TODO: 對每次連線都close
 
 // InitDatabase the database package initialization function
 func InitDatabase() error {
@@ -109,6 +111,7 @@ func GetAccountByID(id int) (*Account, error) {
 		return nil, query.Error
 	}
 
+	db.Close()
 	return &account, nil
 }
 
@@ -126,6 +129,7 @@ func GetFriendships(accountID int) ([]Friendship, error) {
 		return nil, query.Error
 	}
 
+	db.Close()
 	return friendShips, nil
 }
 
@@ -210,6 +214,7 @@ func MakeFriendship(leftID int, rightID int) error {
 		db.Create(&rightFriendship)
 	}
 
+	db.Close()
 	return nil
 }
 
@@ -469,7 +474,6 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 		blacklistAccounts[friend.ID] = friend
 	}
 
-
 	for i := 1; i <= degree; i++ {
 		newOpenFriends := make(map[int]*Account)
 
@@ -508,8 +512,8 @@ func AppendActivityLog(accountID int, action string, description string) error {
 	}
 
 	log := ActivityLog{
-		AccountID: accountID,
-		Action: action,
+		AccountID:   accountID,
+		Action:      action,
 		Description: description,
 	}
 

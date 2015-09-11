@@ -2,53 +2,12 @@ package main
 
 import (
 	"bonbon/communicate"
-	"bonbon/config"
 	"bonbon/database"
 	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/gorilla/websocket"
-	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"net"
-	"net/http"
-	"net/url"
-	"strconv"
+	"test-bonbon/client"
 )
-
-func clearDB() error {
-	db, err := gorm.Open(config.DatabaseDriver, config.DatabaseArgs)
-	if err != nil {
-		return fmt.Errorf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
-	}
-
-	db.DropTable(&database.Account{})
-	db.DropTable(&database.Friendship{})
-	database.InitDatabase()
-	return nil
-}
-
-func createAccount(ID int, signature string) error {
-	user := database.Account{ID: ID, Signature: signature}
-
-	db, err := database.GetDB()
-	if err != nil {
-		return err
-	}
-
-	db.Create(&user)
-	return nil
-}
-
-func createConn(id int) *websocket.Conn {
-	u, err := url.Parse("http://localhost:8080/test/chat/" + strconv.Itoa(id))
-	rawConn, err := net.Dial("tcp", u.Host)
-	conn, _, err := websocket.NewClient(rawConn, u, http.Header{}, 1024, 1024)
-	if err != nil {
-		fmt.Printf("%s", err.Error())
-	}
-	return conn
-}
 
 func describe(d string) {
 	println(d)
@@ -81,8 +40,8 @@ var testsuite = [...]func(){
 
 		createAccount(1, signatures[1])
 
-		conn := createConn(1)
-		_, msg, err := conn.ReadMessage()
+		c := client.CreateClient(1)
+		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
@@ -98,7 +57,7 @@ var testsuite = [...]func(){
 		describe(`
 兩個互為好友者登入
 測試API: init, status
-		`)
+			`)
 
 		clearDB()
 
@@ -106,8 +65,8 @@ var testsuite = [...]func(){
 		createAccount(2, signatures[2])
 		database.MakeFriendship(1, 2)
 
-		conn := createConn(1)
-		_, msg, err := conn.ReadMessage()
+		clients := [3]*client.Client{nil, client.CreateClient(1)}
+		_, msg, err := clients[1].Conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
@@ -119,8 +78,8 @@ var testsuite = [...]func(){
 		ok = ok && (req.Friends[0].Status == "off")
 		judge(ok, "id1回傳正確朋友名單及狀態")
 
-		conn2 := createConn(2)
-		_, msg, err = conn2.ReadMessage()
+		clients[2] = client.CreateClient(2)
+		_, msg, err = clients[2].Conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
@@ -131,7 +90,7 @@ var testsuite = [...]func(){
 		ok = ok && (req.Friends[0].Status == "on")
 		judge(ok, "id2回傳正確朋友名單及狀態")
 
-		_, msg, err = conn.ReadMessage()
+		_, msg, err = clients[1].Conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
@@ -144,6 +103,47 @@ var testsuite = [...]func(){
 			Status: "on",
 		})
 		judge(ok, "id2上線主動通知")
+
+		clients[2].Close()
+		_, msg, err = clients[1].Conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		json.Unmarshal(msg, &statusReq)
+		ok = true
+		ok = ok && (statusReq == communicate.StatusCmd{
+			Cmd:    "status",
+			Who:    2,
+			Status: "off",
+		})
+		judge(ok, "id2下線主動通知")
+	},
+	func() {
+		describe(`
+兩人登入，測試互傳訊息
+測試API: send
+			`)
+		clearDB()
+
+		createAccount(1, signatures[1])
+		createAccount(2, signatures[2])
+		database.MakeFriendship(1, 2)
+		clients := [...]*client.Client{nil, client.CreateClient(1), client.CreateClient(2)}
+		_, _, _ = clients[2].Conn.ReadMessage()
+		message := "QQ"
+		clients[1].Send(2, message)
+		for {
+			_, msg, err := clients[2].Conn.ReadMessage()
+			if err != nil {
+				fmt.Printf("%s", err.Error())
+			}
+			var j communicate.SendFromServer
+			json.Unmarshal(msg, &j)
+			if j.Cmd == "sendFromServer" && j.Who == 1 && j.Msg == message {
+				judge(true, "id2收到id1之消息")
+				break
+			}
+		}
 	},
 }
 
