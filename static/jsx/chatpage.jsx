@@ -223,7 +223,7 @@ ChatRoom = React.createClass({
               <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
             </div>
           </div>
-          {(() => {
+          {function() {
             switch (this.props.target) {
               case 0:
                 return (
@@ -234,7 +234,7 @@ ChatRoom = React.createClass({
               //default:
                 //return ();
             }
-          })()}
+          }.bind(this)()}
           <div className="pull-right">
             <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
             <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
@@ -515,3 +515,5 @@ ChatPage = React.createClass({
     );
   }
 });
+
+window.ChatPage = ChatPage

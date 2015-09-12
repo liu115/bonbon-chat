@@ -47,3 +47,5 @@ LoginPage = React.createClass({
     );
   }
 });
+
+window.LoginPage = LoginPage
