@@ -110,7 +110,7 @@ type connectSuccess struct {
 }
 
 // structure for init
-type friend struct {
+type Friend struct {
 	ID     int
 	Sign   string
 	Nick   string
@@ -121,9 +121,9 @@ type setting struct {
 	Sign string
 }
 
-type initCmd struct {
+type InitCmd struct {
 	Cmd     string
 	OK      bool
 	Setting setting
-	Friends []friend
+	Friends []Friend
 }

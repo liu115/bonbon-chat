@@ -1,15 +1,15 @@
 package database
 
 import (
-	"fmt"
-	"log"
-	"errors"
+	"bonbon/config"
 	"bytes"
-	"math/rand"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
-	"bonbon/config"
+	"log"
+	"math/rand"
 )
 
 // InitDatabase the database package initialization function
@@ -18,6 +18,7 @@ func InitDatabase() error {
 	if err != nil {
 		return fmt.Errorf("cannot connect to database %v://%v", config.DatabaseDriver, config.DatabaseArgs)
 	}
+	defer db.Close()
 
 	db.AutoMigrate(&Account{}, &Friendship{})
 	return nil
@@ -59,6 +60,7 @@ func CreateAccountByToken(token string) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("facebook_id = ?", facebookID).First(&account)
@@ -100,6 +102,7 @@ func GetAccountByID(id int) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
@@ -118,6 +121,7 @@ func GetFriendships(accountID int) ([]Friendship, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var friendShips []Friendship
 	query := db.Where("account_id = ?", accountID).Find(&friendShips)
@@ -136,6 +140,7 @@ func MakeFriendship(leftID int, rightID int) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	var leftAccount Account
 	var rightAccount Account
@@ -219,6 +224,7 @@ func RemoveFriendship(leftID int, rightID int) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	// get accounts from database
 	var leftAccount Account
@@ -274,6 +280,7 @@ func GetSignature(id int) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
@@ -291,6 +298,7 @@ func SetSignature(id int, signature string) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
@@ -315,6 +323,7 @@ func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	var friendship Friendship
 	query := db.Where("account_id = ? and friend_id = ?", accountID, friendID).First(&friendship)
@@ -334,6 +343,7 @@ func UpdateFacebookFriends(id int) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
@@ -402,6 +412,7 @@ func GetFacebookFriends(id int) ([]*Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	var account Account
 	query := db.Where("id = ?", id).First(&account)
@@ -469,7 +480,6 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 		blacklistAccounts[friend.ID] = friend
 	}
 
-
 	for i := 1; i <= degree; i++ {
 		newOpenFriends := make(map[int]*Account)
 
@@ -506,10 +516,11 @@ func AppendActivityLog(accountID int, action string, description string) error {
 	if err != nil {
 		return err
 	}
+	defer db.Close()
 
 	log := ActivityLog{
-		AccountID: accountID,
-		Action: action,
+		AccountID:   accountID,
+		Action:      action,
 		Description: description,
 	}
 

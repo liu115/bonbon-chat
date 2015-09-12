@@ -1,6 +1,10 @@
+# tmp file
 *~
 .*~
 *.swp
+
+# mac
+
 .DS_Store
 _vendor/
 build/
@@ -8,4 +12,10 @@ bonbon-server
 bonbon-*.tar.gz
 bonbon-*.docker.tar
 !bonbon/bonbon-server/
+
+# test
+tester
+!test-bonbon/tester/
+
+# nodejs
 node_modules/
