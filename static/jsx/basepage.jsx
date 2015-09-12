@@ -28,5 +28,5 @@ BasePage = React.createClass({
 
 React.render(
   <BasePage/>,
-  document.getElementsByTagName('body')[0]
+  document.getElementById('all')
 );
