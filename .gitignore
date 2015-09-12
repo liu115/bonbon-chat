@@ -15,6 +15,7 @@ bonbon-*.docker.tar
 
 # test
 tester
+!test-bonbon/tester/
 
 # nodejs
 node_modules/
