@@ -205,7 +205,7 @@ ChatRoom = React.createClass({
     return (
       <div id="message-area">
         <div id="message-header" className="area-header"r ref="header">
-          {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.header}</a>
+          {this.props.friends[this.props.target].name} - <a id="message-header-sign" href="#">{this.props.friends[this.props.target].sign}</a>
         </div>
         <div id="message-content" className="area-content" ref="refContent">
         {
@@ -257,7 +257,7 @@ Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: 'img/stranger.png',
+        img: 'img/stranger-m.jpg',
         sign: '猜猜我是誰',
         messages: [{from: 'system', content: '尚未配對成功'}]
       };
@@ -280,7 +280,6 @@ Chat = React.createClass({
       this.setState({
         friend_number: cmd.Friends.length,
         friends: friends,
-        header: friends[this.state.who].sign,
         who: 1
       });
     }.bind(this));
@@ -345,10 +344,10 @@ Chat = React.createClass({
       var friends = this.state.friends;
       friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
       friends[0].online = true;
+      friends[0].sign = cmd.Sign;
       this.setState({
         friends: friends,
         who: 0,
-        header: cmd.Sign
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
@@ -388,20 +387,18 @@ Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: 'img/stranger.png',
+        img: 'img/stranger-m.jpg',
         sign: '猜猜我是誰',
         messages: [{from: 'system', content: '尚未配對成功'}]
       }
       this.setState({
         friends: this.state.friends,
         who: index,
-        header: this.state.friend[0].sign
       });
     }.bind(this));
     return {
       who: 0,
       friends: [{messages: []}],
-      header: '', /* header need fix */
     };
   },
 
@@ -411,7 +408,6 @@ Chat = React.createClass({
     this.setState({
       who: selectedFriend,
       friends: this.state.friends,
-      header: this.state.friends[selectedFriend].sign
     });
     this.refs.refChat.focusInput();
   },
@@ -427,7 +423,7 @@ Chat = React.createClass({
       return (
         <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} header={this.state.header} addMessage={this.addMessage}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} addMessage={this.addMessage}/>
         </div>
       );
     }
