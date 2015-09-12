@@ -195,7 +195,12 @@ ChatRoom = React.createClass({
   componentWillUnmount: function() {
     window.removeEventListener('scroll', this.handleScroll);
   },
-
+  bonbon: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "bonbon"}));
+  },
+  disconnect: function() {
+    this.props.chatSocket.send(JSON.stringify({Cmd: "disconnect"}));
+  },
   render: function() {
     return (
       <div id="message-area">
@@ -223,8 +228,8 @@ ChatRoom = React.createClass({
               case 0:
                 return (
                 <div className="pull-left">
-                  <a id="button-bonbon" className="message-button" onclick="return false">Bonbon!</a>
-                  <a id="button-report" className="message-button" onclick="return false">離開</a>
+                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
+                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
                 </div>);
               //default:
                 //return ();
@@ -273,6 +278,7 @@ Chat = React.createClass({
         friends.push(friend);
       }
       this.setState({
+        friend_number: cmd.Friends.length,
         friends: friends,
         header: friends[this.state.who].sign,
         who: 1
@@ -341,11 +347,12 @@ Chat = React.createClass({
       friends[0].online = true;
       this.setState({
         friends: friends,
-        who: 0
+        who: 0,
+        header: cmd.Sign
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷'});
       friends[0].online = false;
       this.setState({
         friends: this.state.friends
@@ -356,6 +363,39 @@ Chat = React.createClass({
       friends[0].online = false;
       this.setState({
         friends: this.state.friends
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('bonbon', function(cmd) {
+
+    }.bind(this));
+    this.props.chatSocket.addHandler('new_friend', function(cmd) {
+      var index = this.state.friends.length;
+      var new_friend = {
+        index: index,
+        name: cmd.Nick,
+        ID: cmd.Who,
+        online: true,
+        stat: 'selected',
+        img: 'img/friend_' + parseInt(i + 1) + '.jpg',
+        sign: this.state.friends[0].sign,
+        messages: this.state.friends[0].messages
+      };
+      new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！'});
+      this.state.friends.push(new_friend);
+      this.state.friends[0] = {
+        index: 0,
+        name: '陌生人',
+        ID: 0,
+        online: false,
+        stat: 'read',
+        img: 'img/stranger.png',
+        sign: '猜猜我是誰',
+        messages: [{from: 'system', content: '尚未配對成功'}]
+      }
+      this.setState({
+        friends: this.state.friends,
+        who: index,
+        header: this.state.friend[0].sign
       });
     }.bind(this));
     return {
