@@ -124,13 +124,12 @@ var testsuite = [...]func(){
 測試API: send
 			`)
 		clearDB()
-
 		createAccount(1, signatures[1])
 		createAccount(2, signatures[2])
 		database.MakeFriendship(1, 2)
 		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
-		// _, _, _ = clients[2].Conn.ReadMessage()
 		message := "QQ"
+
 		clients[1].Send(2, message)
 		for {
 			_, msg, err := clients[2].Conn.ReadMessage()
@@ -150,6 +149,28 @@ var testsuite = [...]func(){
 兩非朋友登入，透過connect連線並互傳
 測試API: connect, send
 		`)
+		clearDB()
+		createAccount(1, signatures[1])
+		createAccount(2, signatures[2])
+		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+		clients[1].Connect("stranger")
+		clients[2].Connect("stranger")
+		clients[1].WaitForConnected()
+		clients[2].WaitForConnected()
+		message := "QQ"
+		clients[1].SendToStranger(message)
+		for {
+			_, msg, err := clients[2].Conn.ReadMessage()
+			if err != nil {
+				fmt.Printf("%s", err.Error())
+			}
+			var j communicate.SendFromServer
+			json.Unmarshal(msg, &j)
+			if j.Cmd == "sendFromServer" && j.Who == 0 && j.Msg == message {
+				judge(true, "id2收到陌生人之消息")
+				break
+			}
+		}
 	},
 }
 

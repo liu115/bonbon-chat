@@ -118,13 +118,13 @@ func MatchConsumer() {
 // 實作隨機連結(connect) API
 func handleConnect(msg []byte, id int, u *user) {
 	fmt.Printf("start handle Connect\n")
-	var req connectRequest
+	var req ConnectRequest
 	err := json.Unmarshal(msg, &req)
 	if err != nil {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"})
+	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"})
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -143,10 +143,10 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("%d connect to %d\n", id, stranger)
 		sendJsonToUnknownStatusID(
 			stranger,
-			connectSuccess{Cmd: "connected", Sign: *selfSignature},
+			ConnectSuccess{Cmd: "connected", Sign: *selfSignature},
 			false,
 		)
-		sendJsonByUserWithLock(u, connectSuccess{Cmd: "connected", Sign: *strangerSignature})
+		sendJsonByUserWithLock(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
 	}
 }
 

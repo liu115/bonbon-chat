@@ -2,6 +2,7 @@ package client
 
 import (
 	"bonbon/communicate"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net"
@@ -35,6 +36,33 @@ func (c *Client) Send(id int, s string) {
 		Msg:   s,
 		Order: 0,
 	})
+}
+
+func (c *Client) SendToStranger(s string) {
+	c.Conn.WriteJSON(communicate.SendRequest{
+		Cmd:   "send",
+		Who:   0,
+		Msg:   s,
+		Order: 0,
+	})
+}
+
+func (c *Client) Connect(t string) {
+	c.Conn.WriteJSON(communicate.ConnectRequest{
+		Cmd:  "connect",
+		Type: t,
+	})
+}
+
+func (c *Client) WaitForConnected() {
+	for {
+		_, msg, _ := c.Conn.ReadMessage()
+		var j communicate.ConnectSuccess
+		json.Unmarshal(msg, &j)
+		if j.Cmd == "connected" {
+			return
+		}
+	}
 }
 
 func CreateClient(id int) *Client {

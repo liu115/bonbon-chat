@@ -94,17 +94,17 @@ type simpleResponse struct {
 }
 
 // structure for connect
-type connectRequest struct {
+type ConnectRequest struct {
 	Cmd  string
 	Type string
 }
 
-type connectResponse struct {
+type ConnectResponse struct {
 	OK  bool
 	Cmd string
 }
 
-type connectSuccess struct {
+type ConnectSuccess struct {
 	Cmd  string
 	Sign string
 }
