@@ -128,8 +128,8 @@ var testsuite = [...]func(){
 		createAccount(1, signatures[1])
 		createAccount(2, signatures[2])
 		database.MakeFriendship(1, 2)
-		clients := [...]*client.Client{nil, client.CreateClient(1), client.CreateClient(2)}
-		_, _, _ = clients[2].Conn.ReadMessage()
+		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+		// _, _, _ = clients[2].Conn.ReadMessage()
 		message := "QQ"
 		clients[1].Send(2, message)
 		for {
@@ -144,6 +144,12 @@ var testsuite = [...]func(){
 				break
 			}
 		}
+	},
+	func() {
+		describe(`
+兩非朋友登入，透過connect連線並互傳
+測試API: connect, send
+		`)
 	},
 }
 

@@ -40,3 +40,13 @@ func (c *Client) Send(id int, s string) {
 func CreateClient(id int) *Client {
 	return &Client{Conn: createConn(id)}
 }
+
+func CreateAndReceiveInit(id int) *Client {
+	c := CreateClient(id)
+	_, _, err := c.Conn.ReadMessage()
+	if err != nil {
+		fmt.Printf("in CreateAndReceiveInit, %s", err.Error())
+		return nil
+	}
+	return c
+}
