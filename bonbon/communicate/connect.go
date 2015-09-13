@@ -84,11 +84,7 @@ func (wq *waitingQueue) match(id int) int {
 	case "stranger":
 		wq.accept = strangerAccept(id)
 	case "L1_FB_friend":
-		friendAccounts, err := database.GetFacebookFriends(id)
-		if err != nil {
-			// TODO: handle it
-		}
-		wq.accept = inAcconts(friendAccounts)
+		wq.accept = L1_FB_friendAccept(id)
 	case "L2_FB_friend":
 		friendAccounts, err := database.GetFacebookFriendsOfFriends(id, 2)
 		if err != nil {
