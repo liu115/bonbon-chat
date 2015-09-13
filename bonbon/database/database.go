@@ -605,6 +605,10 @@ func AppendActivityLog(accountID int, action string, description string) error {
 		Description: description,
 	}
 
-	db.Create(&log)
+	query := db.Create(&log)
+	if query.Error != nil {
+		return query.Error
+	}
+
 	return nil
 }
