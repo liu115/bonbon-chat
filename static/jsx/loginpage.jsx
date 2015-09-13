@@ -42,8 +42,12 @@ LoginPage = React.createClass({
   render: function() {
     return (
       <div id="login-page">
-        <a href="#" onClick={this.handleClick}>Login</a>
+        <div id="login-img">
+          <a id="login-button" href="#" onClick={this.handleClick}></a>
+        </div>
       </div>
     );
   }
 });
+
+window.LoginPage = LoginPage
