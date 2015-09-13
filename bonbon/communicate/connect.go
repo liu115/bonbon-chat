@@ -54,8 +54,29 @@ func strangerAccept(id int) func(int) bool {
 	}
 }
 
-// func L1_FB_friendAccept(id int) func(int) bool {
-// }
+func L1_FB_friendAccept(id int) func(int) bool {
+	L1_FB_friends, err := database.GetFacebookFriends(id)
+	if err != nil {
+		fmt.Printf("in L1_FB_friend  Accept, %s", err.Error())
+	}
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in L1_FB_friend Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		for _, friend := range L1_FB_friends {
+			if friend.ID == s {
+				return true
+			}
+		}
+		return false
+	}
+}
 
 func (wq *waitingQueue) match(id int) int {
 	onlineUser[id].matchType = wq.Type
