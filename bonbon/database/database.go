@@ -317,6 +317,23 @@ func SetSignature(id int, signature string) error {
 	return nil
 }
 
+// GetNickNameOfFriendship set the nickname to a friend
+func GetNickNameOfFriendship(accountID int, friendID int) (string, error) {
+	db, err := GetDB()
+	if err != nil {
+		return "", err
+	}
+	defer db.Close()
+
+	var friendship Friendship
+	query := db.Where("account_id = ? and friend_id = ?", accountID, friendID).First(&friendship)
+	if query.Error != nil {
+		return "", query.Error
+	}
+
+	return friendship.NickName, nil
+}
+
 // SetNickNameOfFriendship set the nickname to a friend
 func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error {
 	db, err := GetDB()

@@ -39,11 +39,29 @@ func inAcconts(accounts []*database.Account) func(int) bool {
 	}
 }
 
+func strangerAccept(id int) func(int) bool {
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in stranger Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// func L1_FB_friendAccept(id int) func(int) bool {
+// }
+
 func (wq *waitingQueue) match(id int) int {
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
 	case "stranger":
-		wq.accept = func(s int) bool { return true }
+		wq.accept = strangerAccept(id)
 	case "L1_FB_friend":
 		friendAccounts, err := database.GetFacebookFriends(id)
 		if err != nil {
@@ -124,7 +142,7 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"})
+	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"}, false)
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -172,5 +190,5 @@ func disconnectByID(id int, lock bool) {
 // 實作斷線
 func handleDisconnect(id int) {
 	disconnectByID(id, false)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"}, false)
 }
