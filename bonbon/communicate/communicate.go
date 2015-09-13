@@ -91,6 +91,10 @@ func handleBonbon(id int, u *user) {
 		u.bonbon = true
 	} else if stranger.bonbon == true {
 		fmt.Printf("%d bonbon: 成為朋友\n", id)
+		u.bonbon = false
+		stranger.bonbon = false
+		u.match = -1
+		stranger.match = -1
 		success = true
 	}
 bonbonUnlock:
