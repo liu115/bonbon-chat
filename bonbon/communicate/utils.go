@@ -51,8 +51,15 @@ func sendJsonToUnknownStatusID(id int, json interface{}, lock bool) error {
 	return nil
 }
 
-func sendJsonToOnlineID(id int, json interface{}) error {
-	err := sendJsonByUserWithLock(onlineUser[id], json)
+func sendJsonToOnlineID(id int, json interface{}, lock bool) error {
+	if !lock {
+		onlineLock.RLock()
+	}
+	u := onlineUser[id]
+	if !lock {
+		onlineLock.RUnlock()
+	}
+	err := sendJsonByUserWithLock(u, json)
 	if err != nil {
 		return err
 	}

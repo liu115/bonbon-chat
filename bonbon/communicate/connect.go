@@ -124,7 +124,7 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"})
+	sendJsonToOnlineID(id, connectResponse{OK: true, Cmd: "connect"}, false)
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -172,5 +172,5 @@ func disconnectByID(id int, lock bool) {
 // 實作斷線
 func handleDisconnect(id int) {
 	disconnectByID(id, false)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"}, false)
 }

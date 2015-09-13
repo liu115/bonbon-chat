@@ -95,7 +95,7 @@ func sendInitMsg(id int) error {
 	if err != nil {
 		return err
 	}
-	err = sendJsonToOnlineID(id, msg)
+	err = sendJsonToOnlineID(id, msg, true)
 	if err != nil {
 		return err
 	}
