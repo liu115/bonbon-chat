@@ -105,18 +105,18 @@ bonbonUnlock:
 		if err != nil {
 			return
 		}
-		strangerNick, err := database.GetSignature(strangerID)
+		strangerNick, err := database.GetNickNameOfFriendship(id, strangerID)
 		if err != nil {
 			return
 		}
-		myNick, err := database.GetSignature(strangerID)
+		myNick, err := database.GetNickNameOfFriendship(strangerID, id)
 		if err != nil {
 			return
 		}
-		sendJsonToOnlineID(id, newFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: *strangerNick})
+		sendJsonToOnlineID(id, newFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
-			newFriendCmd{Cmd: "new_friend", Who: id, Nick: *myNick},
+			newFriendCmd{Cmd: "new_friend", Who: id, Nick: myNick},
 			false,
 		)
 	}
