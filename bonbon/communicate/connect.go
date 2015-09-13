@@ -39,11 +39,29 @@ func inAcconts(accounts []*database.Account) func(int) bool {
 	}
 }
 
+func strangerAccept(id int) func(int) bool {
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in stranger Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// func L1_FB_friendAccept(id int) func(int) bool {
+// }
+
 func (wq *waitingQueue) match(id int) int {
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
 	case "stranger":
-		wq.accept = func(s int) bool { return true }
+		wq.accept = strangerAccept(id)
 	case "L1_FB_friend":
 		friendAccounts, err := database.GetFacebookFriends(id)
 		if err != nil {
