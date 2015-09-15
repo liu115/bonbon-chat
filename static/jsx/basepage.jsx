@@ -1,6 +1,7 @@
 if (localStorage.getItem('login') === null) {
   localStorage.setItem('login', 'false');
 }
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 BasePage = React.createClass({
   getInitialState: function() {

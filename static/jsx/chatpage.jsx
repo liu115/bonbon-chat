@@ -64,11 +64,45 @@ SideBar = React.createClass({
         console.log('setting failed!');
       }
     }.bind(this));
-    return {Sign: ""};
+    return {Sign: "", buttonList: null};
+  },
+  NewConnection: function(i) {
+      console.log(i);
+      switch (i) {
+        case 1:
+          this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
+          break;
+        case 2:
+          this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
+          break;
+        case 3:
+          this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
+          break;
+      }
+      this.setState({buttonList: null});
   },
   logout: function() {
     localStorage.setItem('login', 'false');
     this.props.logout();
+  },
+  handleClick: function() {
+    if (!this.state.buttonList) {
+      this.setState({
+        buttonList: (
+          <div className="connection-menu">
+            <ul id="connection-list">
+              <li className="connection-line"><a className="connection-button" onClick={this.NewConnection.bind(this,1)}>FB的好友</a></li>
+              <li className="connection-line"><a className="connection-button" onClick={this.NewConnection.bind(this,2)}>朋友的朋友</a></li>
+              <li className="connection-line"><a className="connection-button" onClick={this.NewConnection.bind(this,3)}>陌生人</a></li>
+              <li className="connection-line"><a className="connection-button" onClick={this.NewConnection.bind(this,4)}>取消</a></li>
+            </ul>
+          </div>
+        )
+      });
+    }
+    else {
+      this.setState({buttonList: null});
+    }
   },
   render: function() {
     return (
@@ -78,7 +112,10 @@ SideBar = React.createClass({
           <span id="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
         </div>
-        <a id="new-connection" onClick={this.props.changeState.bind(null, 'new_connection')}>建立新連線</a>
+        <a id="new-connection" onClick={/*this.props.changeState.bind(null, 'new_connection')*/this.handleClick }>建立新連線</a>
+        <ReactCSSTransitionGroup transitionName="list-animate">
+          {this.state.buttonList}
+        </ReactCSSTransitionGroup>
         <ul id="menu">
           <li><a onClick={this.logout}><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
         </ul>
@@ -423,65 +460,32 @@ Chat = React.createClass({
   },
 
   render: function() {
-    if (this.props.show == 'chat') {
-      return (
-        <div id="chat-panel">
-          <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} addMessage={this.addMessage} chatSocket={this.props.chatSocket}/>
-        </div>
-      );
-    }
-    else if (this.props.show == 'new_connection') {
-      return (
-        <div id="chat-panel">
-          <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <NewConnection chatSocket={this.props.chatSocket} changeState={this.props.changeState}/>
-        </div>
-      );
-    }
+    return (
+    <div id="chat-panel">
+      <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
+      {function() {
+        if (this.props.show == 'chat') {
+          return (
+            <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} addMessage={this.addMessage} chatSocket={this.props.chatSocket}/>
+          );
+        }
+      }.bind(this)()}
+    </div>);
   }
 });
 
-NewConnection = React.createClass({
+//not using but can be used for NewPage
+/*
+AnotherPage = React.createClass({
   getInitialState: function() {
-    //name is this.props.name and header take from the name
     return {
     };
   },
-
-  L1Friend: function() {
-    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L1_FB_friend"}));
-    this.handleClick();
-  },
-
-  L2Friend: function() {
-    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "L2_FB_friend"}));
-    this.handleClick();
-  },
-
-  Stranger: function() {
-    this.props.chatSocket.send(JSON.stringify({Cmd: "connect", Type: "stranger"}));
-    this.handleClick();
-  },
-
-  handleClick: function() {
-    this.props.changeState('chat');
-  },
-
   render: function() {
-    return (
-      <div id="connection">
-        <ul id="connection-list">
-          <li className="connection-line"><a className="connection-button" onClick={this.L1Friend}>FB的好友</a></li>
-          <li className="connection-line"><a className="connection-button" onClick={this.L2Friend}>朋友的朋友</a></li>
-          <li className="connection-line"><a className="connection-button" onClick={this.Stranger}>陌生人</a></li>
-          <li className="connection-line"><a className="connection-button" onClick={this.handleClick}>取消</a></li>
-        </ul>
-      </div>
-    );
+
   }
 });
-
+*/
 Content = React.createClass({
   render: function() {
     return (

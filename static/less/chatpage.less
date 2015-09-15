@@ -190,6 +190,32 @@
         background: rgba(255, 255, 255, 0.1);
       }
     }
+    #connection-list {
+      background-color: #1A4D84;
+      color: white;
+    }
+    .connection-menu {
+      overflow: hidden;
+
+      .connection-line {
+        padding: 10px 0;
+        cursor: pointer;
+      }
+      &.list-animate-enter {
+        transition: .3s;
+        height: 0px;
+      }
+      &.list-animate-enter-active {
+        height: 144px;
+      }
+      &.list-animate-leave {
+        height: 144px;
+        transition: .3s;
+      }
+      &.list-animate-leave-active {
+        height: 0px;
+      }
+    }
 
     #menu {
       text-align: left;
