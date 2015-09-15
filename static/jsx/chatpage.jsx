@@ -66,7 +66,10 @@ SideBar = React.createClass({
     }.bind(this));
     return {Sign: ""};
   },
-
+  logout: function() {
+    localStorage.setItem('login', 'false');
+    this.props.logout();
+  },
   render: function() {
     return (
       //<!-- start of navigation area -->
@@ -77,7 +80,7 @@ SideBar = React.createClass({
         </div>
         <a id="new-connection" onClick={this.props.changeState.bind(null, 'new_connection')}>建立新連線</a>
         <ul id="menu">
-          <li><a><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
+          <li><a onClick={this.logout}><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
         </ul>
       </nav>
       //<!-- end of navigation area -->
@@ -510,7 +513,7 @@ ChatPage = React.createClass({
   render: function() {
     return (
       <div id="chat-page">
-        <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
+        <SideBar show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket} logout={this.props.logout}/>
         <Content show={this.state.show} changeState={this.changeState} chatSocket={this.state.chatSocket}/>
       </div>
     );

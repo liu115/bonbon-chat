@@ -1,10 +1,18 @@
+if (localStorage.getItem('login') === null) {
+  localStorage.setItem('login', 'false');
+}
+
 BasePage = React.createClass({
   getInitialState: function() {
     return {
       login: false
     };
   },
-
+  logout: function() {
+    this.setState({
+      login: false
+    });
+  },
   logined: function(token) {
     this.setState({
       login: true,
@@ -15,7 +23,7 @@ BasePage = React.createClass({
   render: function() {
     if (this.state.login == true) {
       return (
-        <ChatPage token={this.state.token}/>
+        <ChatPage token={this.state.token} logout={this.logout}/>
       );
     }
     else {
