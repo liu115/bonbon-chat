@@ -64,7 +64,7 @@ SideBar = React.createClass({
         console.log('setting failed!');
       }
     }.bind(this));
-    return {Sign: "我建超世志，必至無上道"};
+    return {Sign: ""};
   },
 
   render: function() {
