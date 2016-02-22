@@ -280,7 +280,7 @@ Chat = React.createClass({
       this.setState({
         friend_number: cmd.Friends.length,
         friends: friends,
-        who: 1
+        who: 0
       });
     }.bind(this));
 
@@ -352,14 +352,14 @@ Chat = React.createClass({
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
       this.state.friends[0].messages.push({from: 'system', content: '連線已中斷'});
-      friends[0].online = false;
+      this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnected', function(cmd) {
       this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
-      friends[0].online = false;
+      this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
       });
@@ -375,7 +375,7 @@ Chat = React.createClass({
         ID: cmd.Who,
         online: true,
         stat: 'selected',
-        img: 'img/friend_' + parseInt(i + 1) + '.jpg',
+        img: 'img/friend_' + index + '.jpg',
         sign: this.state.friends[0].sign,
         messages: this.state.friends[0].messages
       };
@@ -414,6 +414,7 @@ Chat = React.createClass({
 
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
+      console.log('sending to id: ' + this.state.friends[who].ID);
       this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
     }
   },
@@ -423,7 +424,7 @@ Chat = React.createClass({
       return (
         <div id="chat-panel">
           <FriendList friends={this.state.friends} changeState={this.props.changeState} selectedFriend={this.state.who} select={this.selectFriend} chatSocket={this.props.chatSocket}/>
-          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} addMessage={this.addMessage}/>
+          <ChatRoom ref="refChat" messages={this.state.friends[this.state.who].messages} friends={this.state.friends} target={this.state.who} addMessage={this.addMessage} chatSocket={this.props.chatSocket}/>
         </div>
       );
     }
