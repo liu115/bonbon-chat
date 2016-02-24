@@ -24,6 +24,16 @@ type Friendship struct {
 	FriendID  int
 }
 
+// Message the log structure of activities
+type Message struct {
+	ID            int       `sql:"AUTO_INCREMENT" gorm:"primary_key"`
+	FromAccountID int
+	ToAccountID   int
+	Type          int
+	Context       string
+	Time          time.Time `sql:"DEFAULT:current_timestamp"`
+}
+
 // ActivityLog the log structure of activities
 type ActivityLog struct {
 	ID          int       `sql:"AUTO_INCREMENT" gorm:"primary_key"`
