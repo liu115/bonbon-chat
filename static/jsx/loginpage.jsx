@@ -7,9 +7,11 @@ LoginPage = React.createClass({
         xfbml  : true,
         version: 'v2.4'
       });
-      FB.getLoginStatus(function(response) {
-        this.statusChangeCallback(response);
-      }.bind(this));
+      if (localStorage.getItem('login') == 'true') {
+        FB.getLoginStatus(function(response) {
+          this.statusChangeCallback(response);
+        }.bind(this));
+      }
     }.bind(this);
 
     // load Facebook SDK
@@ -25,6 +27,7 @@ LoginPage = React.createClass({
   statusChangeCallback: function(response) {
     if (response.status === 'connected') {
       // update access token and show chat page
+      localStorage.setItem('login', 'true');
       this.props.logined(response.authResponse.accessToken);
     }
   },
@@ -36,14 +39,18 @@ LoginPage = React.createClass({
   },
 
   handleClick: function() {
+    console.log('try login');
     FB.login(this.checkLoginState(), {scope: 'public_profile,email,user_friends'});
   },
 
   render: function() {
     return (
       <div id="login-page">
-        <a href="#" onClick={this.handleClick}>Login</a>
+        <img src="img/bonbon.png" id="bonbon"></img>
+        <a id="login-button" onClick={this.handleClick}>Login</a>
       </div>
     );
   }
 });
+
+window.LoginPage = LoginPage

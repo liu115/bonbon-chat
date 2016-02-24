@@ -1,10 +1,19 @@
+if (localStorage.getItem('login') === null) {
+  localStorage.setItem('login', 'false');
+}
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+
 BasePage = React.createClass({
   getInitialState: function() {
     return {
       login: false
     };
   },
-
+  logout: function() {
+    this.setState({
+      login: false
+    });
+  },
   logined: function(token) {
     this.setState({
       login: true,
@@ -15,7 +24,7 @@ BasePage = React.createClass({
   render: function() {
     if (this.state.login == true) {
       return (
-        <ChatPage token={this.state.token}/>
+        <ChatPage token={this.state.token} logout={this.logout}/>
       );
     }
     else {
@@ -28,5 +37,5 @@ BasePage = React.createClass({
 
 React.render(
   <BasePage/>,
-  document.getElementsByTagName('body')[0]
+  document.getElementById('all')
 );

@@ -39,23 +39,79 @@ func inAcconts(accounts []*database.Account) func(int) bool {
 	}
 }
 
+func strangerAccept(id int) func(int) bool {
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in stranger Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+func L1_FB_friendAccept(id int) func(int) bool {
+	L1_FB_friends, err := database.GetFacebookFriends(id)
+	if err != nil {
+		fmt.Printf("in L1_FB_friend  Accept, %s", err.Error())
+	}
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in L1_FB_friend Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		for _, friend := range L1_FB_friends {
+			if friend.ID == s {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func L2_FB_friendAccept(id int) func(int) bool {
+	L2_FB_friends, err := database.GetFacebookFriendsOfFriends(id, 2)
+	if err != nil {
+		fmt.Printf("in L2_FB_friend  Accept, %s", err.Error())
+	}
+	friendShips, err := database.GetFriendships(id)
+	if err != nil {
+		fmt.Printf("in L2_FB_friend Accept, %s", err.Error())
+	}
+	return func(s int) bool {
+		for _, friend := range friendShips {
+			if friend.FriendID == s {
+				return false
+			}
+		}
+		for _, friend := range L2_FB_friends {
+			if friend.ID == s {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 func (wq *waitingQueue) match(id int) int {
+	// 需要lock
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
 	case "stranger":
-		wq.accept = func(s int) bool { return true }
+		wq.accept = strangerAccept(id)
 	case "L1_FB_friend":
-		friendAccounts, err := database.GetFacebookFriends(id)
-		if err != nil {
-			// TODO: handle it
-		}
-		wq.accept = inAcconts(friendAccounts)
+		wq.accept = L1_FB_friendAccept(id)
 	case "L2_FB_friend":
-		friendAccounts, err := database.GetFacebookFriendsOfFriends(id, 2)
-		if err != nil {
-			// TODO: handle it
-		}
-		wq.accept = inAcconts(friendAccounts)
+		wq.accept = L2_FB_friendAccept(id)
 	}
 	disconnectByID(id, false)
 	for i := 0; i < len(wq.queue); i++ {
@@ -124,7 +180,7 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"})
+	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"}, false)
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -172,5 +228,5 @@ func disconnectByID(id int, lock bool) {
 // 實作斷線
 func handleDisconnect(id int) {
 	disconnectByID(id, false)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"}, false)
 }
