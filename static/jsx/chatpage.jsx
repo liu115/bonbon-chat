@@ -203,7 +203,7 @@ ChatRoom = React.createClass({
     this.setState({
       scroll: React.findDOMNode(this.refs.refContent).scrollHeight
     }, function() {
-      React.findDOMNode(this.refs.refContent).scrollTop = (this.state.scroll);
+      React.findDOMNode(this.refs.refContent).scrollTop = React.findDOMNode(this.refs.refContent).scrollHeight;
     });
     this.focusInput();
   },
