@@ -151,19 +151,26 @@ FriendList = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('status', function(cmd) {
     }.bind(this));
-    return {};
+    return {
+      filterText: ''
+    };
   },
-
+  handleFilterInput: function(e) {
+    this.setState({
+      filterText: e.target.value
+    });
+  },
   render: function() {
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
+      if (this.props.friends[i].name.indexOf(this.state.filterText) === -1) continue;
       friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
     }
     return (
       <div id="friend-area">
         <div id="friend-search">
           <div id="wrapper-input-search" className="wrapper-input">
-            <input type="text" placeholder="搜尋朋友"/>
+            <input type="text" placeholder="搜尋朋友" ref="filterText" onChange={this.handleFilterInput}/>
           </div>
         </div>
         { friendBoxs }
@@ -438,7 +445,14 @@ Chat = React.createClass({
     }.bind(this));
     return {
       who: 0,
-      friends: [{messages: []}],
+      friends: [{index: 0,
+      name: '陌生人',
+      ID: 0,
+      online: false,
+      stat: 'read',
+      img: 'img/stranger-m.jpg',
+      sign: '猜猜我是誰',
+      messages: [{from: 'system', content: '尚未配對成功'}]}],
     };
   },
 
