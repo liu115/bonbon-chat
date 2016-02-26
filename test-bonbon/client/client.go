@@ -65,6 +65,12 @@ func (c *Client) WaitForConnected() {
 	}
 }
 
+func (c *Client) Bonbon() {
+	c.Conn.WriteJSON(communicate.ConnectRequest{
+		Cmd: "bonbon",
+	})
+}
+
 func CreateClient(id int) *Client {
 	return &Client{Conn: createConn(id)}
 }

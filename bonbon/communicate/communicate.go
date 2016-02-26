@@ -117,10 +117,10 @@ bonbonUnlock:
 		if err != nil {
 			return
 		}
-		sendJsonToOnlineID(id, newFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick}, false)
+		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick}, false)
 		sendJsonToUnknownStatusID(
 			strangerID,
-			newFriendCmd{Cmd: "new_friend", Who: id, Nick: myNick},
+			NewFriendCmd{Cmd: "new_friend", Who: id, Nick: myNick},
 			false,
 		)
 	}

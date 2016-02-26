@@ -172,6 +172,47 @@ var testsuite = [...]func(){
 			}
 		}
 	},
+	func() {
+		describe(`
+兩非朋友登入，以bonbon成為朋友
+測試API: bonbon
+		`)
+		clearDB()
+		createAccount(1, signatures[1])
+		createAccount(2, signatures[2])
+		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+		clients[1].Connect("stranger")
+		clients[2].Connect("stranger")
+		clients[1].WaitForConnected()
+		clients[2].WaitForConnected()
+		clients[1].Bonbon()
+		clients[2].Bonbon()
+		for {
+			_, msg, err := clients[1].Conn.ReadMessage()
+			if err != nil {
+				fmt.Printf("%s", err.Error())
+			}
+			var j communicate.NewFriendCmd
+			json.Unmarshal(msg, &j)
+			if j.Cmd == "new_friend" && j.Who == 2 { // TODO: 檢測j.Nick
+				judge(true, "id1收到new_friend命令")
+				break
+			}
+		}
+		for {
+			_, msg, err := clients[2].Conn.ReadMessage()
+			if err != nil {
+				fmt.Printf("%s", err.Error())
+			}
+			var j communicate.NewFriendCmd
+			json.Unmarshal(msg, &j)
+			if j.Cmd == "new_friend" && j.Who == 1 { // TODO: 檢測j.Nick
+				judge(true, "id2收到new_friend命令")
+				break
+			}
+		}
+		judge(checkFriendship(1, 2), "兩人在資料庫中已為好友")
+	},
 }
 
 func main() {

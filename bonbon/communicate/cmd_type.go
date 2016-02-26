@@ -83,7 +83,7 @@ type bonbonResponse struct {
 	OK  bool
 }
 
-type newFriendCmd struct {
+type NewFriendCmd struct {
 	Cmd  string
 	Who  int
 	Nick string
