@@ -9,8 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
 	"log"
-	"time"
 	"math/rand"
+	"time"
 )
 
 // InitDatabase the database package initialization function
@@ -21,7 +21,7 @@ func InitDatabase() error {
 	}
 	defer db.Close()
 
-	db.AutoMigrate(&Account{}, &Friendship{})
+	db.AutoMigrate(&Account{}, &Friendship{}, &Message{})
 	return nil
 }
 
@@ -529,7 +529,8 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 }
 
 // AppendMessage create a new message record in database
-func AppendMessage(fromAccountID int, toAccountID int, messageType int, context string) error {
+// NOTE: 還不知道messageType有什麼用
+func AppendMessage(fromAccountID int, toAccountID int, messageType int, context string, time time.Time) error {
 	if fromAccountID == toAccountID {
 		return errors.New("database: from- and to-account ids cannot be identical")
 	}
@@ -551,9 +552,10 @@ func AppendMessage(fromAccountID int, toAccountID int, messageType int, context 
 
 	message := Message{
 		FromAccountID: fromAccountID,
-		ToAccountID: toAccountID,
-		Type: messageType,
-		Context: context,
+		ToAccountID:   toAccountID,
+		Type:          messageType,
+		Context:       context,
+		Time:          time,
 	}
 
 	query := db.Create(&message)
@@ -565,7 +567,7 @@ func AppendMessage(fromAccountID int, toAccountID int, messageType int, context 
 }
 
 // GetMessagesBeforeTime find
-func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime time.Time) ([]Message, error) {
+func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime time.Time, number int) ([]Message, error) {
 	if firstAccountID == secondAccountID {
 		return nil, errors.New("database: first and second account ids cannot be identical")
 	}
@@ -577,12 +579,14 @@ func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime t
 	defer db.Close()
 
 	var messages []Message
-	query := db.Where("(from_account_id = ? and from_account_id = ? or from_account_id = ? and from_account_id = ?) and time <= ?",
+	// TODO: 確定順序後加index
+	// XXX: from 跟 to 才對？
+	query := db.Where("((from_account_id = ? and to_account_id = ?) or (from_account_id = ? and to_account_id = ?)) and time <= ?",
 		firstAccountID,
 		secondAccountID,
 		secondAccountID,
 		firstAccountID,
-		beforeTime).Find(&messages)
+		beforeTime).Limit(number).Order("time desc").Find(&messages)
 
 	if query.Error != nil {
 		return nil, query.Error

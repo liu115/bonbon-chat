@@ -45,7 +45,9 @@ func handleSend(msg []byte, id int, u *user) {
 	}
 
 	println(req.Msg)
-	now := time.Now().UnixNano()
+	u_now := time.Now()
+	database.AppendMessage(id, req.Who, 0, req.Msg, u_now)
+	now := u_now.UnixNano()
 	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 
 	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss, false) == nil {
@@ -215,6 +217,8 @@ func ChatHandler(id int, c *gin.Context) {
 				handleDisconnect(id)
 			case "bonbon":
 				handleBonbon(id, user)
+			case "history":
+				handleHistory(msg, id, user)
 			default:
 				fmt.Println("未知的請求")
 			}

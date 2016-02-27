@@ -49,6 +49,29 @@ func respondToSend(req SendRequest, now int64, exist bool) SendResponse {
 	return res
 }
 
+// structure for history
+type historyMsg struct {
+	Text string
+	From int
+	Time int64
+}
+
+type historyRequest struct {
+	Cmd      string
+	With_who int
+	When     int64
+	Number   int
+	Order    int
+}
+
+type historyResponse struct {
+	Cmd      string
+	With_who int
+	Number   int
+	Order    int
+	Msgs     []historyMsg
+}
+
 // structure for set nickname
 type setNickNameRequest struct {
 	Cmd      string
