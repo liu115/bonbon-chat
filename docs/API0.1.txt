@@ -60,7 +60,11 @@ API 實體
 	   伺服器主動斷另一邊 {"Cmd": "disconnected"}
 	c. 請求 {"Cmd": "bonbon"}
 	   回應 {"OK": true, "Cmd": "bonbon"}
-	d.
+	d. 請求 {"Cmd": "history", "With_who": "對方id", "Number": XX, "When": XXXXXXX, "Order": XXX}
+	   回應 {"Cmd": "history", "With_who": "對方id", "Number": XX, "Order": XXX,
+	         "Msgs": [{"Who": "哪個id的傳的", "Text": "XXXXXXX", Time: XXXXXXXX}]}
+	   number為要從這個時間起往前多少個
+	   order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
 	e.
 	f. onopen
 	伺服器主動 {"Cmd": "status", "Who": "對方id", "Status": "on or off"}
