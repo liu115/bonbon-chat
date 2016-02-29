@@ -66,8 +66,17 @@ func (c *Client) WaitForConnected() {
 }
 
 func (c *Client) Bonbon() {
-	c.Conn.WriteJSON(communicate.ConnectRequest{
+	c.Conn.WriteJSON(communicate.BonbonRequest{
 		Cmd: "bonbon",
+	})
+}
+
+func (c *Client) GetHistory(id int, number int, when int64) {
+	c.Conn.WriteJSON(communicate.HistoryRequest{
+		Cmd:      "history",
+		With_who: id,
+		Number:   number,
+		When:     when,
 	})
 }
 

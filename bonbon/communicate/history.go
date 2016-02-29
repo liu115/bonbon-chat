@@ -8,7 +8,7 @@ import (
 )
 
 func handleHistory(msg []byte, id int, user *user) {
-	var request historyRequest
+	var request HistoryRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		fmt.Printf("unmarshal history cmd, %s\n", err.Error())
@@ -20,13 +20,13 @@ func handleHistory(msg []byte, id int, user *user) {
 		return
 	}
 
-	msgs_modify := make([]historyMsg, len(msgs))
+	msgs_modify := make([]HistoryMsg, len(msgs))
 	for i, msg := range msgs {
-		msgs_modify[i] = historyMsg{Text: msg.Context, From: msg.FromAccountID, Time: msg.Time.UnixNano()}
+		msgs_modify[i] = HistoryMsg{Text: msg.Context, From: msg.FromAccountID, Time: msg.Time.UnixNano()}
 	}
 
 	sendJsonToOnlineID(id,
-		historyResponse{
+		HistoryResponse{
 			Cmd:      "history",
 			Order:    request.Order,
 			With_who: request.With_who,

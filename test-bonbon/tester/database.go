@@ -14,6 +14,7 @@ func clearDB() error {
 	}
 	db.DropTable(&database.Account{})
 	db.DropTable(&database.Friendship{})
+	db.DropTable(&database.Message{})
 	database.InitDatabase()
 	return nil
 }

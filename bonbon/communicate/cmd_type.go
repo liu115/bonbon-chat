@@ -50,13 +50,13 @@ func respondToSend(req SendRequest, now int64, exist bool) SendResponse {
 }
 
 // structure for history
-type historyMsg struct {
+type HistoryMsg struct {
 	Text string
 	From int
 	Time int64
 }
 
-type historyRequest struct {
+type HistoryRequest struct {
 	Cmd      string
 	With_who int
 	When     int64
@@ -64,12 +64,12 @@ type historyRequest struct {
 	Order    int
 }
 
-type historyResponse struct {
+type HistoryResponse struct {
 	Cmd      string
 	With_who int
 	Number   int
 	Order    int
-	Msgs     []historyMsg
+	Msgs     []HistoryMsg
 }
 
 // structure for set nickname
@@ -97,9 +97,9 @@ type updateSettingsResponse struct {
 
 // structure for bonbon
 
-// type bonbonRequest struct {
-// 	Cmd string
-// }
+type BonbonRequest struct {
+	Cmd string
+}
 
 type bonbonResponse struct {
 	Cmd string
