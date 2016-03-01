@@ -10,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
 	"log"
 	"math/rand"
+	"time"
 )
 
 // InitDatabase the database package initialization function
@@ -20,7 +21,7 @@ func InitDatabase() error {
 	}
 	defer db.Close()
 
-	db.AutoMigrate(&Account{}, &Friendship{})
+	db.AutoMigrate(&Account{}, &Friendship{}, &Message{})
 	return nil
 }
 
@@ -527,6 +528,73 @@ func GetFacebookFriendsOfFriends(id int, degree int) ([]*Account, error) {
 	return friendsOfFriends, nil
 }
 
+// AppendMessage create a new message record in database
+// NOTE: 還不知道messageType有什麼用
+func AppendMessage(fromAccountID int, toAccountID int, messageType int, context string, time time.Time) error {
+	if fromAccountID == toAccountID {
+		return errors.New("database: from- and to-account ids cannot be identical")
+	}
+
+	// check account existence
+	if _, err := GetAccountByID(fromAccountID); err != nil {
+		return err
+	}
+
+	if _, err := GetAccountByID(toAccountID); err != nil {
+		return err
+	}
+
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	message := Message{
+		FromAccountID: fromAccountID,
+		ToAccountID:   toAccountID,
+		Type:          messageType,
+		Context:       context,
+		Time:          time,
+	}
+
+	query := db.Create(&message)
+	if query.Error != nil {
+		return query.Error
+	}
+
+	return nil
+}
+
+// GetMessagesBeforeTime find
+func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime time.Time, number int) ([]Message, error) {
+	if firstAccountID == secondAccountID {
+		return nil, errors.New("database: first and second account ids cannot be identical")
+	}
+
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var messages []Message
+	// TODO: 確定順序後加index
+	// XXX: from 跟 to 才對？
+	query := db.Where("((from_account_id = ? and to_account_id = ?) or (from_account_id = ? and to_account_id = ?)) and time <= ?",
+		firstAccountID,
+		secondAccountID,
+		secondAccountID,
+		firstAccountID,
+		beforeTime).Limit(number).Order("time desc").Find(&messages)
+
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return messages, nil
+}
+
 // AppendActivityLog push a new activity log to database
 func AppendActivityLog(accountID int, action string, description string) error {
 	db, err := GetDB()
@@ -541,6 +609,10 @@ func AppendActivityLog(accountID int, action string, description string) error {
 		Description: description,
 	}
 
-	db.Create(&log)
+	query := db.Create(&log)
+	if query.Error != nil {
+		return query.Error
+	}
+
 	return nil
 }

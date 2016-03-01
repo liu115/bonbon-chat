@@ -14,6 +14,7 @@ func clearDB() error {
 	}
 	db.DropTable(&database.Account{})
 	db.DropTable(&database.Friendship{})
+	db.DropTable(&database.Message{})
 	database.InitDatabase()
 	return nil
 }
@@ -26,4 +27,31 @@ func createAccount(ID int, signature string) error {
 	}
 	db.Create(&user)
 	return nil
+}
+
+func checkFriendship(ID1 int, ID2 int) bool {
+	check_point := 0
+	friendships, err := database.GetFriendships(ID1)
+	if err != nil {
+		fmt.Printf("in checkFriendship %s", err.Error())
+	}
+	for _, friendship := range friendships {
+		if friendship.FriendID == ID2 {
+			check_point += 1
+			break
+		}
+	}
+
+	friendships, err = database.GetFriendships(ID2)
+	if err != nil {
+		fmt.Printf("in checkFriendship %s", err.Error())
+	}
+	for _, friendship := range friendships {
+		if friendship.FriendID == ID1 {
+			check_point += 1
+			break
+		}
+	}
+
+	return (check_point == 2)
 }

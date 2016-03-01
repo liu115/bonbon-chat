@@ -2,6 +2,7 @@ package client
 
 import (
 	"bonbon/communicate"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net"
@@ -37,6 +38,58 @@ func (c *Client) Send(id int, s string) {
 	})
 }
 
+func (c *Client) SendToStranger(s string) {
+	c.Conn.WriteJSON(communicate.SendRequest{
+		Cmd:   "send",
+		Who:   0,
+		Msg:   s,
+		Order: 0,
+	})
+}
+
+func (c *Client) Connect(t string) {
+	c.Conn.WriteJSON(communicate.ConnectRequest{
+		Cmd:  "connect",
+		Type: t,
+	})
+}
+
+func (c *Client) WaitForConnected() {
+	for {
+		_, msg, _ := c.Conn.ReadMessage()
+		var j communicate.ConnectSuccess
+		json.Unmarshal(msg, &j)
+		if j.Cmd == "connected" {
+			return
+		}
+	}
+}
+
+func (c *Client) Bonbon() {
+	c.Conn.WriteJSON(communicate.BonbonRequest{
+		Cmd: "bonbon",
+	})
+}
+
+func (c *Client) GetHistory(id int, number int, when int64) {
+	c.Conn.WriteJSON(communicate.HistoryRequest{
+		Cmd:      "history",
+		With_who: id,
+		Number:   number,
+		When:     when,
+	})
+}
+
 func CreateClient(id int) *Client {
 	return &Client{Conn: createConn(id)}
+}
+
+func CreateAndReceiveInit(id int) *Client {
+	c := CreateClient(id)
+	_, _, err := c.Conn.ReadMessage()
+	if err != nil {
+		fmt.Printf("in CreateAndReceiveInit, %s", err.Error())
+		return nil
+	}
+	return c
 }

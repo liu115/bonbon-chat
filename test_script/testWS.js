@@ -34,6 +34,9 @@ function createClient(id) {
 	client.toStranger = function (msg) {
 		client.sendTo(0, msg)
 	}
+	client.history = function(id, number, when) {
+		client.send(JSON.stringify({Cmd: "history", With_who: id, Number: number, When: when}))
+	}
 	return client
 }
 
@@ -43,6 +46,14 @@ clients = []
 for (var i = 1; i <= SOCKET_NUM; i++) {
 	clients[i] = createClient(i)
 }
+
+// clients[1].connect("stranger")
+// clients[2].connect("stranger")
+// clients[1].sendTo(2, "11111111111")
+// clients[1].sendTo(2, "22222222222")
+// clients[1].sendTo(2, "33333333333")
+// clients[1].sendTo(2, "44444444444")
+// clients[2].history(2, 3, Math.pow(2, 62))
 
 // rl.on('line', function(line){
 // 	id = parseInt(line.split(' ')[0])
