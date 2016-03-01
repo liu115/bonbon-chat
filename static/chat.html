@@ -29,4 +29,10 @@
     <script type="text/jsx" src="jsx/chatpage.jsx"></script>
     <script type="text/jsx" src="jsx/basepage.jsx"></script>
   </body>
+  <script>
+  window.onload = function() {
+    var stateObj = { foo: "bar" };
+    history.pushState("aaa", "Title", "/");
+  }
+  </script>
 </html>

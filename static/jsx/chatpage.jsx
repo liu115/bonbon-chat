@@ -109,7 +109,7 @@ SideBar = React.createClass({
       //<!-- start of navigation area -->
       <nav id="sidebar-panel">
         <div id="sidebar-profile">
-          <span id="profile-avatar"><a><img src="img/me_finn.jpg"/></a></span>
+          <span id="profile-avatar"><a><img src="/static/img/me_finn.jpg"/></a></span>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
         </div>
         <a id="new-connection" onClick={/*this.props.changeState.bind(null, 'new_connection')*/this.handleClick }>建立新連線</a>
@@ -304,7 +304,7 @@ Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: 'img/stranger-m.jpg',
+        img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
         messages: [{from: 'system', content: '尚未配對成功'}]
       };
@@ -318,7 +318,7 @@ Chat = React.createClass({
           ID: cmd.Friends[i].ID,
           online: cmd.Friends[i].Status == 'on' ? true : false,
           stat: i == 0 ? 'selected' : 'read',
-          img: 'img/friend_' + parseInt(i + 1) + '.jpg',
+          img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
           messages: [],
         };
@@ -422,7 +422,7 @@ Chat = React.createClass({
         ID: cmd.Who,
         online: true,
         stat: 'selected',
-        img: 'img/friend_' + index + '.jpg',
+        img: '/static/img/friend_' + index + '.jpg',
         sign: this.state.friends[0].sign,
         messages: this.state.friends[0].messages
       };
@@ -434,7 +434,7 @@ Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: 'img/stranger-m.jpg',
+        img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
         messages: [{from: 'system', content: '尚未配對成功'}]
       }
@@ -450,7 +450,7 @@ Chat = React.createClass({
       ID: 0,
       online: false,
       stat: 'read',
-      img: 'img/stranger-m.jpg',
+      img: '/static/img/stranger-m.jpg',
       sign: '猜猜我是誰',
       messages: [{from: 'system', content: '尚未配對成功'}]}],
     };
