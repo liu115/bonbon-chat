@@ -179,9 +179,10 @@ func handleSetNickName(msg []byte, id int) {
 
 type requestInChannel struct {
 	ID      int
-	Msg     string
+	Msg     []byte
 	Special string
 	Conn    *websocket.Conn
+	User    *user
 }
 
 var responseChannel = make(map[*websocket.Conn]chan *user)
@@ -200,31 +201,15 @@ func CommandComsumer() {
 				fmt.Printf("send initialize message to %d fail, %s\n", id, err)
 			}
 			responseChannel[req.Conn] <- user
+			continue
+		} else if req.Special == "close" {
+			continue
 		}
-	}
-}
 
-// ChatHandler 一個gin handler，為websocket之入口
-func ChatHandler(id int, c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		fmt.Printf("establish connection, %s\n", err.Error())
-		return
-	}
-	println("send to requestChannel")
-	responseChannel[conn] = make(chan *user)
-	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
-	// user, err := initOnline(id, conn)
-	user := <-responseChannel[conn]
-	// TODO 通知所有人此人上線
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-		fmt.Printf("id %d: %s\n", id, msg)
+		user := req.User
+		msg := req.Msg
 		var decodedMsg map[string]interface{}
-		json.Unmarshal(msg, &decodedMsg)
+		json.Unmarshal(req.Msg, &decodedMsg)
 		switch decodedMsg["Cmd"] {
 		// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
 		case "setting":
@@ -246,6 +231,28 @@ func ChatHandler(id int, c *gin.Context) {
 		default:
 			fmt.Println("未知的請求")
 		}
+	}
+}
+
+// ChatHandler 一個gin handler，為websocket之入口
+func ChatHandler(id int, c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		fmt.Printf("establish connection, %s\n", err.Error())
+		return
+	}
+	responseChannel[conn] = make(chan *user)
+	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
+	// user, err := initOnline(id, conn)
+	user := <-responseChannel[conn]
+	// TODO 通知所有人此人上線
+	for {
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+		fmt.Printf("id %d: %s\n", id, msg)
+		requestChannel <- requestInChannel{ID: id, User: user, Conn: conn, Msg: msg}
 	}
 	fmt.Printf("%d id leave")
 	clearOffline(id, conn)
