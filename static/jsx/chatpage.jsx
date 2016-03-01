@@ -183,8 +183,7 @@ ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     return {
-      userInput: '',
-      scroll: 0,
+      userInput: ''
     };
   },
 
@@ -193,7 +192,10 @@ ChatRoom = React.createClass({
       userInput: e.target.value
     });
   },
-
+  componentDidUpdate: function() {
+    var node = React.findDOMNode(this.refs.refContent);
+    node.scrollTop = node.scrollHeight;
+},
   sendMessage: function(e) {
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
@@ -205,13 +207,7 @@ ChatRoom = React.createClass({
       this.setState({
         userInput: ''
       });
-      //scrollTop = scrollHeight
     }
-    this.setState({
-      scroll: React.findDOMNode(this.refs.refContent).scrollHeight
-    }, function() {
-      React.findDOMNode(this.refs.refContent).scrollTop = React.findDOMNode(this.refs.refContent).scrollHeight;
-    });
     this.focusInput();
   },
 
@@ -222,25 +218,15 @@ ChatRoom = React.createClass({
       e.preventDefault();
     }
   },
-
   focusInput: function() {
     React.findDOMNode(this.refs.refInput).focus();
 
   },
-
-  handleScroll: function() {
-    this.setState({
-      scroll: React.findDOMNode(this.refs.refContent).scrollTop
-    });
-  },
-
   componentDidMount: function() {
-    window.addEventListener('scroll', this.handleScroll);
     React.findDOMNode(this.refs.refInput).focus();
   },
 
   componentWillUnmount: function() {
-    window.removeEventListener('scroll', this.handleScroll);
   },
   bonbon: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "bonbon"}));
