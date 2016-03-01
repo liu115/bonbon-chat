@@ -258,9 +258,9 @@ ChatRoom = React.createClass({
         {
           this.props.messages.map(function(msg) {
             if (msg.from == 'system') {
-              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + '】'}</span></p>
+              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + msg.time+ '】'}</span></p>
             }
-            return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
+            return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content + msg.time}</span></p>
           })
         }
         </div>
@@ -306,7 +306,7 @@ Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        messages: [{from: 'system', content: '尚未配對成功'}]
+        messages: [{from: 'system', content: '尚未配對成功', time: Date.now() * 10e+6}]
       };
       friends.push(initFriend);
       // BUG cmd.Friends may be null
@@ -342,10 +342,10 @@ Chat = React.createClass({
       }
       console.log('index is ' + index);
       if (cmd.OK == true) {
-        this.state.friends[index].messages.push({content: cmd.Msg, from: 'me'});
+        this.state.friends[index].messages.push({content: cmd.Msg, from: 'me', time: cmd.Time});
       }
       else {
-        this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me'});
+        this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me', time: cmd.Time});
         console.log(this.state.friends[index].messages);
       }
       this.setState({
@@ -360,7 +360,7 @@ Chat = React.createClass({
           index = i;
         }
       }
-      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others'});
+      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
       this.setState({
         friends: this.state.friends
       });
@@ -381,7 +381,7 @@ Chat = React.createClass({
 
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '建立配對中...請稍候'}];
+      friends[0].messages = [{from: 'system', content: '建立配對中...請稍候', time: Date.now() * 10e+6}];
       this.setState({
         friends: friends,
         who: 0
@@ -389,7 +389,7 @@ Chat = React.createClass({
     }.bind(this));
     this.props.chatSocket.addHandler('connected', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！'}];
+      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！', time: Date.now() * 10e+6}];
       friends[0].online = true;
       friends[0].sign = cmd.Sign;
       this.setState({
@@ -398,14 +398,14 @@ Chat = React.createClass({
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷'});
+      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: Date.now() * 10e+6});
       this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnected', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷'});
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷', time: Date.now() * 10e+6});
       this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
@@ -426,7 +426,7 @@ Chat = React.createClass({
         sign: this.state.friends[0].sign,
         messages: this.state.friends[0].messages
       };
-      new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！'});
+      new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！', time: Date.now() * 10e+6});
       this.state.friends.push(new_friend);
       this.state.friends[0] = {
         index: 0,
@@ -436,11 +436,27 @@ Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        messages: [{from: 'system', content: '尚未配對成功'}]
+        messages: [{from: 'system', content: '尚未配對成功', time: Date.now() * 10e+6}]
       }
       this.setState({
         friends: this.state.friends,
         who: index,
+      });
+    }.bind(this));
+    this.props.chatSocket.addHandler('history', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.With_who) {
+          index = i;
+        }
+      }
+      var historyMessage = cmd.Msgs;
+      for (var i = 0; i < historyMessage.length; i++) {
+        var msg = historyMessage[i];
+        this.state.friends[index].messages.unshift({content: msg.Text, from: msg.From, time: msg.Time});
+      }
+      this.setState({
+        friends: this.state.friends
       });
     }.bind(this));
     return {
@@ -452,7 +468,7 @@ Chat = React.createClass({
       stat: 'read',
       img: '/static/img/stranger-m.jpg',
       sign: '猜猜我是誰',
-      messages: [{from: 'system', content: '尚未配對成功'}]}],
+      messages: [{from: 'system', content: '尚未配對成功', time: Date.now() * 10e+6}]}],
     };
   },
 
