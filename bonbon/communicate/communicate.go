@@ -177,6 +177,33 @@ func handleSetNickName(msg []byte, id int) {
 	sendJsonToOnlineID(id, &response, false)
 }
 
+type requestInChannel struct {
+	ID      int
+	Msg     string
+	Special string
+	Conn    *websocket.Conn
+}
+
+var responseChannel = make(map[*websocket.Conn]chan *user)
+
+var requestChannel = make(chan requestInChannel)
+
+func CommandComsumer() {
+	for {
+		req := <-requestChannel
+		id := req.ID
+		conn := req.Conn
+		println(req.Special)
+		if req.Special == "init" {
+			user, err := initOnline(id, conn)
+			if err != nil {
+				fmt.Printf("send initialize message to %d fail, %s\n", id, err)
+			}
+			responseChannel[req.Conn] <- user
+		}
+	}
+}
+
 // ChatHandler 一個gin handler，為websocket之入口
 func ChatHandler(id int, c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -184,48 +211,42 @@ func ChatHandler(id int, c *gin.Context) {
 		fmt.Printf("establish connection, %s\n", err.Error())
 		return
 	}
-	user, err := initOnline(id, conn)
-	var wg sync.WaitGroup
-	if err != nil {
-		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
-		goto clear
-	}
+	println("send to requestChannel")
+	responseChannel[conn] = make(chan *user)
+	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
+	// user, err := initOnline(id, conn)
+	user := <-responseChannel[conn]
 	// TODO 通知所有人此人上線
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		wg.Add(1)
-		go func() {
-			fmt.Printf("id %d: %s\n", id, msg)
-			var decodedMsg map[string]interface{}
-			json.Unmarshal(msg, &decodedMsg)
-			switch decodedMsg["Cmd"] {
-			// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
-			case "setting":
-				handleUpdateSettings(msg, id)
+		fmt.Printf("id %d: %s\n", id, msg)
+		var decodedMsg map[string]interface{}
+		json.Unmarshal(msg, &decodedMsg)
+		switch decodedMsg["Cmd"] {
+		// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
+		case "setting":
+			handleUpdateSettings(msg, id)
 			// XXX: 誤用API，此為下版功能
 			// case "change_nick":
 			// 	handleSetNickName(msg, id)
-			case "connect":
-				fmt.Printf("id %d try connect\n", id)
-				handleConnect(msg, id, user)
-			case "send":
-				handleSend(msg, id, user)
-			case "disconnect":
-				handleDisconnect(id)
-			case "bonbon":
-				handleBonbon(id, user)
-			case "history":
-				handleHistory(msg, id, user)
-			default:
-				fmt.Println("未知的請求")
-			}
-			wg.Done()
-		}()
+		case "connect":
+			fmt.Printf("id %d try connect\n", id)
+			handleConnect(msg, id, user)
+		case "send":
+			handleSend(msg, id, user)
+		case "disconnect":
+			handleDisconnect(id)
+		case "bonbon":
+			handleBonbon(id, user)
+		case "history":
+			handleHistory(msg, id, user)
+		default:
+			fmt.Println("未知的請求")
+		}
 	}
-	wg.Wait()
-clear:
+	fmt.Printf("%d id leave")
 	clearOffline(id, conn)
 }
