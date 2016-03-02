@@ -194,7 +194,6 @@ func CommandComsumer() {
 		req := <-requestChannel
 		id := req.ID
 		conn := req.Conn
-		println(req.Special)
 		if req.Special == "init" {
 			user, err := initOnline(id, conn)
 			if err != nil {
@@ -203,6 +202,7 @@ func CommandComsumer() {
 			responseChannel[req.Conn] <- user
 			continue
 		} else if req.Special == "close" {
+			clearOffline(id, conn)
 			continue
 		}
 
@@ -255,5 +255,5 @@ func ChatHandler(id int, c *gin.Context) {
 		requestChannel <- requestInChannel{ID: id, User: user, Conn: conn, Msg: msg}
 	}
 	fmt.Printf("%d id leave")
-	clearOffline(id, conn)
+	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "close"}
 }
