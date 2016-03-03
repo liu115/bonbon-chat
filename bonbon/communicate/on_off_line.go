@@ -4,7 +4,7 @@ import (
 	"bonbon/database"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"sync"
+	// "sync"
 )
 
 func initOnline(id int, conn *websocket.Conn) (*user, error) {
@@ -20,13 +20,10 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 		return nil, err
 	}
 
-	onlineLock.Lock()
-
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
 			match:  -1,
 			conns:  []*websocket.Conn{conn},
-			lock:   new(sync.Mutex),
 			bonbon: false,
 		}
 		err = sendInitMsg(id)
@@ -41,15 +38,12 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			)
 		}
 	} else {
-		onlineUser[id].lock.Lock()
 		onlineUser[id].conns = append(onlineUser[id].conns, conn)
-		onlineUser[id].lock.Unlock()
 		err = sendInitMsg(id)
 		if err != nil {
 			return nil, err
 		}
 	}
-	onlineLock.Unlock()
 	return onlineUser[id], nil //此時必定還存在
 }
 
@@ -103,14 +97,11 @@ func sendInitMsg(id int) error {
 
 func clearOffline(id int, conn *websocket.Conn) {
 	// 刪除本連線
-	onlineLock.Lock()
 	u := onlineUser[id]
 	if u == nil {
-		onlineLock.Unlock()
 		fmt.Printf("id %d 下線了\n", id)
 		return
 	}
-	u.lock.Lock()
 	conns := u.conns
 	var which int
 	for i := 0; i < len(conns); i++ {
@@ -139,7 +130,5 @@ func clearOffline(id int, conn *websocket.Conn) {
 		}
 		delete(onlineUser, id)
 	}
-	u.lock.Unlock()
-	onlineLock.Unlock()
 	fmt.Printf("id %d 下線了\n", id)
 }

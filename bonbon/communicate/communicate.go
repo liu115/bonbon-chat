@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"sync"
+	// "sync"
 	"time"
 )
 
@@ -19,14 +19,12 @@ var upgrader = websocket.Upgrader{
 
 type user struct {
 	conns     []*websocket.Conn
-	lock      *sync.Mutex // lock住conns
-	match     int         // -1表示無配對
+	match     int // -1表示無配對
 	matchType string
 	bonbon    bool
 }
 
 var onlineUser = make(map[int]*user)
-var onlineLock = new(sync.RWMutex)
 
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
@@ -65,17 +63,16 @@ func handleSend(msg []byte, id int, u *user) {
 func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
 	var success = false
-	onlineLock.RLock()
 	var stranger *user
 	strangerID := u.match
 	if strangerID == -1 {
 		fmt.Printf("沒有connect就bonbon\n")
-		goto bonbonUnlock
+		goto endLabel
 	}
 	stranger = onlineUser[strangerID]
 	if stranger == nil {
 		fmt.Printf("陌生人已經離線或不存在\n")
-		goto bonbonUnlock
+		goto endLabel
 	}
 
 	if stranger.bonbon == false {
@@ -89,8 +86,7 @@ func handleBonbon(id int, u *user) {
 		stranger.match = -1
 		success = true
 	}
-bonbonUnlock:
-	onlineLock.RUnlock()
+endLabel:
 
 	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
 
