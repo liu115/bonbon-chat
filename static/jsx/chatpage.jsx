@@ -263,9 +263,9 @@ ChatRoom = React.createClass({
         {
           this.props.messages.map(function(msg) {
             if (msg.from == 'system') {
-              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + msg.time+ '】'}</span></p>
+              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + '】'}</span></p>
             }
-            return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content + msg.time}</span></p>
+            return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
           })
         }
         </div>
