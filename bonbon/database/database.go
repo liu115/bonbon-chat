@@ -581,7 +581,7 @@ func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime t
 	var messages []Message
 	// TODO: 確定順序後加index
 	// XXX: from 跟 to 才對？
-	query := db.Where("((from_account_id = ? and to_account_id = ?) or (from_account_id = ? and to_account_id = ?)) and time <= ?",
+	query := db.Where("((from_account_id = ? and to_account_id = ?) or (from_account_id = ? and to_account_id = ?)) and time < ?",
 		firstAccountID,
 		secondAccountID,
 		secondAccountID,
