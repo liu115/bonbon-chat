@@ -44,21 +44,21 @@ func handleSend(msg []byte, id int, u *user) {
 	now := u_now.UnixNano()
 	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 
-	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss, false) == nil {
-		sendJsonToOnlineID(id, respondToSend(req, now, true), false)
+	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss) == nil {
+		sendJsonToOnlineID(id, respondToSend(req, now, true))
 	} else if req.Who == 0 {
 		var stranger int
 		if stranger = u.match; stranger != -1 {
 			ss.Who = 0
-			sendJsonToUnknownStatusID(u.match, ss, false)
+			sendJsonToUnknownStatusID(u.match, ss)
 		}
 		if stranger == -1 {
-			sendJsonToOnlineID(id, respondToSend(req, now, false), false)
+			sendJsonToOnlineID(id, respondToSend(req, now, false))
 		} else {
-			sendJsonToOnlineID(id, respondToSend(req, now, true), false)
+			sendJsonToOnlineID(id, respondToSend(req, now, true))
 		}
 	} else {
-		sendJsonToOnlineID(id, respondToSend(req, now, false), false)
+		sendJsonToOnlineID(id, respondToSend(req, now, false))
 	}
 }
 
@@ -92,7 +92,7 @@ func handleBonbon(id int, u *user) {
 bonbonUnlock:
 	onlineLock.RUnlock()
 
-	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"}, false)
+	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
 
 	if success {
 		err := database.MakeFriendship(id, strangerID)
@@ -107,11 +107,10 @@ bonbonUnlock:
 		if err != nil {
 			return
 		}
-		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick}, false)
+		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
 			NewFriendCmd{Cmd: "new_friend", Who: id, Nick: myNick},
-			false,
 		)
 	}
 }
@@ -123,7 +122,7 @@ func handleUpdateSettings(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
@@ -131,14 +130,14 @@ func handleUpdateSettings(msg []byte, id int) {
 	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
 		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// TODO 告訴所有人此人改簽名檔
 	// send success response
 	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
-	sendJsonToOnlineID(id, &response, false)
+	sendJsonToOnlineID(id, &response)
 }
 
 // XXX: 下版功能 handle setting nickname of friends
@@ -148,7 +147,7 @@ func handleSetNickName(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
@@ -156,13 +155,13 @@ func handleSetNickName(msg []byte, id int) {
 	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// send success response
 	response := simpleResponse{OK: true}
-	sendJsonToOnlineID(id, &response, false)
+	sendJsonToOnlineID(id, &response)
 }
 
 type requestInChannel struct {

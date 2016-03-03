@@ -38,7 +38,6 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			sendJsonToUnknownStatusID(
 				friendships[i].FriendID,
 				StatusCmd{Cmd: "status", Who: id, Status: "on"},
-				true,
 			)
 		}
 	} else {
@@ -95,7 +94,7 @@ func sendInitMsg(id int) error {
 	if err != nil {
 		return err
 	}
-	err = sendJsonToOnlineID(id, msg, true)
+	err = sendJsonToOnlineID(id, msg)
 	if err != nil {
 		return err
 	}
@@ -126,7 +125,7 @@ func clearOffline(id int, conn *websocket.Conn) {
 		matchRequestChannel <- matchRequest{Cmd: "out", ID: id, Type: u.matchType}
 		<-matchDoneChannel
 		// 若還在連線
-		disconnectByID(id, true)
+		disconnectByID(id)
 		// 傳送離線訊息
 		friendships, err := database.GetFriendships(id)
 		if err == nil {
@@ -135,7 +134,6 @@ func clearOffline(id int, conn *websocket.Conn) {
 				sendJsonToUnknownStatusID(
 					friendships[i].FriendID,
 					StatusCmd{Cmd: "status", Who: id, Status: "off"},
-					true,
 				)
 			}
 		}

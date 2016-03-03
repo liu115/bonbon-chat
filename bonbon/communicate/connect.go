@@ -113,7 +113,7 @@ func (wq *waitingQueue) match(id int) int {
 	case "L2_FB_friend":
 		wq.accept = L2_FB_friendAccept(id)
 	}
-	disconnectByID(id, false)
+	disconnectByID(id)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
 			return -1
@@ -178,7 +178,7 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"}, false)
+	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"})
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -198,13 +198,12 @@ func handleConnect(msg []byte, id int, u *user) {
 		sendJsonToUnknownStatusID(
 			stranger,
 			ConnectSuccess{Cmd: "connected", Sign: *selfSignature},
-			false,
 		)
-		sendJsonByUserWithLock(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
+		sendJsonByUser(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
 	}
 }
 
-func disconnectByID(id int, lock bool) {
+func disconnectByID(id int) {
 	var stranger int
 	if stranger = onlineUser[id].match; stranger != -1 {
 		onlineUser[id].match = -1
@@ -216,13 +215,12 @@ func disconnectByID(id int, lock bool) {
 		sendJsonToUnknownStatusID(
 			stranger,
 			map[string]interface{}{"Cmd": "disconnected"},
-			lock,
 		)
 	}
 }
 
 // 實作斷線
 func handleDisconnect(id int) {
-	disconnectByID(id, false)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"}, false)
+	disconnectByID(id)
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
 }
