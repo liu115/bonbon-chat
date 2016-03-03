@@ -28,10 +28,6 @@ type user struct {
 var onlineUser = make(map[int]*user)
 var onlineLock = new(sync.RWMutex)
 
-// 粒度高，將降低效能
-
-var globalBonbonLock = new(sync.Mutex)
-
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
 	var req SendRequest
@@ -70,7 +66,6 @@ func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
 	var success = false
 	onlineLock.RLock()
-	globalBonbonLock.Lock()
 	var stranger *user
 	strangerID := u.match
 	if strangerID == -1 {
@@ -95,7 +90,6 @@ func handleBonbon(id int, u *user) {
 		success = true
 	}
 bonbonUnlock:
-	globalBonbonLock.Unlock()
 	onlineLock.RUnlock()
 
 	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"}, false)
@@ -248,6 +242,5 @@ func ChatHandler(id int, c *gin.Context) {
 		fmt.Printf("id %d: %s\n", id, msg)
 		requestChannel <- requestInChannel{ID: id, User: user, Conn: conn, Msg: msg}
 	}
-	fmt.Printf("%d id leave")
 	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "close"}
 }
