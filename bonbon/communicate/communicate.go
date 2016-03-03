@@ -29,8 +29,6 @@ var onlineUser = make(map[int]*user)
 var onlineLock = new(sync.RWMutex)
 
 // 粒度高，將降低效能
-// TODO: 改為讀寫鎖或拆分粒度
-var globalMatchLock = new(sync.Mutex)
 
 var globalBonbonLock = new(sync.Mutex)
 
@@ -54,12 +52,10 @@ func handleSend(msg []byte, id int, u *user) {
 		sendJsonToOnlineID(id, respondToSend(req, now, true), false)
 	} else if req.Who == 0 {
 		var stranger int
-		globalMatchLock.Lock()
 		if stranger = u.match; stranger != -1 {
 			ss.Who = 0
 			sendJsonToUnknownStatusID(u.match, ss, false)
 		}
-		globalMatchLock.Unlock()
 		if stranger == -1 {
 			sendJsonToOnlineID(id, respondToSend(req, now, false), false)
 		} else {
@@ -74,7 +70,6 @@ func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
 	var success = false
 	onlineLock.RLock()
-	globalMatchLock.Lock()
 	globalBonbonLock.Lock()
 	var stranger *user
 	strangerID := u.match
@@ -101,7 +96,6 @@ func handleBonbon(id int, u *user) {
 	}
 bonbonUnlock:
 	globalBonbonLock.Unlock()
-	globalMatchLock.Unlock()
 	onlineLock.RUnlock()
 
 	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"}, false)

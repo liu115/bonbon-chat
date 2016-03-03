@@ -120,10 +120,8 @@ func (wq *waitingQueue) match(id int) int {
 		} else if wq.accept(wq.queue[i]) {
 			stranger := wq.queue[i]
 			wq.queue = append(wq.queue[:i], wq.queue[i+1:]...)
-			globalMatchLock.Lock()
 			onlineUser[id].match = stranger
 			onlineUser[stranger].match = id
-			globalMatchLock.Unlock()
 			return stranger
 		}
 	}
@@ -208,12 +206,10 @@ func handleConnect(msg []byte, id int, u *user) {
 
 func disconnectByID(id int, lock bool) {
 	var stranger int
-	globalMatchLock.Lock()
 	if stranger = onlineUser[id].match; stranger != -1 {
 		onlineUser[id].match = -1
 		onlineUser[stranger].match = -1
 	}
-	globalMatchLock.Unlock()
 	// 將io取出鎖外操作
 	fmt.Printf("%d disconnect with %d\n", id, stranger)
 	if stranger > 0 {
