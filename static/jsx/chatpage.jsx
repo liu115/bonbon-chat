@@ -139,7 +139,13 @@ FriendBox = React.createClass({
         </div>
         <div className="friend-info">
           <p className="friend-info-name">{this.props.friend.name}</p>
-          <p className="friend-info-status">{this.props.friend.messages[this.props.friend.messages.length - 1].content}</p>
+          <p className="friend-info-status">
+            {function() {
+              if (this.props.friend.messages.length > 0)
+                return (this.props.friend.messages[this.props.friend.messages.length - 1].content);
+              else return ('');
+            }.bind(this)()}
+          </p>
         </div>
         <div style={{clear: "both"}}></div>
       </div>
