@@ -1,11 +1,11 @@
 package config
 
 import (
-	"fmt"
-	"strings"
 	"errors"
-	"code.google.com/p/gcfg"
+	"fmt"
 	"github.com/huandu/facebook"
+	"gopkg.in/gcfg.v1"
+	"strings"
 )
 
 type bonbonConfig struct {
@@ -59,19 +59,19 @@ func LoadConfigFile(path string) error {
 
 	// populate values
 	Hostname = conf.Server.Hostname
-	Port     = conf.Server.Port
-	Mode     = conf.Server.Mode
-	Address  = fmt.Sprintf("%s:%d", Hostname, Port)
+	Port = conf.Server.Port
+	Mode = conf.Server.Mode
+	Address = fmt.Sprintf("%s:%d", Hostname, Port)
 
 	ElectiveNickNames = strings.Split(conf.Parameters.ElectiveNickNames, ",")
-	NumFriendsLimit   = conf.Parameters.NumFriendsLimit
+	NumFriendsLimit = conf.Parameters.NumFriendsLimit
 
-	FBAppID     = conf.Facebook.AppID
+	FBAppID = conf.Facebook.AppID
 	FBAppSecret = conf.Facebook.AppSecret
-	GlobalApp   = facebook.New(FBAppID, FBAppSecret)
+	GlobalApp = facebook.New(FBAppID, FBAppSecret)
 
 	DatabaseDriver = conf.Database.Driver
-	DatabaseArgs   = conf.Database.Arguments
+	DatabaseArgs = conf.Database.Arguments
 
 	return nil
 }
