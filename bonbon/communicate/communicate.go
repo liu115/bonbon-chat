@@ -38,12 +38,18 @@ func handleSend(msg []byte, id int, u *user) {
 
 	println(req.Msg)
 	u_now := time.Now()
-	database.AppendMessage(id, req.Who, 0, req.Msg, u_now)
 	now := u_now.UnixNano()
 	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 
-	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss) == nil {
-		sendJsonToOnlineID(id, respondToSend(req, now, true))
+	if req.Who != 0 {
+		err = database.AppendMessage(id, req.Who, 0, req.Msg, u_now)
+		if err != nil {
+			fmt.Printf("AppendMessage fail, %s\n", err.Error())
+			sendJsonToOnlineID(id, respondToSend(req, now, false))
+		} else {
+			sendJsonToUnknownStatusID(req.Who, ss)
+			sendJsonToOnlineID(id, respondToSend(req, now, true))
+		}
 	} else if req.Who == 0 {
 		var stranger int
 		if stranger = u.match; stranger != -1 {
