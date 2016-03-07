@@ -217,13 +217,14 @@ ChatRoom = React.createClass({
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
     if (this.state.userInput != ''){
-      this.props.addMessage(this.props.target, 'buttom', {
+      if (this.props.addMessage(this.props.target, 'buttom', {
         from: 'me',
         content: this.state.userInput
-      });
-      this.setState({
-        userInput: ''
-      });
+      }) == true) {
+        this.setState({
+          userInput: ''
+        });
+      }
     }
     this.focusInput();
   },
@@ -502,8 +503,21 @@ Chat = React.createClass({
   addMessage: function(who, where, message) {
     if (where == 'buttom') {
       console.log('sending to id: ' + this.state.friends[who].ID);
-      this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
+      try {
+        if (this.props.chatSocket.readyState == 1) {
+          this.props.chatSocket.send(JSON.stringify({Cmd: "send", Who: this.state.friends[who].ID, Msg: message.content}));
+        }
+        else {
+          console.log('send fail(socket close)');
+          return false;
+        }
+      }
+      catch(err) {
+        console.log('send fail(socket error)');
+        return false;
+      }
     }
+    return true;
   },
 
   render: function() {
