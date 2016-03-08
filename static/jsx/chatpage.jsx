@@ -254,6 +254,7 @@ ChatRoom = React.createClass({
   handleScroll: function() {
     if (React.findDOMNode(this.refs.refContent).scrollTop <= 0) {
       if (this.historyLock === 'unlock') {
+        if (this.props.target == 0) return false;
         var who = this.props.friends[this.props.target].ID;
         var time = this.props.friends[this.props.target].messages[0].time;
         this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: who, Number: 15, When: time, Order: 0}));
@@ -341,7 +342,7 @@ Chat = React.createClass({
         friends: friends,
         who: 0
       });
-      for (var i = 0; i < this.state.friends.length; i++) {
+      for (var i = 1; i < this.state.friends.length; i++) {
         this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: this.state.friends[i].ID, Number: 15, When: Date.now() * 10e+5, Order: 0}));
       }
     }.bind(this));
