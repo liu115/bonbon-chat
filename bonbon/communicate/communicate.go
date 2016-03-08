@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"sync"
+	// "sync"
 	"time"
 )
 
@@ -19,20 +19,12 @@ var upgrader = websocket.Upgrader{
 
 type user struct {
 	conns     []*websocket.Conn
-	lock      *sync.Mutex // lock住conns
-	match     int         // -1表示無配對
+	match     int // -1表示無配對
 	matchType string
 	bonbon    bool
 }
 
 var onlineUser = make(map[int]*user)
-var onlineLock = new(sync.RWMutex)
-
-// 粒度高，將降低效能
-// TODO: 改為讀寫鎖或拆分粒度
-var globalMatchLock = new(sync.Mutex)
-
-var globalBonbonLock = new(sync.Mutex)
 
 // 實作 send message API
 func handleSend(msg []byte, id int, u *user) {
@@ -50,42 +42,37 @@ func handleSend(msg []byte, id int, u *user) {
 	now := u_now.UnixNano()
 	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
 
-	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss, false) == nil {
-		sendJsonToOnlineID(id, respondToSend(req, now, true), false)
+	if req.Who != 0 && sendJsonToUnknownStatusID(req.Who, ss) == nil {
+		sendJsonToOnlineID(id, respondToSend(req, now, true))
 	} else if req.Who == 0 {
 		var stranger int
-		globalMatchLock.Lock()
 		if stranger = u.match; stranger != -1 {
 			ss.Who = 0
-			sendJsonToUnknownStatusID(u.match, ss, false)
+			sendJsonToUnknownStatusID(u.match, ss)
 		}
-		globalMatchLock.Unlock()
 		if stranger == -1 {
-			sendJsonToOnlineID(id, respondToSend(req, now, false), false)
+			sendJsonToOnlineID(id, respondToSend(req, now, false))
 		} else {
-			sendJsonToOnlineID(id, respondToSend(req, now, true), false)
+			sendJsonToOnlineID(id, respondToSend(req, now, true))
 		}
 	} else {
-		sendJsonToOnlineID(id, respondToSend(req, now, false), false)
+		sendJsonToOnlineID(id, respondToSend(req, now, false))
 	}
 }
 
 func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
 	var success = false
-	onlineLock.RLock()
-	globalMatchLock.Lock()
-	globalBonbonLock.Lock()
 	var stranger *user
 	strangerID := u.match
 	if strangerID == -1 {
 		fmt.Printf("沒有connect就bonbon\n")
-		goto bonbonUnlock
+		goto endLabel
 	}
 	stranger = onlineUser[strangerID]
 	if stranger == nil {
 		fmt.Printf("陌生人已經離線或不存在\n")
-		goto bonbonUnlock
+		goto endLabel
 	}
 
 	if stranger.bonbon == false {
@@ -99,12 +86,9 @@ func handleBonbon(id int, u *user) {
 		stranger.match = -1
 		success = true
 	}
-bonbonUnlock:
-	globalBonbonLock.Unlock()
-	globalMatchLock.Unlock()
-	onlineLock.RUnlock()
+endLabel:
 
-	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"}, false)
+	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
 
 	if success {
 		err := database.MakeFriendship(id, strangerID)
@@ -119,11 +103,10 @@ bonbonUnlock:
 		if err != nil {
 			return
 		}
-		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick}, false)
+		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
 			NewFriendCmd{Cmd: "new_friend", Who: id, Nick: myNick},
-			false,
 		)
 	}
 }
@@ -135,7 +118,7 @@ func handleUpdateSettings(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
@@ -143,14 +126,14 @@ func handleUpdateSettings(msg []byte, id int) {
 	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
 		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// TODO 告訴所有人此人改簽名檔
 	// send success response
 	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
-	sendJsonToOnlineID(id, &response, false)
+	sendJsonToOnlineID(id, &response)
 }
 
 // XXX: 下版功能 handle setting nickname of friends
@@ -160,7 +143,7 @@ func handleSetNickName(msg []byte, id int) {
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
@@ -168,13 +151,70 @@ func handleSetNickName(msg []byte, id int) {
 	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
 	if err != nil {
 		response := simpleResponse{OK: false}
-		sendJsonToOnlineID(id, &response, false)
+		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// send success response
 	response := simpleResponse{OK: true}
-	sendJsonToOnlineID(id, &response, false)
+	sendJsonToOnlineID(id, &response)
+}
+
+type requestInChannel struct {
+	ID      int
+	Msg     []byte
+	Special string
+	Conn    *websocket.Conn
+	User    *user
+}
+
+var responseChannel = make(map[*websocket.Conn]chan *user)
+
+var requestChannel = make(chan requestInChannel)
+
+func CommandComsumer() {
+	for {
+		req := <-requestChannel
+		id := req.ID
+		conn := req.Conn
+		if req.Special == "init" {
+			user, err := initOnline(id, conn)
+			if err != nil {
+				fmt.Printf("send initialize message to %d fail, %s\n", id, err)
+			}
+			responseChannel[req.Conn] <- user
+			continue
+		} else if req.Special == "close" {
+			clearOffline(id, conn)
+			continue
+		}
+
+		user := req.User
+		msg := req.Msg
+		var decodedMsg map[string]interface{}
+		json.Unmarshal(req.Msg, &decodedMsg)
+		switch decodedMsg["Cmd"] {
+		// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
+		case "setting":
+			handleUpdateSettings(msg, id)
+			// XXX: 誤用API，此為下版功能
+			// case "change_nick":
+			// 	handleSetNickName(msg, id)
+		case "connect":
+			fmt.Printf("id %d try connect\n", id)
+			handleConnect(msg, id, user)
+		case "send":
+			handleSend(msg, id, user)
+		case "disconnect":
+			handleDisconnect(id)
+		case "bonbon":
+			handleBonbon(id, user)
+		case "history":
+			handleHistory(msg, id, user)
+		default:
+			fmt.Println("未知的請求")
+		}
+	}
 }
 
 // ChatHandler 一個gin handler，為websocket之入口
@@ -184,48 +224,18 @@ func ChatHandler(id int, c *gin.Context) {
 		fmt.Printf("establish connection, %s\n", err.Error())
 		return
 	}
-	user, err := initOnline(id, conn)
-	var wg sync.WaitGroup
-	if err != nil {
-		fmt.Printf("send initialize message to %d fail, %s\n", id, err)
-		goto clear
-	}
+	responseChannel[conn] = make(chan *user)
+	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
+	// user, err := initOnline(id, conn)
+	user := <-responseChannel[conn]
 	// TODO 通知所有人此人上線
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		wg.Add(1)
-		go func() {
-			fmt.Printf("id %d: %s\n", id, msg)
-			var decodedMsg map[string]interface{}
-			json.Unmarshal(msg, &decodedMsg)
-			switch decodedMsg["Cmd"] {
-			// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
-			case "setting":
-				handleUpdateSettings(msg, id)
-			// XXX: 誤用API，此為下版功能
-			// case "change_nick":
-			// 	handleSetNickName(msg, id)
-			case "connect":
-				fmt.Printf("id %d try connect\n", id)
-				handleConnect(msg, id, user)
-			case "send":
-				handleSend(msg, id, user)
-			case "disconnect":
-				handleDisconnect(id)
-			case "bonbon":
-				handleBonbon(id, user)
-			case "history":
-				handleHistory(msg, id, user)
-			default:
-				fmt.Println("未知的請求")
-			}
-			wg.Done()
-		}()
+		fmt.Printf("id %d: %s\n", id, msg)
+		requestChannel <- requestInChannel{ID: id, User: user, Conn: conn, Msg: msg}
 	}
-	wg.Wait()
-clear:
-	clearOffline(id, conn)
+	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "close"}
 }

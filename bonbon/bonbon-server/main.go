@@ -5,11 +5,11 @@ import (
 	"bonbon/config"
 	"bonbon/database"
 	"bonbon/test"
+	"flag"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"runtime"
-	"flag"
-	"log"
 )
 
 func main() {
@@ -59,6 +59,7 @@ func main() {
 	app.Static("/static/", "./static")
 
 	// run consumer
+	go communicate.CommandComsumer()
 	go communicate.MatchConsumer()
 
 	// run server

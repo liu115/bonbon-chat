@@ -113,17 +113,15 @@ func (wq *waitingQueue) match(id int) int {
 	case "L2_FB_friend":
 		wq.accept = L2_FB_friendAccept(id)
 	}
-	disconnectByID(id, false)
+	disconnectByID(id)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
 			return -1
 		} else if wq.accept(wq.queue[i]) {
 			stranger := wq.queue[i]
 			wq.queue = append(wq.queue[:i], wq.queue[i+1:]...)
-			globalMatchLock.Lock()
 			onlineUser[id].match = stranger
 			onlineUser[stranger].match = id
-			globalMatchLock.Unlock()
 			return stranger
 		}
 	}
@@ -180,7 +178,7 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("unmarshal connect cmd, %s\n", err.Error())
 		return
 	}
-	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"}, false)
+	sendJsonToOnlineID(id, ConnectResponse{OK: true, Cmd: "connect"})
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
@@ -200,33 +198,29 @@ func handleConnect(msg []byte, id int, u *user) {
 		sendJsonToUnknownStatusID(
 			stranger,
 			ConnectSuccess{Cmd: "connected", Sign: *selfSignature},
-			false,
 		)
-		sendJsonByUserWithLock(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
+		sendJsonByUser(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
 	}
 }
 
-func disconnectByID(id int, lock bool) {
+func disconnectByID(id int) {
 	var stranger int
-	globalMatchLock.Lock()
 	if stranger = onlineUser[id].match; stranger != -1 {
 		onlineUser[id].match = -1
 		onlineUser[stranger].match = -1
 	}
-	globalMatchLock.Unlock()
 	// 將io取出鎖外操作
 	fmt.Printf("%d disconnect with %d\n", id, stranger)
 	if stranger > 0 {
 		sendJsonToUnknownStatusID(
 			stranger,
 			map[string]interface{}{"Cmd": "disconnected"},
-			lock,
 		)
 	}
 }
 
 // 實作斷線
 func handleDisconnect(id int) {
-	disconnectByID(id, false)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"}, false)
+	disconnectByID(id)
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
 }

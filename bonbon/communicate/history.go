@@ -32,6 +32,5 @@ func handleHistory(msg []byte, id int, user *user) {
 			With_who: request.With_who,
 			Number:   len(msgs),
 			Msgs:     msgs_modify,
-		},
-		false)
+		})
 }
