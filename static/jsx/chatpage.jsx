@@ -192,6 +192,16 @@ ChatRoom = React.createClass({
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
+    /* lock when message are sending */
+    this.sendLock = 'unlock';
+    this.props.chatSocket.addHandler('send', function(cmd) {
+      this.sendLock = 'unlock';
+      if (cmd.OK == true) {
+        this.setState({
+          userInput: ''
+        });
+      }
+    }.bind(this));
     return {
       userInput: ''
     };
@@ -216,15 +226,12 @@ ChatRoom = React.createClass({
   sendMessage: function(e) {
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    if (this.state.userInput != ''){
-      if (this.props.addMessage(this.props.target, 'buttom', {
+    if (this.state.userInput != '' && this.sendLock == 'unlock'){
+      this.props.addMessage(this.props.target, 'buttom', {
         from: 'me',
         content: this.state.userInput
-      }) == true) {
-        this.setState({
-          userInput: ''
-        });
-      }
+      });
+      this.sendLock = 'lock';
     }
     this.focusInput();
   },
@@ -359,8 +366,7 @@ Chat = React.createClass({
         this.state.friends[index].messages.push({content: cmd.Msg, from: 'me', time: cmd.Time});
       }
       else {
-        this.state.friends[index].messages.push({content: cmd.Msg + '(send failed)', from: 'me', time: cmd.Time});
-        console.log(this.state.friends[index].messages);
+        console.log('send fail(cmd.OK=false)');
       }
       this.setState({
         friends: this.state.friends
