@@ -12,11 +12,17 @@ import (
 )
 
 func createConn(id int) *websocket.Conn {
-	u, err := url.Parse("http://localhost:8080/test/chat/" + strconv.Itoa(id))
+	u, err := url.Parse("ws://localhost:8080/test/chat/" + strconv.Itoa(id))
+	if err != nil {
+		fmt.Printf("url.Parse: %s", err.Error())
+	}
 	rawConn, err := net.Dial("tcp", u.Host)
+	if err != nil {
+		fmt.Printf("net.Dial: %s", err.Error())
+	}
 	conn, _, err := websocket.NewClient(rawConn, u, http.Header{}, 1024, 1024)
 	if err != nil {
-		fmt.Printf("%s", err.Error())
+		fmt.Printf("websocket.NewClient: %s", err.Error())
 	}
 	return conn
 }

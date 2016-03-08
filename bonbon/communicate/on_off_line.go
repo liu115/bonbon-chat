@@ -17,6 +17,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 
 	friendships, err := database.GetFriendships(id)
 	if err != nil {
+		fmt.Printf("getFriendships: %s", err.Error())
 		return nil, err
 	}
 
