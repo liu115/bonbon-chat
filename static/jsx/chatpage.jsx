@@ -327,7 +327,7 @@ Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+2).toString()}]
+        messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
       friends.push(initFriend);
       // BUG cmd.Friends may be null
@@ -351,7 +351,7 @@ Chat = React.createClass({
         who: 0
       });
       for (var i = 1; i < this.state.friends.length; i++) {
-        this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: this.state.friends[i].ID, Number: 15, When: (Date.now() * 10e+2).toString(), Order: 0}));
+        this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: this.state.friends[i].ID, Number: 15, When: (Date.now() * 10e+5).toString(), Order: 0}));
       }
     }.bind(this));
 
@@ -402,7 +402,7 @@ Chat = React.createClass({
 
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '建立配對中...請稍候', time: (Date.now() * 10e+2).toString()}];
+      friends[0].messages = [{from: 'system', content: '建立配對中...請稍候', time: (Date.now() * 10e+5).toString()}];
       this.setState({
         friends: friends,
         who: 0
@@ -410,7 +410,7 @@ Chat = React.createClass({
     }.bind(this));
     this.props.chatSocket.addHandler('connected', function(cmd) {
       var friends = this.state.friends;
-      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！', time: (Date.now() * 10e+2).toString()}];
+      friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！', time: (Date.now() * 10e+5).toString()}];
       friends[0].online = true;
       friends[0].sign = cmd.Sign;
       this.setState({
@@ -419,14 +419,14 @@ Chat = React.createClass({
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+2).toString()});
+      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+5).toString()});
       this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnected', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷', time: (Date.now() * 10e+2).toString()});
+      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷', time: (Date.now() * 10e+5).toString()});
       this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
@@ -447,7 +447,7 @@ Chat = React.createClass({
         sign: this.state.friends[0].sign,
         messages: this.state.friends[0].messages
       };
-      new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！', time: (Date.now() * 10e+2).toString()});
+      new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！', time: (Date.now() * 10e+5).toString()});
       this.state.friends.push(new_friend);
       this.state.friends[0] = {
         index: 0,
@@ -457,7 +457,7 @@ Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+2).toString()}]
+        messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       }
       this.setState({
         friends: this.state.friends,
@@ -494,7 +494,7 @@ Chat = React.createClass({
       stat: 'read',
       img: '/static/img/stranger-m.jpg',
       sign: '猜猜我是誰',
-      messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+2).toString()}]}],
+      messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]}],
     };
   },
 
