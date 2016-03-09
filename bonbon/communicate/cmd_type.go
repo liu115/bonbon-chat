@@ -26,18 +26,18 @@ type SendResponse struct {
 	Who   int
 	Cmd   string
 	Msg   string
-	Time  int64
+	Time  string
 	Order int
 }
 
 type SendFromServer struct {
 	Cmd  string
 	Who  int
-	Time int64
+	Time string
 	Msg  string
 }
 
-func respondToSend(req SendRequest, now int64, exist bool) SendResponse {
+func respondToSend(req SendRequest, now string, exist bool) SendResponse {
 	res := SendResponse{
 		OK:    exist,
 		Who:   req.Who,
@@ -53,13 +53,13 @@ func respondToSend(req SendRequest, now int64, exist bool) SendResponse {
 type HistoryMsg struct {
 	Text string
 	From int
-	Time int64
+	Time string
 }
 
 type HistoryRequest struct {
 	Cmd      string
 	With_who int
-	When     int64
+	When     string
 	Number   int
 	Order    int
 }
