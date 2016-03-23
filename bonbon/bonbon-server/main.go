@@ -18,6 +18,7 @@ func main() {
 
 	// parse arguments
 	var configPath = flag.String("config", "bonbon.conf", "the path of server configuration file")
+	var staticPath = flag.String("static", "static", "the path of server configuration file")
 	flag.Parse()
 
 	// load config file
@@ -56,7 +57,7 @@ func main() {
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 	})
-	app.Static("/static/", "./static")
+	app.Static("/static/", *staticPath)
 
 	// run consumer
 	go communicate.CommandComsumer()
