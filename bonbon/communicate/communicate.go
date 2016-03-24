@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"strconv"
 	// "sync"
 	"time"
 )
@@ -39,16 +40,16 @@ func handleSend(msg []byte, id int, u *user) {
 	println(req.Msg)
 	u_now := time.Now()
 	now := u_now.UnixNano()
-	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: now, Msg: req.Msg}
+	ss := SendFromServer{Cmd: "sendFromServer", Who: id, Time: strconv.FormatInt(now, 10), Msg: req.Msg}
 
 	if req.Who != 0 {
 		err = database.AppendMessage(id, req.Who, 0, req.Msg, u_now)
 		if err != nil {
 			fmt.Printf("AppendMessage fail, %s\n", err.Error())
-			sendJsonToOnlineID(id, respondToSend(req, now, false))
+			sendJsonToOnlineID(id, respondToSend(req, strconv.FormatInt(now, 10), false))
 		} else {
 			sendJsonToUnknownStatusID(req.Who, ss)
-			sendJsonToOnlineID(id, respondToSend(req, now, true))
+			sendJsonToOnlineID(id, respondToSend(req, strconv.FormatInt(now, 10), true))
 		}
 	} else if req.Who == 0 {
 		var stranger int
@@ -57,12 +58,12 @@ func handleSend(msg []byte, id int, u *user) {
 			sendJsonToUnknownStatusID(u.match, ss)
 		}
 		if stranger == -1 {
-			sendJsonToOnlineID(id, respondToSend(req, now, false))
+			sendJsonToOnlineID(id, respondToSend(req, strconv.FormatInt(now, 10), false))
 		} else {
-			sendJsonToOnlineID(id, respondToSend(req, now, true))
+			sendJsonToOnlineID(id, respondToSend(req, strconv.FormatInt(now, 10), true))
 		}
 	} else {
-		sendJsonToOnlineID(id, respondToSend(req, now, false))
+		sendJsonToOnlineID(id, respondToSend(req, strconv.FormatInt(now, 10), false))
 	}
 }
 

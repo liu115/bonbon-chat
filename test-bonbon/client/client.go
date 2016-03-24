@@ -82,7 +82,7 @@ func (c *Client) GetHistory(id int, number int, when int64) {
 		Cmd:      "history",
 		With_who: id,
 		Number:   number,
-		When:     when,
+		When:     strconv.FormatInt(when, 10),
 	})
 }
 
