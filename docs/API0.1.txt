@@ -13,8 +13,8 @@
 	a. 互傳訊息
 	b. 斷線（陌生人）
 	c. bonbon（陌生人）
-	d. 歷史（好友） X
-	e. 已讀 X
+	d. 歷史（好友）
+	e. 已讀
 	f. 上下線
 6.  a. 成為好友
 	b. 刪好友 X
@@ -39,7 +39,7 @@ API 實體
 	{"Cmd": "init",
 	"OK": true or false
 	"Setting": {"Sign": "XXXXXXX"},
-    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off"}, ...]}
+    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off", Read: 時間（字串）}, ...]}
 3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
        {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
@@ -65,7 +65,9 @@ API 實體
 	         "Msgs": [{"From": "哪個id的傳的", "Text": "XXXXXXX", Time: XXXXXXXX}]}
 	   number為要從這個時間起往前多少個
 	   order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
-	e.
+	e. 請求 {"Cmd": "read", "With_who": "對方id", Time: 讀取之時間}
+	   回應 {"OK": true, Cmd": "read", "With_who": "對方id", Time: 讀取之時間}
+	   伺服器主動 {"Cmd": "read_by_other_client": "With_who": "對方id", Time: 讀取之時間}
 	f. onopen
 	伺服器主動 {"Cmd": "status", "Who": "對方id", "Status": "on or off"}
 6.
