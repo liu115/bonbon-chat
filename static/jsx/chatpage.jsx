@@ -381,6 +381,9 @@ Chat = React.createClass({
           index = i;
         }
       }
+      if (this.state.who != index) {
+        NewMessage(this.state.friends[index].name, cmd.Msg);
+      }
       this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
       this.setState({
         friends: this.state.friends
