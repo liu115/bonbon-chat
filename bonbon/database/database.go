@@ -580,7 +580,6 @@ func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime t
 
 	var messages []Message
 	// TODO: 確定順序後加index
-	// XXX: from 跟 to 才對？
 	query := db.Where("((from_account_id = ? and to_account_id = ?) or (from_account_id = ? and to_account_id = ?)) and time < ?",
 		firstAccountID,
 		secondAccountID,
@@ -593,6 +592,25 @@ func GetMessagesBeforeTime(firstAccountID int, secondAccountID int, beforeTime t
 	}
 
 	return messages, nil
+}
+
+func UpdateReadTime(accountID int, friendID int, time time.Time) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	var friendship Friendship
+	query := db.Where("account_id = ? and friend_id = ?", accountID, friendID).First(&friendship)
+
+	if query.Error != nil {
+		return query.Error
+	}
+
+	friendship.LastRead = time
+	db.Save(&friendship)
+	return nil
 }
 
 // AppendActivityLog push a new activity log to database

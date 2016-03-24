@@ -19,6 +19,12 @@ task :test => ["bonbon-server", "tester"] do
   `./tester`
 end
 
+namespace :docker do
+  task :build do
+    puts `sudo docker build -t dadiuhazon/bonbon .`
+  end
+end
+
 task :clean do
   `rm bonbon-server tester`
 end

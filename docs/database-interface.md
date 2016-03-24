@@ -12,6 +12,7 @@ In package "bonbon/database", _models.go_ provides object definitions in databas
 * func SetNickNameOfFriendship(accountID int, friendID int, nickName string) error
 * func GetFacebookFriends(id int) ([]\*Account, error)
 * func GetFacebookFriendsOfFriends(id int, degree int) ([]Account, error)
+* func UpdateReadTime(accountID int, friendID int, time time.Time) error
 * func AppendActivityLog(accountID int, action string, description string) error
 
 ## database table schema
@@ -21,6 +22,7 @@ type Friendship struct {
 	ID        int     `sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	AccountID int     `sql:"index"`
 	NickName  string
+	LastRead  time.Time
 	FriendID  int
 }
 ```
@@ -88,6 +90,9 @@ func foo() {
     for _, account := range fofAccounts {
         fmt.Println(account.ID)
     }
+
+	// 更新已讀時間
+	err := UpdateReadTime(id, who, time)
 }
 
 ```

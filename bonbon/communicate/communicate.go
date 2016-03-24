@@ -218,6 +218,8 @@ func CommandComsumer() {
 			handleBonbon(id, user)
 		case "history":
 			handleHistory(msg, id, user)
+		case "read":
+			handleRead(msg, id, user)
 		default:
 			fmt.Println("未知的請求")
 		}

@@ -65,9 +65,8 @@ API 實體
 	         "Msgs": [{"From": "哪個id的傳的", "Text": "XXXXXXX", Time: XXXXXXXX}]}
 	   number為要從這個時間起往前多少個
 	   order並非訊息的絕對order，而是請求的序號，用於協助判斷此回應是要回給哪一個請求
-	e. 請求 {"Cmd": "read", "With_who": "對方id", Time: 讀取之時間}
+	e. 請求 {"Cmd": "read", "With_who": "對方id"}
 	   回應 {"OK": true, Cmd": "read", "With_who": "對方id", Time: 讀取之時間}
-	   伺服器主動 {"Cmd": "read_by_other_client": "With_who": "對方id", Time: 讀取之時間}
 	f. onopen
 	伺服器主動 {"Cmd": "status", "Who": "對方id", "Status": "on or off"}
 6.

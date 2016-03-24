@@ -37,6 +37,9 @@ function createClient(id) {
 	client.history = function(id, number, when) {
 		client.send(JSON.stringify({Cmd: "history", With_who: id, Number: number, When: when}))
 	}
+	client.read = function(id) {
+		client.send(JSON.stringify({Cmd: "read", With_who: id}))
+	}
 	return client
 }
 

@@ -209,7 +209,6 @@ func disconnectByID(id int) {
 		onlineUser[id].match = -1
 		onlineUser[stranger].match = -1
 	}
-	// 將io取出鎖外操作
 	fmt.Printf("%d disconnect with %d\n", id, stranger)
 	if stranger > 0 {
 		sendJsonToUnknownStatusID(

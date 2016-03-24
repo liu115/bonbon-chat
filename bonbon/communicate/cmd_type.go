@@ -49,6 +49,23 @@ func respondToSend(req SendRequest, now string, exist bool) SendResponse {
 	return res
 }
 
+// structure for read
+type ReadRequest struct {
+	Cmd      string
+	With_who int
+	Time     string
+}
+
+type ReadResponse struct {
+	OK       bool
+	Cmd      string
+	With_who int
+	Time     string
+}
+
+type ReadFromOtherClient struct {
+}
+
 // structure for history
 type HistoryMsg struct {
 	Text string
