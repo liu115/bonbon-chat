@@ -4,7 +4,7 @@ import (
 	"bonbon/database"
 	"fmt"
 	"github.com/gorilla/websocket"
-	// "sync"
+	"strconv"
 )
 
 func initOnline(id int, conn *websocket.Conn) (*user, error) {
@@ -69,10 +69,11 @@ func getInitInfo(id int) (*InitCmd, error) {
 		}
 		if err == nil {
 			new_firiend := Friend{
-				ID:     friendships[i].FriendID,
-				Sign:   friend_account.Signature,
-				Nick:   friendships[i].NickName,
-				Status: status,
+				ID:       friendships[i].FriendID,
+				Sign:     friend_account.Signature,
+				Nick:     friendships[i].NickName,
+				Status:   status,
+				LastRead: strconv.FormatInt(friendships[i].LastRead.UnixNano(), 10),
 			}
 			friends = append(friends, new_firiend)
 		} else {

@@ -151,10 +151,11 @@ type ConnectSuccess struct {
 
 // structure for init
 type Friend struct {
-	ID     int
-	Sign   string
-	Nick   string
-	Status string
+	ID       int
+	Sign     string
+	Nick     string
+	Status   string
+	LastRead string
 }
 
 type setting struct {

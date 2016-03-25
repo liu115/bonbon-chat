@@ -203,6 +203,7 @@ func MakeFriendship(leftID int, rightID int) error {
 			AccountID: leftAccount.ID,
 			NickName:  config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
 			FriendID:  rightAccount.ID,
+			LastRead:  time.Now(),
 		}
 		db.Create(&leftFriendship)
 	}
@@ -212,6 +213,7 @@ func MakeFriendship(leftID int, rightID int) error {
 			AccountID: rightAccount.ID,
 			NickName:  config.ElectiveNickNames[rand.Intn(numElectiveNickNames)],
 			FriendID:  leftAccount.ID,
+			LastRead:  time.Now(),
 		}
 		db.Create(&rightFriendship)
 	}
