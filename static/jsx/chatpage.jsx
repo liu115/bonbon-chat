@@ -142,7 +142,12 @@ FriendBox = React.createClass({
           <p className="friend-info-status">
             {function() {
               if (this.props.friend.messages.length > 0)
+              {
+                if (this.props.friend.messages[this.props.friend.messages.length - 1].content.length > 20) {
+                  return this.props.friend.messages[this.props.friend.messages.length - 1].content.slice(0,20) + '...';
+                }
                 return (this.props.friend.messages[this.props.friend.messages.length - 1].content);
+              }
               else return ('');
             }.bind(this)()}
           </p>
