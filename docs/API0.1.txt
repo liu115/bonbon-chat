@@ -76,6 +76,12 @@ API 實體
 	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick", "XXXXX"}       伺服器先送假暱稱
 	b.
 
-9. GET /meta/YOUR-URL
-	例：要取得slack的元訊息，則GET /meta/slack.com
+9. GET /meta?protocal=xxxx&url=xxxxxxxxx
+	說明 protocal為http或https
+	例：要取得slack的元訊息，則GET /meta?protocal=https&url=slack.com
 	回應 {"site_name": "XXX", "title": "XXX", "description": "XXXX", "image": "XXXXXX"}
+	屬性對應的標籤為
+	site_name   -> <meta property="og:site_name">
+	title       -> <meta property="og:title">       若無則用 <title>
+	description -> <meta property="og:description"> 若無則用 <meta neme="description">
+	image       -> <meta property="og:image">
