@@ -4,6 +4,7 @@ import (
 	"bonbon/communicate"
 	"bonbon/config"
 	"bonbon/database"
+	"bonbon/meta"
 	"bonbon/test"
 	"flag"
 	"github.com/gin-gonic/gin"
@@ -52,6 +53,8 @@ func main() {
 	}
 
 	app.GET("/chat/:token", HandleWebsocket)
+
+	app.GET("/meta/*url", meta.HandleURLMeta)
 
 	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {

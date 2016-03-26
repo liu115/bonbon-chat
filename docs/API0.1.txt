@@ -20,6 +20,7 @@
 	b. 刪好友 X
 7. 好友資料 撲克牌假名
 8. 傳圖 （暫時不做） X
+9. 得到超連結的元訊息
 
 websocket 強在不需要進行輪詢，若沒有伺服器需要主動傳訊息的狀況，是可以考慮用AJAX來做
 websocket使用異步回覆
@@ -32,6 +33,8 @@ websocket使用異步回覆
 5. websocket
 6. websocket
 7. 塞網址
+8.
+9. AJAX
 
 API 實體
 1. GET /
@@ -73,3 +76,6 @@ API 實體
 	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick", "XXXXX"}       伺服器先送假暱稱
 	b.
 
+9. GET /meta/YOUR-URL
+	例：要取得slack的元訊息，則GET /meta/slack.com
+	回應 {"site_name": "XXX", "title": "XXX", "description": "XXXX", "image": "XXXXXX"}
