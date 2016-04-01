@@ -142,7 +142,12 @@ FriendBox = React.createClass({
           <p className="friend-info-status">
             {function() {
               if (this.props.friend.messages.length > 0)
+              {
+                if (this.props.friend.messages[this.props.friend.messages.length - 1].content.length > 20) {
+                  return this.props.friend.messages[this.props.friend.messages.length - 1].content.slice(0,20) + '...';
+                }
                 return (this.props.friend.messages[this.props.friend.messages.length - 1].content);
+              }
               else return ('');
             }.bind(this)()}
           </p>
@@ -429,7 +434,7 @@ Chat = React.createClass({
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnected', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '對方以下線，連線中斷', time: (Date.now() * 10e+5).toString()});
+      this.state.friends[0].messages.push({from: 'system', content: '對方已下線，連線中斷', time: (Date.now() * 10e+5).toString()});
       this.state.friends[0].online = false;
       this.setState({
         friends: this.state.friends
