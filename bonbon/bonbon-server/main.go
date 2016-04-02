@@ -18,7 +18,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// parse arguments
-	var configPath = flag.String("config", "bonbon.conf", "the path of server configuration file")
+	var configPath = flag.String("config", "bonbon-develop.conf", "the path of server configuration file")
 	var staticPath = flag.String("static", "static", "the path of server configuration file")
 	flag.Parse()
 

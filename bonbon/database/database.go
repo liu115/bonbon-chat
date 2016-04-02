@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql" // provide mysql driver
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3" // provide sqlite3 driver
 	"log"
@@ -32,7 +33,7 @@ func GetDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	return &db, nil
+	return db, nil
 }
 
 // CreateAccountByToken struct Account initializer
