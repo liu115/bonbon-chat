@@ -47,7 +47,9 @@ LoginPage = React.createClass({
     return (
       <div id="login-page">
         <img src="/static/img/bonbon.png" id="bonbon"></img>
-        <a id="login-button" onClick={this.handleClick}>Login</a>
+		<button id="login-button" onClick={this.handleClick}>
+			<i className="fa fa-facebook-official" aria-hidden="true"></i> 登入
+		</button>
       </div>
     );
   }
