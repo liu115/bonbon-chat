@@ -3,7 +3,8 @@
 function createSocket(token) {
   var host = window.location.host;
   // 目前使用的 /test/chat/:id 會讓你連進去之後不經確認就把你當做是id為1的使用者
-  var chatSocket = new WebSocket("ws://" + host + "/chat/" + token);
+  var protocol = (window.location.protocol == "http:") ? "ws:" : "wss:";
+  var chatSocket = new WebSocket(protocol + "//" + host + "/chat/" + token);
   chatSocket.handlers = {}
   // 請見 docs/API0.1 以充分了解 API ，對前端行為不清楚時我們再進行討論，大部份都是顯而易見的
   // addHandler 會可註冊當cmd_type發生時，所要呼叫的函式，請在 chat.js 中註冊相應的行為
