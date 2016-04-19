@@ -7,17 +7,21 @@ var MessageBalloon = React.createClass({
       var url = find_url[0];
       var protocal = find_url[1];
       var remain = find_url[2];
-      var httpRequest = new XMLHttpRequest();
-      httpRequest.onreadystatechange = function() {
-        if (httpRequest.readyState == 4) {
-          if (httpRequest.status == 200) {
-            var meta = JSON.parse(httpRequest.responseText);
-            this.setState({meta: meta})
+      if (url.match(/.+\.(jpg|png|gif|bmp)/)) {
+        return {meta: {image: url}};
+      } else {
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+          if (httpRequest.readyState == 4) {
+            if (httpRequest.status == 200) {
+              var meta = JSON.parse(httpRequest.responseText);
+              this.setState({meta: meta})
+            }
           }
-        }
-      }.bind(this)
-      httpRequest.open('GET', window.location.origin + '/meta?protocal=' + protocal + "&url=" + remain);
-      httpRequest.send(null);
+        }.bind(this)
+        httpRequest.open('GET', window.location.origin + '/meta?protocal=' + protocal + "&url=" + remain);
+        httpRequest.send(null);
+      }
     }
 	  return {meta: null};
   },
