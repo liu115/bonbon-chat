@@ -230,6 +230,18 @@ var ChatRoom = React.createClass({
     if (this.shouldScrollBottom) {
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = node.scrollHeight;
+      var messageLength = this.props.friends[this.props.target].messages.length;
+      if (messageLength <= 0) return 0;
+      var lastMessage = false;
+      for (var i = messageLength - 1; i >= 0; i--) {
+        if (this.props.friends[this.props.target].messages[i] == 'others')
+          lastMessage = this.props.friends[this.props.target].messages[i];
+      }
+      if (lastMessage === false) return 0;
+      if (this.props.friends[this.props.target].read < lastMessage.time) {
+        console.log('read auto');
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
+      }
     }
   },
   sendMessage: function(e) {
@@ -268,13 +280,28 @@ var ChatRoom = React.createClass({
     this.props.chatSocket.send(JSON.stringify({Cmd: "disconnect"}));
   },
   handleScroll: function() {
-    if (React.findDOMNode(this.refs.refContent).scrollTop <= 0) {
+    var node = React.findDOMNode(this.refs.refContent);
+    if (node.scrollTop <= 0) {
       if (this.historyLock === 'unlock') {
         if (this.props.target == 0) return false;
         var who = this.props.friends[this.props.target].ID;
         var time = this.props.friends[this.props.target].messages[0].time;
         console.log(time);
         this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: who, Number: 15, When: time, Order: 0}));
+      }
+    }
+    if (node.scrollTop + node.offsetHeight === node.scrollHeight) {
+      var messageLength = this.props.friends[this.props.target].messages.length;
+      if (messageLength <= 0) return 0;
+      var lastMessage = false;
+      for (var i = messageLength - 1; i >= 0; i--) {
+        if (this.props.friends[this.props.target].messages[i] == 'other')
+          lastMessage = this.props.friends[this.props.target].messages[i];
+      }
+      if (lastMessage === false) return 0;
+      if (this.props.friends[this.props.target].read < lastMessage.time) {
+        console.log('read');
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
       }
     }
   },
@@ -337,12 +364,13 @@ var Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
+        read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
       friends.push(initFriend);
       // BUG cmd.Friends may be null
       for (var i = 0; i < cmd.Friends.length; i++) {
-        console.log(cmd.Friends[i])
+        console.log(cmd.Friends[i]);
         var friend = {
           index: i + 1,
           name: cmd.Friends[i].Nick,
@@ -351,8 +379,10 @@ var Chat = React.createClass({
           stat: i == 0 ? 'selected' : 'read',
           img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
+          read: cmd.Friends[i].Read,
           messages: [],
         };
+        console.log('read' + friend.read);
         friends.push(friend);
       }
       this.setState({
@@ -458,6 +488,7 @@ var Chat = React.createClass({
         stat: 'selected',
         img: '/static/img/friend_' + index + '.jpg',
         sign: this.state.friends[0].sign,
+        read: this.state.friends[0].read,
         messages: this.state.friends[0].messages
       };
       new_friend.messages.push({from: 'system', content: '你們已經Bon在一起，成為了好友！', time: (Date.now() * 10e+5).toString()});
@@ -470,8 +501,24 @@ var Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
+        read: cmd.Friends[i].Read,
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
-      }
+      };
+      this.props.chatSocket.addHandler('read', function(cmd) {
+        var index = -1;
+        for (var i = 0; i < this.state.friends.length; i++) {
+          if (this.state.friends[i].ID == cmd.Who) {
+            index = i;
+          }
+        }
+        if (index == -1) return 0;
+        if (this.state.friends[index].time < cmd.Time) {
+          this.state.friends[index].time = cmd.Time;
+        }
+        this.setState({
+          friends: this.state.friends
+        });
+      }.bind(this));
       this.setState({
         friends: this.state.friends,
         who: index,
