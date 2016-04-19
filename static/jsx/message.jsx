@@ -1,4 +1,6 @@
-MessageBalloon = React.createClass({
+var React = require('../bower/react/react-with-addons.js');
+
+var MessageBalloon = React.createClass({
   getInitialState: function() {
     var find_url = this.findURL(); 
     if (find_url != null) {
@@ -63,3 +65,4 @@ MessageBalloon = React.createClass({
   }
 });
 
+module.exports = MessageBalloon;

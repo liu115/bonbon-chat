@@ -1,4 +1,8 @@
-SignClass = React.createClass({
+var React = require('../bower/react/react-with-addons.js');
+var MessageBalloon  = require('./message.jsx');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+
+var SignClass = React.createClass({
   getInitialState: function() {
     return {
       setting: false,
@@ -50,7 +54,7 @@ SignClass = React.createClass({
   }
 });
 
-SideBar = React.createClass({
+var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
       this.setState({Sign: cmd.Setting.Sign});
@@ -125,7 +129,7 @@ SideBar = React.createClass({
   }
 });
 
-FriendBox = React.createClass({
+var FriendBox = React.createClass({
   handleClick: function() {
     this.props.select(this.props.index);
     this.props.changeState('chat');
@@ -158,7 +162,7 @@ FriendBox = React.createClass({
   }
 });
 
-FriendList = React.createClass({
+var FriendList = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('status', function(cmd) {
     }.bind(this));
@@ -190,7 +194,7 @@ FriendList = React.createClass({
   }
 });
 
-ChatRoom = React.createClass({
+var ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
     this.props.chatSocket.addHandler('history', function(cmd) {
@@ -321,7 +325,7 @@ ChatRoom = React.createClass({
   }
 });
 
-Chat = React.createClass({
+var Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
       var friends = [];
@@ -564,7 +568,7 @@ AnotherPage = React.createClass({
   }
 });
 */
-Content = React.createClass({
+var Content = React.createClass({
   render: function() {
     return (
       <Chat chatSocket={this.props.chatSocket} show={this.props.show} changeState={this.props.changeState}/>
@@ -572,7 +576,7 @@ Content = React.createClass({
   }
 });
 
-ChatPage = React.createClass({
+var ChatPage = React.createClass({
   getInitialState: function() {
     return {
       chatSocket: createSocket(this.props.token),
@@ -602,4 +606,4 @@ ChatPage = React.createClass({
   }
 });
 
-window.ChatPage = ChatPage
+module.exports = ChatPage;

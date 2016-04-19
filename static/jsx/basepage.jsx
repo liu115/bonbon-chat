@@ -1,9 +1,12 @@
+var React = require('../bower/react/react-with-addons.js');
+var ChatPage = require('./chatpage.jsx');
+var LoginPage = require('./loginpage.jsx');
+
 if (localStorage.getItem('login') === null) {
   localStorage.setItem('login', 'false');
 }
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
-BasePage = React.createClass({
+var BasePage = React.createClass({
   getInitialState: function() {
     return {
       login: false

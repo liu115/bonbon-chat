@@ -1,4 +1,6 @@
-LoginPage = React.createClass({
+var React = require('../bower/react/react-with-addons.js');
+
+var LoginPage = React.createClass({
   componentDidMount: function() {
     // define Facebook app data and try auto login
     window.fbAsyncInit = function() {
@@ -53,4 +55,4 @@ LoginPage = React.createClass({
   }
 });
 
-window.LoginPage = LoginPage
+module.exports = LoginPage;
