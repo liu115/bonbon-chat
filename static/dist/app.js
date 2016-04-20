@@ -6774,19 +6774,7 @@
 	        'div',
 	        { id: 'message-content', className: 'area-content', ref: 'refContent', onScroll: this.handleScroll },
 	        this.props.messages.map(function (msg) {
-	          if (msg.from == 'system') {
-	            return React.createElement(
-	              'p',
-	              { className: "wrapper-message-" + msg.from },
-	              React.createElement(
-	                'span',
-	                { className: "message-balloon message-" + msg.from },
-	                '【' + msg.content + '】'
-	              )
-	            );
-	          }
-	          return React.createElement(MessageBalloon, { msg: msg });
-	          // return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
+	          return React.createElement(MessageBalloon, { key: msg.time, msg: msg });
 	        })
 	      ),
 	      React.createElement(
@@ -7150,12 +7138,9 @@
 	  displayName: 'MessageBalloon',
 
 	  getInitialState: function () {
-	    return this.renew();
-	  },
-	  componentWillReceiveProps: function (nextProps) {
-	    this.setState(this.renew());
-	  },
-	  renew: function () {
+	    if (this.props.msg.from == 'system') {
+	      return null;
+	    }
 	    var find_url = this.findURL();
 	    if (find_url != null) {
 	      var url = find_url[0];
@@ -7179,7 +7164,7 @@
 	    }
 	    return { meta: null };
 	  },
-	  findURL: function () {
+	  findURL: function (content) {
 	    var urlPattern = /(http|https):\/\/([\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-]))?/;
 	    return this.props.msg.content.match(urlPattern);
 	  },
@@ -7218,16 +7203,28 @@
 	    }
 	  },
 	  render: function () {
-	    return React.createElement(
-	      'div',
-	      { className: "wrapper-message-" + this.props.msg.from },
-	      React.createElement(
+	    if (this.props.msg.from == 'system') {
+	      return React.createElement(
+	        'p',
+	        { className: "wrapper-message-" + this.props.msg.from },
+	        React.createElement(
+	          'span',
+	          { className: "message-balloon message-" + this.props.msg.from },
+	          '【' + this.props.msg.content + '】'
+	        )
+	      );
+	    } else {
+	      return React.createElement(
 	        'div',
-	        { className: "message-balloon message-" + this.props.msg.from },
-	        this.showMsg(),
-	        this.showMeta()
-	      )
-	    );
+	        { className: "wrapper-message-" + this.props.msg.from },
+	        React.createElement(
+	          'div',
+	          { className: "message-balloon message-" + this.props.msg.from },
+	          this.showMsg(),
+	          this.showMeta()
+	        )
+	      );
+	    }
 	  }
 	});
 
@@ -7293,9 +7290,10 @@
 	      { id: 'login-page' },
 	      React.createElement('img', { src: '/static/img/bonbon.png', id: 'bonbon' }),
 	      React.createElement(
-	        'a',
+	        'button',
 	        { id: 'login-button', onClick: this.handleClick },
-	        'Login'
+	        React.createElement('i', { className: 'fa fa-facebook-official', 'aria-hidden': 'true' }),
+	        ' 登入'
 	      )
 	    );
 	  }

@@ -314,11 +314,7 @@ var ChatRoom = React.createClass({
         <div id="message-content" className="area-content" ref="refContent" onScroll={this.handleScroll}>
         {
           this.props.messages.map(function(msg) {
-            if (msg.from == 'system') {
-              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + '】'}</span></p>
-            }
-			return <MessageBalloon msg={msg} />
-            // return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
+			return <MessageBalloon key={msg.time} msg={msg} />
           })
         }
         </div>

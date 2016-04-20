@@ -2,12 +2,9 @@ var React = require('../bower/react/react-with-addons.js');
 
 var MessageBalloon = React.createClass({
   getInitialState: function() {
-    return this.renew();
-  },
-  componentWillReceiveProps: function(nextProps) {
-    this.setState(this.renew());
-  },
-  renew: function () {
+    if (this.props.msg.from == 'system') {
+      return null;
+    }
     var find_url = this.findURL(); 
     if (find_url != null) {
       var url = find_url[0];
@@ -31,7 +28,7 @@ var MessageBalloon = React.createClass({
     }
 	  return {meta: null};
   },
-  findURL: function() {
+  findURL: function(content) {
     var urlPattern = /(http|https):\/\/([\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-]))?/
     return this.props.msg.content.match(urlPattern);
   },
@@ -64,14 +61,18 @@ var MessageBalloon = React.createClass({
     }
   },
   render: function() {
-    return (
-      <div className={"wrapper-message-" + this.props.msg.from}>
-        <div className={"message-balloon message-" + this.props.msg.from}>
-          {this.showMsg()}
-          {this.showMeta()}
+    if (this.props.msg.from == 'system') {
+      return <p className={"wrapper-message-" + this.props.msg.from}><span className={"message-balloon message-" + this.props.msg.from}>{'【' + this.props.msg.content + '】'}</span></p>
+    } else {
+      return (
+        <div className={"wrapper-message-" + this.props.msg.from}>
+          <div className={"message-balloon message-" + this.props.msg.from}>
+            {this.showMsg()}
+            {this.showMeta()}
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
   }
 });
 
