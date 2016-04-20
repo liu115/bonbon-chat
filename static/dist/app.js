@@ -6646,15 +6646,10 @@
 	  }
 	});
 
-	var ChatRoom = React.createClass({
-	  displayName: 'ChatRoom',
+	var InputArea = React.createClass({
+	  displayName: 'InputArea',
 
 	  getInitialState: function () {
-	    //name is this.props.name and header take from the name
-	    this.props.chatSocket.addHandler('history', function (cmd) {
-	      var node = React.findDOMNode(this.refs.refContent);
-	      node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
-	    }.bind(this));
 	    /* lock when message are sending */
 	    this.sendLock = 'unlock';
 	    this.props.chatSocket.addHandler('send', function (cmd) {
@@ -6669,10 +6664,48 @@
 	      userInput: ''
 	    };
 	  },
+	  sendMessage: function (e) {
+	    //send it to websocket
+	    //this.state.messages.splice(0, 0, ['me', 'lalala']);
+	    if (this.state.userInput != '' && this.sendLock == 'unlock') {
+	      this.props.addMessage(this.props.target, 'buttom', {
+	        from: 'me',
+	        content: this.state.userInput
+	      });
+	      this.sendLock = 'lock';
+	    }
+	    this.focusInput();
+	  },
+	  sendMessageByKeyboard: function (e) {
+	    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+	    if (keyInput == 13 && !e.shiftKey) {
+	      this.sendMessage();
+	      e.preventDefault();
+	    }
+	  },
 	  handleChange: function (e) {
 	    this.setState({
 	      userInput: e.target.value
 	    });
+	  },
+	  focusInput: function () {
+	    React.findDOMNode(this.refs.refInput).focus();
+	  },
+	  render: function () {
+	    return React.createElement('textarea', { ref: 'refInput', type: 'text', name: 'id', id: 'login-id', onKeyPress: this.sendMessageByKeyboard, value: this.state.userInput, onChange: this.handleChange, placeholder: '請在這裡輸入訊息！' });
+	  }
+	});
+
+	var ChatRoom = React.createClass({
+	  displayName: 'ChatRoom',
+
+	  getInitialState: function () {
+	    //name is this.props.name and header take from the name
+	    this.props.chatSocket.addHandler('history', function (cmd) {
+	      var node = React.findDOMNode(this.refs.refContent);
+	      node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
+	    }.bind(this));
+	    return {};
 	  },
 	  componentWillUpdate: function () {
 	    var node = React.findDOMNode(this.refs.refContent);
@@ -6696,28 +6729,6 @@
 	        this.props.chatSocket.send(JSON.stringify({ Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time }));
 	      }
 	    }
-	  },
-	  sendMessage: function (e) {
-	    //send it to websocket
-	    //this.state.messages.splice(0, 0, ['me', 'lalala']);
-	    if (this.state.userInput != '' && this.sendLock == 'unlock') {
-	      this.props.addMessage(this.props.target, 'buttom', {
-	        from: 'me',
-	        content: this.state.userInput
-	      });
-	      this.sendLock = 'lock';
-	    }
-	    this.focusInput();
-	  },
-	  sendMessageByKeyboard: function (e) {
-	    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
-	    if (keyInput == 13 && !e.shiftKey) {
-	      this.sendMessage();
-	      e.preventDefault();
-	    }
-	  },
-	  focusInput: function () {
-	    React.findDOMNode(this.refs.refInput).focus();
 	  },
 	  componentDidMount: function () {
 	    this.historyLock = 'unlock';
@@ -6755,6 +6766,9 @@
 	      }
 	    }
 	  },
+	  focusInput: function () {
+	    this.refs.refInput.focusInput();
+	  },
 	  render: function () {
 	    return React.createElement(
 	      'div',
@@ -6786,7 +6800,7 @@
 	          React.createElement(
 	            'div',
 	            { id: 'wrapper-message-box', className: 'wrapper-input' },
-	            React.createElement('textarea', { ref: 'refInput', type: 'text', name: 'id', id: 'login-id', onKeyPress: this.sendMessageByKeyboard, value: this.state.userInput, onChange: this.handleChange, placeholder: '請在這裡輸入訊息！' })
+	            React.createElement(InputArea, { ref: 'refInput', addMessage: this.props.addMessage, chatSocket: this.props.chatSocket, target: this.props.target })
 	          )
 	        ),
 	        function () {

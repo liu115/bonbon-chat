@@ -194,6 +194,54 @@ var FriendList = React.createClass({
   }
 });
 
+var InputArea = React.createClass({
+	getInitialState: function () {
+		/* lock when message are sending */
+		this.sendLock = 'unlock';
+		this.props.chatSocket.addHandler('send', function(cmd) {
+			this.sendLock = 'unlock';
+			if (cmd.OK == true) {
+				this.setState({
+					userInput: ''
+				});
+			}
+		}.bind(this));
+		return {
+			userInput: ''
+		};
+  },
+  sendMessage: function(e) {
+    //send it to websocket
+    //this.state.messages.splice(0, 0, ['me', 'lalala']);
+    if (this.state.userInput != '' && this.sendLock == 'unlock'){
+      this.props.addMessage(this.props.target, 'buttom', {
+        from: 'me',
+        content: this.state.userInput
+      });
+      this.sendLock = 'lock';
+    }
+    this.focusInput();
+  },
+  sendMessageByKeyboard: function(e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13 && !e.shiftKey) {
+      this.sendMessage();
+      e.preventDefault();
+    }
+  },
+  handleChange: function(e) {
+    this.setState({
+      userInput: e.target.value
+    });
+  },
+  focusInput: function() {
+    React.findDOMNode(this.refs.refInput).focus();
+  },
+  render: function () {
+    return <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
+  }
+})
+
 var ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
@@ -201,24 +249,7 @@ var ChatRoom = React.createClass({
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
-    /* lock when message are sending */
-    this.sendLock = 'unlock';
-    this.props.chatSocket.addHandler('send', function(cmd) {
-      this.sendLock = 'unlock';
-      if (cmd.OK == true) {
-        this.setState({
-          userInput: ''
-        });
-      }
-    }.bind(this));
-    return {
-      userInput: ''
-    };
-  },
-  handleChange: function(e) {
-    this.setState({
-      userInput: e.target.value
-    });
+	return {};
   },
   componentWillUpdate: function() {
     var node = React.findDOMNode(this.refs.refContent);
@@ -243,29 +274,6 @@ var ChatRoom = React.createClass({
         this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
       }
     }
-  },
-  sendMessage: function(e) {
-    //send it to websocket
-    //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    if (this.state.userInput != '' && this.sendLock == 'unlock'){
-      this.props.addMessage(this.props.target, 'buttom', {
-        from: 'me',
-        content: this.state.userInput
-      });
-      this.sendLock = 'lock';
-    }
-    this.focusInput();
-  },
-  sendMessageByKeyboard: function(e) {
-    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
-    if (keyInput == 13 && !e.shiftKey) {
-      this.sendMessage();
-      e.preventDefault();
-    }
-  },
-  focusInput: function() {
-    React.findDOMNode(this.refs.refInput).focus();
-
   },
   componentDidMount: function() {
     this.historyLock = 'unlock'
@@ -305,6 +313,9 @@ var ChatRoom = React.createClass({
       }
     }
   },
+  focusInput: function() {
+    this.refs.refInput.focusInput();
+  },
   render: function() {
     return (
       <div id="message-area">
@@ -321,7 +332,7 @@ var ChatRoom = React.createClass({
         <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
-              <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
+              <InputArea ref="refInput" addMessage={this.props.addMessage} chatSocket={this.props.chatSocket} target={this.props.target}/>
             </div>
           </div>
           {function() {
