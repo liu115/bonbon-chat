@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"strings"
 )
 
 func main() {
@@ -58,7 +59,12 @@ func main() {
 
 	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
+		if strings.Contains(c.Request.Header["User-Agent"][0], "Mobile") {
+			println("mobile user")
+			c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
+		} else {
+			c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
+		}
 	})
 	app.Static("/static/", *staticPath)
 
