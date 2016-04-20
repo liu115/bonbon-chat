@@ -2,6 +2,12 @@ var React = require('../bower/react/react-with-addons.js');
 
 var MessageBalloon = React.createClass({
   getInitialState: function() {
+    return this.renew();
+  },
+  componentWillReceiveProps: function(nextProps) {
+    this.setState(this.renew());
+  },
+  renew: function () {
     var find_url = this.findURL(); 
     if (find_url != null) {
       var url = find_url[0];
