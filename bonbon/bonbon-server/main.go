@@ -60,8 +60,7 @@ func main() {
 	// routes for production puropose
 	app.GET("/", func(c *gin.Context) {
 		if strings.Contains(c.Request.Header["User-Agent"][0], "Mobile") {
-			println("mobile user")
-			c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
+			c.Redirect(http.StatusMovedPermanently, "./static/chat-mobile.html")
 		} else {
 			c.Redirect(http.StatusMovedPermanently, "./static/chat.html")
 		}
