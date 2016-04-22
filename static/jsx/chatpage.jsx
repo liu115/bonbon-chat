@@ -271,7 +271,7 @@ var ChatRoom = React.createClass({
       if (lastMessage === false) return 0;
       if (this.props.friends[this.props.target].read < lastMessage.time) {
         console.log('read auto');
-        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
     }
   },
