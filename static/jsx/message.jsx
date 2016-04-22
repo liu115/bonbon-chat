@@ -5,7 +5,7 @@ var MessageBalloon = React.createClass({
     if (this.props.msg.from == 'system') {
       return null;
     }
-    var find_url = this.findURL(); 
+    var find_url = this.findURL();
     if (find_url != null) {
       var url = find_url[0];
       var protocal = find_url[1];
@@ -19,6 +19,7 @@ var MessageBalloon = React.createClass({
             if (httpRequest.status == 200) {
               var meta = JSON.parse(httpRequest.responseText);
               this.setState({meta: meta})
+							this.props.autoScroll();
             }
           }
         }.bind(this)

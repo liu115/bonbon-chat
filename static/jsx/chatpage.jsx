@@ -281,6 +281,12 @@ var ChatRoom = React.createClass({
   },
   componentWillUnmount: function() {
   },
+	autoScrollBottom: function() {
+		if (this.shouldScrollBottom) {
+      var node = React.findDOMNode(this.refs.refContent);
+      node.scrollTop = node.scrollHeight;
+		}
+	},
   bonbon: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "bonbon"}));
   },
@@ -325,8 +331,8 @@ var ChatRoom = React.createClass({
         <div id="message-content" className="area-content" ref="refContent" onScroll={this.handleScroll}>
         {
           this.props.messages.map(function(msg) {
-			return <MessageBalloon key={msg.time} msg={msg} />
-          })
+						return <MessageBalloon key={msg.time} msg={msg} autoScroll={this.autoScrollBottom}/>
+          }.bind(this))
         }
         </div>
         <div id="message-control-panel" ref="panel">
