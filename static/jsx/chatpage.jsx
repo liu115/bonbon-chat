@@ -508,7 +508,7 @@ var Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        read: cmd.Friends[i].Read,
+        read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
       this.props.chatSocket.addHandler('read', function(cmd) {
