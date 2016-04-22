@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bonbon 行動版</title>
+    <meta charset="utf-8">
+
+    <!--stylesheets -->
+    <link rel="stylesheet" href="bower/reset-css/reset.css">
+    <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet/less" type="text/css" href="less/loginpage.less">
+    <link rel="stylesheet/less" type="text/css" href="less/chatpage.less">
+    <link rel="stylesheet/less" type="text/css" href="less/message.less">
+
+    <!-- js libraries -->
+    <script type="text/javascript" src="bower/jquery/dist/jquery.min.js"></script>
+    <!-- <script type="text/javascript" src="bower/react/react&#45;with&#45;addons.js"></script> -->
+    <!-- <script type="text/javascript" src="bower/react/JSXTransformer.js"></script> -->
+    <script type="text/javascript" src="bower/less/dist/less.min.js"></script>
+    <script type="text/javascript" src="js/websocket.js"></script>
+    <script type="text/javascript" src="js/notification.js"></script>
+    <!-- [if lt IE 9]><script type="text/javascript" src="js/excanvas.js"></script><![endif] -->
+  </head>
+  <body>
+	<div id="all"></div>
+
+    <script type="text/javascript" src="dist/app.js"></script>
+    <!-- <script type="text/jsx" src="jsx/message.jsx"></script> -->
+    <!-- <script type="text/jsx" src="jsx/chatpage.jsx"></script> -->
+    <!-- <script type="text/jsx" src="jsx/loginpage.jsx"></script> -->
+    <!-- <script type="text/jsx" src="jsx/basepage.jsx"></script> -->
+  </body>
+  <script>
+  window.onload = function() {
+    var stateObj = { foo: "bar" };
+    history.pushState("aaa", "Title", "/");
+  }
+  </script>
+</html>
