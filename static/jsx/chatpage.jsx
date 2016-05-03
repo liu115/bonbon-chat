@@ -436,6 +436,13 @@ var Chat = React.createClass({
       }
       NewMessage(this.state.friends[index].name, cmd.Msg);
       this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
+			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+				function(x , y) {
+					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+				}
+			);
+			sorted_friends.unshift(this.state.friends[0]);
+			this.state.friends = sorted_friends;
       this.setState({
         friends: this.state.friends
       });
@@ -552,6 +559,13 @@ var Chat = React.createClass({
           this.state.friends[index].messages.unshift({content: msg.Text, from: 'me', time: msg.Time});
         }
       }
+			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+				function(x , y) {
+					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+				}
+			);
+			sorted_friends.unshift(this.state.friends[0]);
+			this.state.friends = sorted_friends;
       this.setState({
         friends: this.state.friends
       });
