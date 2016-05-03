@@ -1,21 +1,30 @@
 @import "base.less";
 
-@sidebar-panel-width: 200px;
+@major-font-color: #db3274;
+@bright-font-color: #eba747;
+
+@upper-background: #171616;
+@friendlist-background: #242323;
 @friendlist-area-width: 320px;
+
+@sidebar-panel-width: 200px;
+@sidebar-panel-color: #000000;
+
+@input-box-color: #ffffff;
+
 @message-header-height: 50px;
 @message-control-panel-height: 115px;
-@message-content-color: #8DAAC9;
-
+@message-content-color: #515050;
 
 //color of the message-block
-@message-font-color: white;
-@message-me-color: #BBCCDE;
-@message-others-color: #1D99A8;
+@message-font-color: #171616;
+@message-me-color: #cdcece;
+@message-others-color: #eba747;
 @message-system-color: #FFFE99;
+
 .friend-unit {
-  //background: #F6F6F6;
   padding: 18px 0;
-  border-bottom: 1px solid #DDD;
+  border-bottom: 1px solid #000000;
   cursor: pointer;
   max-height: 90px;
   
@@ -64,10 +73,11 @@
       font-size: large;
       font-weight: bold;
       margin-bottom: 4px;
+	  color: @major-font-color;
     }
 
     .friend-info-status {
-      color: #286090;
+      color: @bright-font-color;
       font-size: small;
       font-weight: bold;
       line-height: 140%;
@@ -86,10 +96,11 @@
 }
 
 .area-header {
+  background: @upper-background;
+  color: @major-font-color;
   line-height: 140%;
-  //background: #F6F6F6;
   padding: 14px 10px 14px 15px;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid @major-font-color;
 }
 
 .wrapper-input {
@@ -125,7 +136,8 @@
     bottom: 0;
     width: @sidebar-panel-width;
     text-align: center;
-    background: #415E7D;
+    background: @sidebar-panel-color;
+	border-right: 1px solid @major-font-color;
 
     #sidebar-profile {
       margin-top: 60px;
@@ -158,13 +170,13 @@
 
       #profile-status {
         display: block;
-        color: #EEE;
+        color: @major-font-color;
         line-height: 140%;
         margin: 20px 10px 10px;
         cursor: pointer;
 
         &:hover {
-          color: white;
+          color: @bright-font-color;
         }
 
         &:active {
@@ -175,10 +187,10 @@
 
     #new-connection {
       display: inline-block;
-      color: white;
-      background: rgba(255, 255, 255, 0.15);
+	  color: @major-font-color;
+      background: rgba(255, 255, 255, 0.05);
       padding: 10px 20px;
-      border: 1px solid #F8F8FF;
+      border: 1px solid @major-font-color;
       border-radius: 5px;
       margin: 20px 0;
       cursor: pointer;
@@ -192,8 +204,8 @@
       }
     }
     #connection-list {
-      background-color: #1A4D84;
-      color: white;
+      background-color: @upper-background;
+      color: @major-font-color;
     }
     .connection-menu {
       overflow: hidden;
@@ -225,7 +237,7 @@
 
       li > a {
         display: block;
-        color: white;
+        color: @major-font-color;
         padding: 10px 0;
         cursor: pointer;
 
@@ -241,7 +253,6 @@
           margin-left: 40px;
 
           .fa {
-            color: #EEE;
             line-height: 0;
             width: 15px;
             margin-right: 10px;
@@ -259,20 +270,26 @@
     bottom: 0;
 
     #friend-area {
+      background-color: @friendlist-background;
       position: absolute;
       left: 0;
       top: 0;
       bottom: 0;
       width: @friendlist-area-width;
-      border-right: 1px solid #BBB;
+      border-right: 1px solid @major-font-color;
       overflow: auto;
 
       #friend-search {
-        //background: #EEE;
         //border-bottom: 1px solid #CCC;
-        border-bottom: 1px solid #DDD;
+        border-bottom: 1px solid #000000;
         #wrapper-input-search {
           margin: 12px 8px 12px 8px;
+		  background: @upper-background;
+		  border: 0px;
+		  input {
+			color: #ffffff;
+			background: @upper-background;
+		  }
         }
       }
     }
@@ -292,7 +309,7 @@
         height: @message-header-height;
 
         #message-header-sign {
-          color: #286090;
+          color: @major-font-color;
         }
       }
 
@@ -323,7 +340,7 @@
         .wrapper-message-me {
           text-align: right;
           .message-me {
-            color: rgb(65, 94, 125);
+            color: #000000;
             background: @message-me-color;
           }
         }
@@ -356,14 +373,19 @@
         left: 0;
         right: 0;
         height: @message-control-panel-height;
-        //background: #F6F6F6;
-        border-top: 1px solid #BBB;
+        background: @friendlist-background;
+        border-top: 1px solid @major-font-color;
 
         #message-box {
           #wrapper-message-box {
             margin: 12px 12px 8px 8px;
             height: 48px;
+			background-color: @friendlist-background;
+			border: 1px solid @major-font-color;
             textarea {
+              background-color: @friendlist-background;
+			  color: @input-box-color;
+			  color: input-box-color;
               width: 100%;
               height: 100%;
               border: 0 none;
@@ -394,14 +416,14 @@
         }
 
         .message-button {
+		  background-color: @friendlist-background;
           display: block;
           float: left;
-          color: black;
+          color: @major-font-color;
           font-size: small;
           text-decoration: none;
-          background: white;
           padding: 10px 14px;
-          border: 1px solid #CCC;
+          border: 1px solid @major-font-color;
           margin-bottom: 8px;
           margin-top: 2px;
           cursor: pointer;
