@@ -1,46 +1,28 @@
-# Setup (manual method)
-1. Install golang on your system.
+# Setup
+1. 安裝go編譯器（目前只在 go 1.5 編譯成功）
 ```
 $ apt-get install golang # Ubuntu, Debian, etc
 $ yum install golang     # Fedora, CentOS, etc
 $ pacman -S go           # ArchLinux
 ```
 
-2. Set environment variable GOPATH.
+2. 設定 GOPATH 環境變數
 ```
-$ export GOPATH=~/.go # "~/.go" for example. Add this line in your .*shrc
+$ export GOPATH=~/.go          # "~/.go" for example. Add this line in your .*shrc
 ```
 
-3. Clone git repo from hosting site and get into the 'bonbon' repository.
+3. git clone repo
 ```
 $ git clone git@git.coding.net:jerry73204/bonbon.git
 $ cd bonbon
 ```
 
-4. Initialize pre-commit GIT hook.
+4. 符號連接專案到 GOPATH 下
 ```
-$ ln -s ../../pre-commit.sh .git/hooks/pre-commit
-```
-
-5. Link project source in GOPATH.
-```
-$ ln -s $PWD ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
+$ ln -s $PWD/bonbon ~/.go/src/bonbon # Assumed your $PWD is in the "bonbon" repo
 ```
 
-6. Check your setup
-```
-$ go build bonbon # Suceed if no output
-```
-
-# Setup (via build automation)
-1. Install golang on your system.
-```
-$ apt-get install golang # Ubuntu, Debian, etc
-$ yum install golang     # Fedora, CentOS, etc
-$ pacman -S go           # ArchLinux
-```
-
-2. 安裝 ruby 及 rake
+5. 安裝 ruby 及 rake
 ```
 $ apt-get install ruby # Ubuntu, Debian, etc
 $ yum install ruby     # Fedora, CentOS, etc
@@ -48,13 +30,7 @@ $ yum install ruby     # Fedora, CentOS, etc
 $ sudo gem install rake
 ```
 
-3. Clone git repo from hosting site and get into the 'bonbon' repository.
-```
-$ git clone git@git.coding.net:jerry73204/bonbon.git
-$ cd bonbon
-```
-
-4. 若使用mysql，設定mysql
+6. 若使用mysql，設定mysql
 在/etc/my.cnf中加入
 ```
 haracter-set-server=utf8
@@ -63,29 +39,26 @@ collation-server=utf8_unicode_ci
 ```
 以確保mysql支援UTf-8
 
-5. Check your setup (by running a build once)
+7. 編譯並執行
 ```
-$ rake            # Suceed if the binary 'bonbon-server' is produced
-$ ./bonbon-server
+$ rake
+$ ./bonbon-server             # 預設模式
+$ ./bonbon-server -static /path/to/static -config /path/to/config
 ```
 
 # Usage
-1. Use -h option to show usage
+1. 用 -h 來查看幫助
 ```
 $ ./bonbon-server -h
-Usage of ./bonbon-server:
 ...
 ```
 
-2. By default, server loads the config file "bonbon.conf" in current working directory if running without any options
+2. 預設會抓取同目錄下的 bonbon-develop.conf 作為設定檔，static/ 作為靜態檔案位置
 ```
 $ ./bonbon-server
 ```
 
-3. Use -config option to specify the path to the config file.
+3. 使用 -config 參數指定設定檔， -static 來指定靜態檔案的位置
 ```
-$ ./bonbon-server -config path/to/config_file
+$ ./bonbon-server -config path/to/config_file -static path/to/static/
 ```
-
-# Advices
-* Never directly commit to master. Always do your job on your branch.
