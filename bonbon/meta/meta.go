@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	// "io/ioutil"
 	"golang.org/x/net/html"
 	"net/http"
 )

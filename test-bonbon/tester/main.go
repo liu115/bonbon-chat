@@ -2,8 +2,10 @@ package main
 
 import (
 	"bonbon/communicate"
+	"bonbon/config"
 	"bonbon/database"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/fatih/color"
 	"test-bonbon/client"
@@ -36,15 +38,17 @@ var testsuite = [...]func(){
 一個使用者登入
 測試API: init
 		`)
+		fmt.Printf("start\n")
 		clearDB()
 
 		createAccount(1, signatures[1])
-
+		fmt.Printf("initialize DB end\n")
 		c := client.CreateClient(1)
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}
+		fmt.Printf("%s", msg)
 		var req communicate.InitCmd
 		json.Unmarshal(msg, &req)
 
@@ -245,20 +249,42 @@ var testsuite = [...]func(){
 		length := len(msgs)
 		clients[1].GetHistory(2, length, 3*1e18)
 		_, msg, _ := clients[1].Conn.ReadMessage()
+		fmt.Printf("%s", msg)
 		var j communicate.HistoryResponse
 		json.Unmarshal(msg, &j)
 		ok := true
 		for i, msg := range j.Msgs {
 			th := len(msgs) - 1 - i
 			if msg.Text != msgs[th].Text || msg.From != msgs[th].From {
+				fmt.Printf("%s\n%s\n", msg.Text, msgs[th].Text)
 				ok = false
 			}
 		}
 		judge(ok, "成功返回正確歷史訊息")
 	},
+	func() {
+		describe(`
+壓力測試
+		`)
+		// clearDB()
+		// createAccount(1, signatures[1])
+		// createAccount(2, signatures[2])
+		// database.MakeFriendship(1, 2)
+		// clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+	},
 }
 
 func main() {
+	var configPath = flag.String("config", "bonbon-develop.conf", "the path of server configuration file")
+	flag.Parse()
+
+	// load config file
+	err := config.LoadConfigFile(*configPath)
+	if err != nil {
+		fmt.Errorf("error: cannot load config file \"%v\"", configPath)
+		panic(err.Error())
+	}
+
 	for _, test := range testsuite {
 		test()
 	}

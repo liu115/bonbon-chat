@@ -5,7 +5,7 @@ import (
 	"github.com/huandu/facebook"
 )
 
-// in this file, default values are present unless being set by LoadConfigFile()
+// 如果沒有LoadConfigFile()，以下將為預設值
 
 // Hostname the hostname server works on
 var Hostname = "0.0.0.0"
