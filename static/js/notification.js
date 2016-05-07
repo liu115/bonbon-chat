@@ -19,6 +19,8 @@ window.onblur = function () {
   isFocus = false;
 }
 
+var MSG_SOUND = new Audio("/static/audio/msg.wav");
+
 function NewMessage(who, msg) {
   if (Notification && Notification.permission === "granted" && !isFocus) {
     var n = new Notification('New Message', {
@@ -28,6 +30,7 @@ function NewMessage(who, msg) {
     n.onshow = function () {
       setTimeout(n.close.bind(n), 5000);
     }
+	MSG_SOUND.play();
   }
   return 0;
 }
