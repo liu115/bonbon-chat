@@ -194,6 +194,54 @@ var FriendList = React.createClass({
   }
 });
 
+var InputArea = React.createClass({
+	getInitialState: function () {
+		/* lock when message are sending */
+		this.sendLock = 'unlock';
+		this.props.chatSocket.addHandler('send', function(cmd) {
+			this.sendLock = 'unlock';
+			if (cmd.OK == true) {
+				this.setState({
+					userInput: ''
+				});
+			}
+		}.bind(this));
+		return {
+			userInput: ''
+		};
+  },
+  sendMessage: function(e) {
+    //send it to websocket
+    //this.state.messages.splice(0, 0, ['me', 'lalala']);
+    if (this.state.userInput != '' && this.sendLock == 'unlock'){
+      this.props.addMessage(this.props.target, 'buttom', {
+        from: 'me',
+        content: this.state.userInput
+      });
+      this.sendLock = 'lock';
+    }
+    this.focusInput();
+  },
+  sendMessageByKeyboard: function(e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13 && !e.shiftKey) {
+      this.sendMessage();
+      e.preventDefault();
+    }
+  },
+  handleChange: function(e) {
+    this.setState({
+      userInput: e.target.value
+    });
+  },
+  focusInput: function() {
+    React.findDOMNode(this.refs.refInput).focus();
+  },
+  render: function () {
+    return <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
+  }
+})
+
 var ChatRoom = React.createClass({
   getInitialState: function() {
     //name is this.props.name and header take from the name
@@ -201,24 +249,7 @@ var ChatRoom = React.createClass({
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
-    /* lock when message are sending */
-    this.sendLock = 'unlock';
-    this.props.chatSocket.addHandler('send', function(cmd) {
-      this.sendLock = 'unlock';
-      if (cmd.OK == true) {
-        this.setState({
-          userInput: ''
-        });
-      }
-    }.bind(this));
-    return {
-      userInput: ''
-    };
-  },
-  handleChange: function(e) {
-    this.setState({
-      userInput: e.target.value
-    });
+	return {};
   },
   componentWillUpdate: function() {
     var node = React.findDOMNode(this.refs.refContent);
@@ -240,32 +271,9 @@ var ChatRoom = React.createClass({
       if (lastMessage === false) return 0;
       if (this.props.friends[this.props.target].read < lastMessage.time) {
         console.log('read auto');
-        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
     }
-  },
-  sendMessage: function(e) {
-    //send it to websocket
-    //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    if (this.state.userInput != '' && this.sendLock == 'unlock'){
-      this.props.addMessage(this.props.target, 'buttom', {
-        from: 'me',
-        content: this.state.userInput
-      });
-      this.sendLock = 'lock';
-    }
-    this.focusInput();
-  },
-  sendMessageByKeyboard: function(e) {
-    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
-    if (keyInput == 13 && !e.shiftKey) {
-      this.sendMessage();
-      e.preventDefault();
-    }
-  },
-  focusInput: function() {
-    React.findDOMNode(this.refs.refInput).focus();
-
   },
   componentDidMount: function() {
     this.historyLock = 'unlock'
@@ -273,6 +281,12 @@ var ChatRoom = React.createClass({
   },
   componentWillUnmount: function() {
   },
+	autoScrollBottom: function() {
+		if (this.shouldScrollBottom) {
+      var node = React.findDOMNode(this.refs.refContent);
+      node.scrollTop = node.scrollHeight;
+		}
+	},
   bonbon: function() {
     this.props.chatSocket.send(JSON.stringify({Cmd: "bonbon"}));
   },
@@ -305,6 +319,9 @@ var ChatRoom = React.createClass({
       }
     }
   },
+  focusInput: function() {
+    this.refs.refInput.focusInput();
+  },
   render: function() {
     return (
       <div id="message-area">
@@ -314,18 +331,14 @@ var ChatRoom = React.createClass({
         <div id="message-content" className="area-content" ref="refContent" onScroll={this.handleScroll}>
         {
           this.props.messages.map(function(msg) {
-            if (msg.from == 'system') {
-              return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{'【' + msg.content + '】'}</span></p>
-            }
-			return <MessageBalloon msg={msg} />
-            // return <p className={"wrapper-message-" + msg.from}><span className={"message-balloon message-" + msg.from}>{msg.content}</span></p>
-          })
+						return <MessageBalloon key={msg.time} msg={msg} autoScroll={this.autoScrollBottom}/>
+          }.bind(this))
         }
         </div>
         <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
-              <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
+              <InputArea ref="refInput" addMessage={this.props.addMessage} chatSocket={this.props.chatSocket} target={this.props.target}/>
             </div>
           </div>
           {function() {
@@ -421,10 +434,15 @@ var Chat = React.createClass({
           index = i;
         }
       }
-      if (this.state.who != index) {
-        NewMessage(this.state.friends[index].name, cmd.Msg);
-      }
+      NewMessage(this.state.friends[index].name, cmd.Msg);
       this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
+			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+				function(x , y) {
+					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+				}
+			);
+			sorted_friends.unshift(this.state.friends[0]);
+			this.state.friends = sorted_friends;
       this.setState({
         friends: this.state.friends
       });
@@ -501,7 +519,7 @@ var Chat = React.createClass({
         stat: 'read',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
-        read: cmd.Friends[i].Read,
+        read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
       this.props.chatSocket.addHandler('read', function(cmd) {
@@ -541,6 +559,13 @@ var Chat = React.createClass({
           this.state.friends[index].messages.unshift({content: msg.Text, from: 'me', time: msg.Time});
         }
       }
+			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+				function(x , y) {
+					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+				}
+			);
+			sorted_friends.unshift(this.state.friends[0]);
+			this.state.friends = sorted_friends;
       this.setState({
         friends: this.state.friends
       });

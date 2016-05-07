@@ -7,11 +7,20 @@ window.addEventListener('load', function () {
       }
     });
   }
-
 });
 
+var isFocus = true;
+
+window.onfocus = function () {
+  isFocus = true;
+}
+
+window.onblur = function () {
+  isFocus = false;
+}
+
 function NewMessage(who, msg) {
-  if (Notification && Notification.permission === "granted") {
+  if (Notification && Notification.permission === "granted" && !isFocus) {
     var n = new Notification('New Message', {
       icon: '',
       body: who + ':' + msg
