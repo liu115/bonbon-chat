@@ -13,6 +13,7 @@
 @sidebar-panel-color: #000000;
 
 @input-box-color: #ffffff;
+@sign-wrapper-background: #444141;
 
 @message-header-height: 50px;
 @message-control-panel-height: 115px;
@@ -162,12 +163,14 @@
         margin: 20px auto 5px;
         border-radius: 5px;
         border: 1px solid;
-        background: white none repeat scroll 0% 0%;
+        background: @sign-wrapper-background none repeat scroll 0% 0%;
         padding: 3px;
 
         #sign-input{
           border: 0px none;
           width: 90%;
+					color: @input-box-color;
+					background: @sign-wrapper-background;
         }
       }
 
