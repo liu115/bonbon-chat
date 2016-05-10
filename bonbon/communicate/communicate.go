@@ -121,10 +121,10 @@ endLabel:
 // handle account settings update
 func handleUpdateSettings(msg []byte, id int) {
 	// decode JSON request
-	var request updateSettingsRequest
+	var request UpdateSettingsRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
-		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+		response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
@@ -132,14 +132,26 @@ func handleUpdateSettings(msg []byte, id int) {
 	// update database
 	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
-		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+		response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
-	// TODO 告訴所有人此人改簽名檔
+	// 通知朋友
+	friendships, err := database.GetFriendships(id)
+	if err == nil {
+		for i := 0; i < len(friendships); i++ {
+			fmt.Printf("%d 通知 %d 換簽名檔\n", id, friendships[i].FriendID)
+			sendJsonToUnknownStatusID(
+				friendships[i].FriendID,
+				SignCmd{Cmd: "change_sign", Who: id, Sign: request.Setting.Sign},
+			)
+		}
+	} else {
+		fmt.Printf("getFriendships: %s", err.Error())
+	}
 	// send success response
-	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
+	response := UpdateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
 	sendJsonToOnlineID(id, &response)
 }
 

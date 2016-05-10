@@ -129,6 +129,8 @@ func clearOffline(id int, conn *websocket.Conn) {
 					StatusCmd{Cmd: "status", Who: id, Status: "off"},
 				)
 			}
+		} else {
+			fmt.Printf("getFriendships: %s", err.Error())
 		}
 		delete(onlineUser, id)
 	}

@@ -116,12 +116,14 @@ func (wq *waitingQueue) match(id int) int {
 	disconnectByID(id)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
+			fmt.Printf("queue is %s\n", wq.queue)
 			return -1
 		} else if wq.accept(wq.queue[i]) {
 			stranger := wq.queue[i]
 			wq.queue = append(wq.queue[:i], wq.queue[i+1:]...)
 			onlineUser[id].match = stranger
 			onlineUser[stranger].match = id
+			fmt.Printf("queue is %s\n", wq.queue)
 			return stranger
 		}
 	}
@@ -159,8 +161,10 @@ func MatchConsumer() {
 		if req.Type != "" {
 			switch req.Cmd {
 			case "in":
+				fmt.Printf("queue in\n")
 				ans = waitingQueues[req.Type].match(req.ID)
 			case "out":
+				fmt.Printf("queue out\n")
 				waitingQueues[req.Type].remove(req.ID)
 			default:
 			}
@@ -182,18 +186,18 @@ func handleConnect(msg []byte, id int, u *user) {
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
-	// get signatures of both
-	selfSignature, err := database.GetSignature(id)
-	if err != nil {
-		// TODO handle error
-	}
-
-	strangerSignature, err := database.GetSignature(stranger)
-	if err != nil {
-		// TODO handle error
-	}
-
 	if stranger != -1 {
+		// get signatures of both
+		selfSignature, err := database.GetSignature(id)
+		if err != nil {
+			// TODO handle error
+		}
+
+		strangerSignature, err := database.GetSignature(stranger)
+		if err != nil {
+			// TODO handle error
+		}
+
 		fmt.Printf("%d connect to %d\n", id, stranger)
 		sendJsonToUnknownStatusID(
 			stranger,

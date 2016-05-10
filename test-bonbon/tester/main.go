@@ -60,7 +60,7 @@ var testsuite = [...]func(){
 	func() {
 		describe(`
 兩個互為好友者登入
-測試API: init, status
+測試API: init, setting, change_nick, status
 			`)
 
 		clearDB()
@@ -107,6 +107,21 @@ var testsuite = [...]func(){
 			Status: "on",
 		})
 		judge(ok, "id2上線主動通知")
+
+		clients[1].ChangeSign(signatures[1])
+		_, msg, err = clients[1].Conn.ReadMessage() // 吃掉 response
+		_, msg, err = clients[2].Conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var signCmd communicate.SignCmd
+		json.Unmarshal(msg, &signCmd)
+		ok = (signCmd == communicate.SignCmd{
+			Cmd:  "change_sign",
+			Who:  1,
+			Sign: signatures[1],
+		})
+		judge(ok, "id1修改簽名檔，id2收到通知")
 
 		clients[2].Close()
 		_, msg, err = clients[1].Conn.ReadMessage()

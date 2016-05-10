@@ -86,6 +86,13 @@ func (c *Client) GetHistory(id int, number int, when int64) {
 	})
 }
 
+func (c *Client) ChangeSign(sign string) {
+	c.Conn.WriteJSON(communicate.UpdateSettingsRequest{
+		Cmd:     "setting",
+		Setting: communicate.Setting{Sign: sign},
+	})
+}
+
 func CreateClient(id int) *Client {
 	return &Client{Conn: createConn(id)}
 }

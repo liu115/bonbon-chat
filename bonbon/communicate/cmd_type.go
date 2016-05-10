@@ -101,15 +101,22 @@ type Setting struct {
 	Sign string
 }
 
-type updateSettingsRequest struct {
+type UpdateSettingsRequest struct {
 	Cmd     string
 	Setting Setting
 }
 
-type updateSettingsResponse struct {
+type UpdateSettingsResponse struct {
 	OK      bool
 	Cmd     string
 	Setting Setting
+}
+
+// structure for change_nick
+type SignCmd struct {
+	Cmd  string
+	Who  int
+	Sign string
 }
 
 // structure for bonbon
