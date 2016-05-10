@@ -90,10 +90,17 @@ type HistoryResponse struct {
 }
 
 // structure for set nickname
-type setNickNameRequest struct {
-	Cmd      string
-	Who      int
-	NickName string
+type SetNickNameRequest struct {
+	Cmd  string
+	Who  int
+	Nick string
+}
+
+type SetNickNameResponse struct {
+	OK   bool
+	Cmd  string
+	Who  int
+	Nick string
 }
 
 // structure for set setting

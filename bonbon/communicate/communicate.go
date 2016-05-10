@@ -155,27 +155,26 @@ func handleUpdateSettings(msg []byte, id int) {
 	sendJsonToOnlineID(id, &response)
 }
 
-// XXX: 下版功能 handle setting nickname of friends
 func handleSetNickName(msg []byte, id int) {
-	// TODO: 修正response
-	var request setNickNameRequest
+	var request SetNickNameRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		response := SetNickNameResponse{OK: false, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// update database
-	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
+	err = database.SetNickNameOfFriendship(id, request.Who, request.Nick)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		fmt.Printf("SetNickNameOfFriendship in handleSetNickName: %s\n", err.Error())
+		response := SetNickNameResponse{OK: false, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// send success response
-	response := simpleResponse{OK: true}
+	response := SetNickNameResponse{OK: true, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 	sendJsonToOnlineID(id, &response)
 }
 
@@ -216,9 +215,8 @@ func CommandComsumer() {
 		// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
 		case "setting":
 			handleUpdateSettings(msg, id)
-			// XXX: 誤用API，此為下版功能
-			// case "change_nick":
-			// 	handleSetNickName(msg, id)
+		case "set_nick":
+			handleSetNickName(msg, id)
 		case "connect":
 			fmt.Printf("id %d try connect\n", id)
 			handleConnect(msg, id, user)

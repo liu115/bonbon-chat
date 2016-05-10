@@ -93,6 +93,14 @@ func (c *Client) ChangeSign(sign string) {
 	})
 }
 
+func (c *Client) SetNick(friendID int, nick string) {
+	c.Conn.WriteJSON(communicate.SetNickNameRequest{
+		Cmd:  "set_nick",
+		Who:  friendID,
+		Nick: nick,
+	})
+}
+
 func CreateClient(id int) *Client {
 	return &Client{Conn: createConn(id)}
 }

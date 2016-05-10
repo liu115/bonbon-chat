@@ -77,8 +77,8 @@ API 實體
 6.
 	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick": "XXXXX"}       伺服器先送假暱稱
 	b.
-	c. 請求 {"Cmd": "change_friend_nick", "Who": "對方id", "Nick": "XXXXX"}
-	   回應 {"OK": true, Cmd": "change_friend_nick"}
+	c. 請求 {"Cmd": "set_nick", "Who": "對方id", "Nick": "XXXXX"}
+	   回應 {"OK": true, Cmd": "set_nick", "Who": "對方id", "Nick": "XXXXX"}
 
 9. GET /meta?protocal=xxxx&url=xxxxxxxxx
 	說明 protocal為http或https

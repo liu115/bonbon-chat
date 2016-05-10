@@ -193,8 +193,8 @@ var testsuite = [...]func(){
 	},
 	func() {
 		describe(`
-兩非朋友登入，以bonbon成為朋友
-測試API: bonbon
+兩非朋友登入，以bonbon成為朋友，並修改匿名
+測試API: bonbon, set_nick
 		`)
 		clearDB()
 		createAccount(1, signatures[1])
@@ -231,6 +231,10 @@ var testsuite = [...]func(){
 			}
 		}
 		judge(checkFriendship(1, 2), "兩人在資料庫中已為好友")
+		newNick := "pofsdjfjo"
+		clients[1].SetNick(2, newNick)
+		_, _, _ = clients[1].Conn.ReadMessage()
+		judge(checkNickName(1, 2, newNick), "成功修改暱稱")
 	},
 	func() {
 		describe(`
