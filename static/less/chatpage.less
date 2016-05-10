@@ -1,6 +1,7 @@
 @import "base.less";
 
 @major-font-color: #db3274;
+@major-font-color-bright: #EEA0BE;
 @bright-font-color: #eba747;
 
 @upper-background: #171616;
@@ -27,7 +28,7 @@
   border-bottom: 1px solid #000000;
   cursor: pointer;
   max-height: 90px;
-  
+
   &:hover {
     //background: #EEE;
   }
@@ -416,7 +417,7 @@
         }
 
         .message-button {
-		  background-color: @friendlist-background;
+		  		background-color: @friendlist-background;
           display: block;
           float: left;
           color: @major-font-color;
@@ -436,6 +437,10 @@
             //box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.125);
           }
         }
+				.bonbon-button-clicked {
+					background-color: @major-font-color-bright;
+
+				}
       }
     }
 

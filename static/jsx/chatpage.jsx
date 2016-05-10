@@ -249,7 +249,15 @@ var ChatRoom = React.createClass({
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
-	return {};
+		this.props.chatSocket.addHandler('bonbon', function(cmd) {
+			this.setState({bonboning: true});
+    }.bind(this));
+		this.props.chatSocket.addHandler('disconnect', function(cmd) {
+			this.setState({bonboning: false});
+    }.bind(this));
+	return {
+		bonboning: false
+		};
   },
   componentWillUpdate: function() {
     var node = React.findDOMNode(this.refs.refContent);
@@ -344,13 +352,20 @@ var ChatRoom = React.createClass({
           {function() {
             switch (this.props.target) {
               case 0:
-                return (
-                <div className="pull-left">
-                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
-                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
-                </div>);
-              //default:
-                //return ();
+								switch (this.state.bonboning) {
+									case true:
+										return (
+											<div className="pull-left">
+			                  <a id="button-bonbon" className="message-button bonbon-button-clicked" onClick={this.bonbon}>Bonbon!</a>
+			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
+			                </div>);
+									case false:
+										return (
+											<div className="pull-left">
+			                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
+			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
+			                </div>);
+								}
             }
           }.bind(this)()}
           <div className="pull-right">
