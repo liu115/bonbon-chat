@@ -6,6 +6,7 @@
 
 @upper-background: #171616;
 @friendlist-background: #242323;
+@friendbox-selected: #525151;
 @friendlist-area-width: 320px;
 
 @sidebar-panel-width: 200px;
@@ -36,7 +37,6 @@
   &:active {
     //background: #E5E5E5;
   }
-
   .friend-avatar {
     float: left;
     width: 50px;
@@ -74,7 +74,7 @@
       font-size: large;
       font-weight: bold;
       margin-bottom: 4px;
-	  color: @major-font-color;
+	  	color: @major-font-color;
     }
 
     .friend-info-status {
@@ -86,7 +86,9 @@
     }
   }
 }
-
+.friend-selected {
+	background-color: @friendbox-selected;
+}
 .area {
   display: none;
   position: fixed;

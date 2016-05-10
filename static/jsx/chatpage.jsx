@@ -389,7 +389,7 @@ var Chat = React.createClass({
         name: '陌生人',
         ID: 0,
         online: false,
-        stat: 'read',
+        stat: 'selected',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
