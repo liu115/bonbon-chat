@@ -22,7 +22,7 @@ var SignClass = React.createClass({
       this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
-        value: ''
+        value: e.target.value
       });
     }
   },
@@ -36,9 +36,12 @@ var SignClass = React.createClass({
   render: function() {
     if (this.state.setting == true) {
       return (
-        <div id="sign-input-wrapper">
-          <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
-        </div>
+				<div>
+	        <div id="sign-input-wrapper">
+	          <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange}/>
+					</div>
+					<span id="sign-memo">按Enter確認更改</span>
+				</div>
       );
     }
     else {
