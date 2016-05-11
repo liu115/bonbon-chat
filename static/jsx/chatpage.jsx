@@ -22,7 +22,7 @@ var SignClass = React.createClass({
       this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Sign: this.state.value}}));
       this.setState({
         setting: false,
-        value: ''
+        value: e.target.value
       });
     }
   },
@@ -36,9 +36,9 @@ var SignClass = React.createClass({
   render: function() {
     if (this.state.setting == true) {
       return (
-        <div id="sign-input-wrapper">
-          <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改簽名"/>
-        </div>
+	        <div id="sign-input-wrapper">
+	          <input type="text" id="sign-input" ref="refInput" value={this.state.value} onKeyPress={this.handleType} onChange={this.handleChange} placeholder="按Enter確認更改"/>
+					</div>
       );
     }
     else {
@@ -249,7 +249,15 @@ var ChatRoom = React.createClass({
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
-	return {};
+		this.props.chatSocket.addHandler('bonbon', function(cmd) {
+			this.setState({bonboning: true});
+    }.bind(this));
+		this.props.chatSocket.addHandler('disconnect', function(cmd) {
+			this.setState({bonboning: false});
+    }.bind(this));
+	return {
+		bonboning: false
+		};
   },
   componentWillUpdate: function() {
     var node = React.findDOMNode(this.refs.refContent);
@@ -344,13 +352,20 @@ var ChatRoom = React.createClass({
           {function() {
             switch (this.props.target) {
               case 0:
-                return (
-                <div className="pull-left">
-                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
-                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
-                </div>);
-              //default:
-                //return ();
+								switch (this.state.bonboning) {
+									case true:
+										return (
+											<div className="pull-left">
+			                  <a id="button-bonbon" className="message-button bonbon-button-clicked" onClick={this.bonbon}>Bonbon!</a>
+			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
+			                </div>);
+									case false:
+										return (
+											<div className="pull-left">
+			                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
+			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
+			                </div>);
+								}
             }
           }.bind(this)()}
           <div className="pull-right">
@@ -374,7 +389,7 @@ var Chat = React.createClass({
         name: '陌生人',
         ID: 0,
         online: false,
-        stat: 'read',
+        stat: 'selected',
         img: '/static/img/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
