@@ -69,35 +69,33 @@ func handleSend(msg []byte, id int, u *user) {
 
 func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
-	var success = false
 	var stranger *user
 	strangerID := u.match
+	fmt.Printf("strangerID is %s\n", strangerID)
 	if strangerID == -1 {
 		fmt.Printf("沒有connect就bonbon\n")
-		goto endLabel
+		sendJsonToOnlineID(id, BonbonResponse{OK: false, Cmd: "bonbon"})
+		return
 	}
 	stranger = onlineUser[strangerID]
 	if stranger == nil {
 		fmt.Printf("陌生人已經離線或不存在\n")
-		goto endLabel
+		sendJsonToOnlineID(id, BonbonResponse{OK: false, Cmd: "bonbon"})
+		return
 	}
 
 	if stranger.bonbon == false {
 		fmt.Printf("%d bonbon: 對方未bonbon\n", id)
 		u.bonbon = true
+		sendJsonToOnlineID(id, BonbonResponse{OK: true, Cmd: "bonbon"})
+		return
 	} else if stranger.bonbon == true {
 		fmt.Printf("%d bonbon: 成為朋友\n", id)
 		u.bonbon = false
 		stranger.bonbon = false
 		u.match = -1
 		stranger.match = -1
-		success = true
-	}
-endLabel:
 
-	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
-
-	if success {
 		err := database.MakeFriendship(id, strangerID)
 		if err != nil {
 			return
@@ -110,6 +108,7 @@ endLabel:
 		if err != nil {
 			return
 		}
+		sendJsonToOnlineID(id, BonbonResponse{OK: true, Cmd: "bonbon"})
 		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
@@ -245,9 +244,7 @@ func ChatHandler(id int, c *gin.Context) {
 	}
 	responseChannel[conn] = make(chan *user)
 	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
-	// user, err := initOnline(id, conn)
 	user := <-responseChannel[conn]
-	// TODO 通知所有人此人上線
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {

@@ -132,7 +132,7 @@ type BonbonRequest struct {
 	Cmd string
 }
 
-type bonbonResponse struct {
+type BonbonResponse struct {
 	Cmd string
 	OK  bool
 }

@@ -136,6 +136,7 @@ var testsuite = [...]func(){
 			Status: "off",
 		})
 		judge(ok, "id2下線主動通知")
+		clients[1].Close()
 	},
 	func() {
 		describe(`
@@ -162,6 +163,8 @@ var testsuite = [...]func(){
 				break
 			}
 		}
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
@@ -190,6 +193,8 @@ var testsuite = [...]func(){
 				break
 			}
 		}
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
@@ -200,6 +205,16 @@ var testsuite = [...]func(){
 		createAccount(1, signatures[1])
 		createAccount(2, signatures[2])
 		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+
+		clients[1].Bonbon()
+		_, msg, err := clients[1].Conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var j communicate.BonbonResponse
+		json.Unmarshal(msg, &j)
+		judge(j.OK == false, "未connect就bonbon會失敗")
+
 		clients[1].Connect("stranger")
 		clients[2].Connect("stranger")
 		clients[1].WaitForConnected()
@@ -207,7 +222,7 @@ var testsuite = [...]func(){
 		clients[1].Bonbon()
 		clients[2].Bonbon()
 		for {
-			_, msg, err := clients[1].Conn.ReadMessage()
+			_, msg, err = clients[1].Conn.ReadMessage()
 			if err != nil {
 				fmt.Printf("%s", err.Error())
 			}
@@ -219,7 +234,7 @@ var testsuite = [...]func(){
 			}
 		}
 		for {
-			_, msg, err := clients[2].Conn.ReadMessage()
+			_, msg, err = clients[2].Conn.ReadMessage()
 			if err != nil {
 				fmt.Printf("%s", err.Error())
 			}
@@ -235,6 +250,8 @@ var testsuite = [...]func(){
 		clients[1].SetNick(2, newNick)
 		_, _, _ = clients[1].Conn.ReadMessage()
 		judge(checkNickName(1, 2, newNick), "成功修改暱稱")
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
@@ -280,6 +297,8 @@ var testsuite = [...]func(){
 			}
 		}
 		judge(ok, "成功返回正確歷史訊息")
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
