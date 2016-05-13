@@ -407,7 +407,7 @@ var Chat = React.createClass({
           name: cmd.Friends[i].Nick,
           ID: cmd.Friends[i].ID,
           online: cmd.Friends[i].Status == 'on' ? true : false,
-          stat: i == 0 ? 'selected' : 'read',
+          stat: 'read',
           img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
           read: cmd.Friends[i].Read,
