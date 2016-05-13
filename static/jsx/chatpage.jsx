@@ -255,6 +255,9 @@ var ChatRoom = React.createClass({
 		this.props.chatSocket.addHandler('disconnect', function(cmd) {
 			this.setState({bonboning: false});
     }.bind(this));
+		this.props.chatSocket.addHandler('new_friend', function(cmd) {
+			this.setState({bonboning: false});
+		}.bind(this));
 	return {
 		bonboning: false
 		};
