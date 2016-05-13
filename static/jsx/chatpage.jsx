@@ -591,6 +591,7 @@ var Chat = React.createClass({
     };
   },
 	sortFriends: function() {
+		var	who = this.state.friends[this.state.who].ID;
 		var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
 			function(x , y) {
 				if (x.messages.length == 0 || y.messages.length == 0) return (x.messages.length < y.messages.length);
@@ -599,9 +600,15 @@ var Chat = React.createClass({
 		);
 		sorted_friends.unshift(this.state.friends[0]);
 		this.state.friends = sorted_friends;
+		for (var i = 0; i < this.state.friends.length; i++) {
+			if (this.state.friends[i].ID == who) {
+				this.state.who = i;
+			}
+		}
 		console.log("sorting");
 		this.setState({
-			friends: this.state.friends
+			friends: this.state.friends,
+			who: this.state.who
 		});
 	},
   selectFriend: function(selectedFriend) {
