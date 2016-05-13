@@ -440,6 +440,7 @@ var Chat = React.createClass({
       else {
         console.log('send fail(cmd.OK=false)');
       }
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -453,14 +454,9 @@ var Chat = React.createClass({
         }
       }
       NewMessage(this.state.friends[index].name, cmd.Msg);
-      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
-			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
-				function(x , y) {
-					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
-				}
-			);
-			sorted_friends.unshift(this.state.friends[0]);
-			this.state.friends = sorted_friends;
+			this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
+			// Sorted by
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -577,13 +573,7 @@ var Chat = React.createClass({
           this.state.friends[index].messages.unshift({content: msg.Text, from: 'me', time: msg.Time});
         }
       }
-			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
-				function(x , y) {
-					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
-				}
-			);
-			sorted_friends.unshift(this.state.friends[0]);
-			this.state.friends = sorted_friends;
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -600,7 +590,20 @@ var Chat = React.createClass({
       messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]}],
     };
   },
-
+	sortFriends: function() {
+		var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+			function(x , y) {
+				if (x.messages.length == 0 || y.messages.length == 0) return (x.messages.length < y.messages.length);
+				return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+			}
+		);
+		sorted_friends.unshift(this.state.friends[0]);
+		this.state.friends = sorted_friends;
+		console.log("sorting");
+		this.setState({
+			friends: this.state.friends
+		});
+	},
   selectFriend: function(selectedFriend) {
     this.state.friends[this.state.who].stat = 'read';
     this.state.friends[selectedFriend].stat = 'selected';
