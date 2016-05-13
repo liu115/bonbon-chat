@@ -474,7 +474,19 @@ var Chat = React.createClass({
         friends: this.state.friends
       });
     }.bind(this));
-
+		this.props.chatSocket.addHandler('change_sign', function(cmd) {
+			var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+			if (index == -1) return 0; // Who not found
+			this.state.friends[index].sign = cmd.Sign;
+			this.setState({
+        friends: this.state.friends
+      });
+		}.bind(this));
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
       friends[0].messages = [{from: 'system', content: '建立配對中...請稍候', time: (Date.now() * 10e+5).toString()}];
