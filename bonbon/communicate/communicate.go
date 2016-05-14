@@ -222,7 +222,7 @@ func CommandComsumer() {
 		case "send":
 			handleSend(msg, id, user)
 		case "disconnect":
-			handleDisconnect(id)
+			handleDisconnect(id, user)
 		case "bonbon":
 			handleBonbon(id, user)
 		case "history":
