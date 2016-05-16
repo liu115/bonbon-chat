@@ -523,6 +523,7 @@ var Chat = React.createClass({
 
     }.bind(this));
     this.props.chatSocket.addHandler('new_friend', function(cmd) {
+      NewFriend();
       var index = this.state.friends.length;
       var new_friend = {
         index: index,
