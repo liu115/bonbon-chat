@@ -130,19 +130,67 @@ var SideBar = React.createClass({
 });
 
 var FriendBox = React.createClass({
+  getInitialState: function () {
+    return {
+      name: this.props.friend.name,
+      changing: false,
+    }
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.friend.name != this.props.friend.name) {
+      this.setState({
+        changing: false,
+        name: nextProps.friend.name
+      });
+    }
+  },
   handleClick: function() {
     this.props.select(this.props.index);
     this.props.changeState('chat');
   },
-
+  handleClickPencil: function (e) {
+    this.setState({changing: true});
+    e.stopPropagation();
+  },
+  handleType: function (e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      if (e.target.value != this.props.friend.name) {
+        console.log("try set_nick of id " + this.props.friend.ID + " to " + e.target.value);
+        this.props.chatSocket.send(JSON.stringify({Cmd: "set_nick", Who: this.props.friend.ID, Nick: e.target.value}));
+      } else {
+        this.setState({changing: false})
+      }
+    } 
+  },
+  handleChange: function (e) {
+    this.setState({name: e.target.value})
+  },
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!prevState.changing && this.state.changing) {
+      var input = this.refs.InputName.getDOMNode();
+      input.focus();
+      input.selectionStart = input.selectionEnd = this.state.name.length;
+    }
+  },
   render: function() {
     return (
-      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} 
+           onClick={this.handleClick}>
         <div className={(this.props.index == 0) ? "stranger-avatar": "friend-avatar"}>
           <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
-          <p className="friend-info-name">{this.props.friend.name}</p>
+            {function () {
+              if (this.state.changing) {
+                return <input type="text" value={this.state.name} 
+                  ref="InputName" onChange={this.handleChange} 
+                  onClick={function(e) {e.stopPropagation()}}
+                  onKeyPress={this.handleType}/>
+              } else {
+                return <p className="friend-info-name"> {this.props.friend.name} </p>
+              }
+            }.bind(this)()}
           <p className="friend-info-status">
             {function() {
               if (this.props.friend.messages.length > 0)
@@ -156,7 +204,9 @@ var FriendBox = React.createClass({
             }.bind(this)()}
           </p>
         </div>
-        <div style={{clear: "both"}}></div>
+        <div className="friend-setting">
+          <i className="fa fa-pencil" onClick={this.handleClickPencil}></i>
+        </div>
       </div>
     );
   }
@@ -179,7 +229,7 @@ var FriendList = React.createClass({
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
       if (this.props.friends[i].name.indexOf(this.state.filterText) === -1) continue;
-      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
+      friendBoxs.push(<FriendBox chatSocket={this.props.chatSocket} index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
     }
     return (
       <div id="friend-area">
@@ -474,6 +524,20 @@ var Chat = React.createClass({
         friends: this.state.friends
       });
     }.bind(this));
+		this.props.chatSocket.addHandler('set_nick', function(cmd) {
+			var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+			if (index == -1) return 0; // Who not found
+      console.log(this.state.friends[index]);
+			this.state.friends[index] = React.addons.update(this.state.friends[index], {name: {$set: cmd.Nick}})
+			this.setState({
+        friends: this.state.friends
+      });
+		}.bind(this));
 		this.props.chatSocket.addHandler('change_sign', function(cmd) {
 			var index = -1;
       for (var i = 0; i < this.state.friends.length; i++) {

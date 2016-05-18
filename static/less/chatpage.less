@@ -39,7 +39,7 @@
     //background: #E5E5E5;
   }
   .friend-avatar {
-    float: left;
+    display: inline-block;
     width: 50px;
     margin-left: 15px;
 
@@ -53,7 +53,7 @@
   }
 
   .stranger-avatar {
-    float:left;
+    display: inline-block;
     width: 50px;
     margin-left: 15px;
 
@@ -67,8 +67,9 @@
   }
 
   .friend-info {
-    float:right;
-    margin-right: 15px;
+    vertical-align: top;
+    display: inline-block;
+    margin-left: 30px;
     width: 200px;
 
     .friend-info-name {
@@ -85,6 +86,11 @@
       line-height: 140%;
       margin: 4px 0;
     }
+  }
+  .friend-setting {
+    vertical-align: top;
+    display: inline-block;
+    color: @major-font-color;
   }
 }
 .friend-selected {
