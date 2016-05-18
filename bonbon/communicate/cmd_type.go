@@ -90,10 +90,17 @@ type HistoryResponse struct {
 }
 
 // structure for set nickname
-type setNickNameRequest struct {
-	Cmd      string
-	Who      int
-	NickName string
+type SetNickNameRequest struct {
+	Cmd  string
+	Who  int
+	Nick string
+}
+
+type SetNickNameResponse struct {
+	OK   bool
+	Cmd  string
+	Who  int
+	Nick string
 }
 
 // structure for set setting
@@ -101,15 +108,22 @@ type Setting struct {
 	Sign string
 }
 
-type updateSettingsRequest struct {
+type UpdateSettingsRequest struct {
 	Cmd     string
 	Setting Setting
 }
 
-type updateSettingsResponse struct {
+type UpdateSettingsResponse struct {
 	OK      bool
 	Cmd     string
 	Setting Setting
+}
+
+// structure for change_nick
+type SignCmd struct {
+	Cmd  string
+	Who  int
+	Sign string
 }
 
 // structure for bonbon
@@ -118,7 +132,7 @@ type BonbonRequest struct {
 	Cmd string
 }
 
-type bonbonResponse struct {
+type BonbonResponse struct {
 	Cmd string
 	OK  bool
 }

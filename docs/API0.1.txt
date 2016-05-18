@@ -16,8 +16,10 @@
 	d. 歷史（好友）
 	e. 已讀
 	f. 上下線
-6.  a. 成為好友
+6. 好友
+	a. 成為好友
 	b. 刪好友 X
+	c. 修改好友名字
 7. 好友資料 撲克牌假名
 8. 傳圖 （暫時不做） X
 9. 得到超連結的元訊息
@@ -45,8 +47,8 @@ API 實體
     "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off", LastRead: 時間（字串）}, ...]}
 3.
 	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
-       {"OK": true, "Cmd": "Setting", "Setting": {"Sign": "XXXXXXX"}}
-	b. 伺服器主動 {"Cmd": "change_nick", "Who": "對方id", "NickName": "XXXXXX"}
+       {"OK": true, "Cmd": "setting", "Setting": {"Sign": "XXXXXXX"}}
+	b. 伺服器主動 {"Cmd": "change_sign", "Who": "對方id", "Sign": "XXXXXX"}
 
 4.  請求 {"Cmd": "connect", "Type": "L1_FB_friend or L2_FB_friend or stranger"} // 修改使之類似bonbon
 	回應 {"OK": true or fase, "Cmd": "connect"}
@@ -73,8 +75,10 @@ API 實體
 	f. onopen
 	伺服器主動 {"Cmd": "status", "Who": "對方id", "Status": "on or off"}
 6.
-	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick", "XXXXX"}       伺服器先送假暱稱
+	a. 伺服器主動 {"Cmd": "new_friend", "Who": "對方id", "Nick": "XXXXX"}       伺服器先送假暱稱
 	b.
+	c. 請求 {"Cmd": "set_nick", "Who": "對方id", "Nick": "XXXXX"}
+	   回應 {"OK": true, Cmd": "set_nick", "Who": "對方id", "Nick": "XXXXX"}
 
 9. GET /meta?protocal=xxxx&url=xxxxxxxxx
 	說明 protocal為http或https

@@ -60,7 +60,7 @@ var testsuite = [...]func(){
 	func() {
 		describe(`
 兩個互為好友者登入
-測試API: init, status
+測試API: init, setting, change_nick, status
 			`)
 
 		clearDB()
@@ -108,6 +108,21 @@ var testsuite = [...]func(){
 		})
 		judge(ok, "id2上線主動通知")
 
+		clients[1].ChangeSign(signatures[1])
+		_, msg, err = clients[1].Conn.ReadMessage() // 吃掉 response
+		_, msg, err = clients[2].Conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var signCmd communicate.SignCmd
+		json.Unmarshal(msg, &signCmd)
+		ok = (signCmd == communicate.SignCmd{
+			Cmd:  "change_sign",
+			Who:  1,
+			Sign: signatures[1],
+		})
+		judge(ok, "id1修改簽名檔，id2收到通知")
+
 		clients[2].Close()
 		_, msg, err = clients[1].Conn.ReadMessage()
 		if err != nil {
@@ -121,6 +136,7 @@ var testsuite = [...]func(){
 			Status: "off",
 		})
 		judge(ok, "id2下線主動通知")
+		clients[1].Close()
 	},
 	func() {
 		describe(`
@@ -147,6 +163,8 @@ var testsuite = [...]func(){
 				break
 			}
 		}
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
@@ -175,16 +193,28 @@ var testsuite = [...]func(){
 				break
 			}
 		}
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
-兩非朋友登入，以bonbon成為朋友
-測試API: bonbon
+兩非朋友登入，以bonbon成為朋友，並修改匿名
+測試API: bonbon, set_nick
 		`)
 		clearDB()
 		createAccount(1, signatures[1])
 		createAccount(2, signatures[2])
 		clients := [...]*client.Client{nil, client.CreateAndReceiveInit(1), client.CreateAndReceiveInit(2)}
+
+		clients[1].Bonbon()
+		_, msg, err := clients[1].Conn.ReadMessage()
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+		}
+		var j communicate.BonbonResponse
+		json.Unmarshal(msg, &j)
+		judge(j.OK == false, "未connect就bonbon會失敗")
+
 		clients[1].Connect("stranger")
 		clients[2].Connect("stranger")
 		clients[1].WaitForConnected()
@@ -192,7 +222,7 @@ var testsuite = [...]func(){
 		clients[1].Bonbon()
 		clients[2].Bonbon()
 		for {
-			_, msg, err := clients[1].Conn.ReadMessage()
+			_, msg, err = clients[1].Conn.ReadMessage()
 			if err != nil {
 				fmt.Printf("%s", err.Error())
 			}
@@ -204,7 +234,7 @@ var testsuite = [...]func(){
 			}
 		}
 		for {
-			_, msg, err := clients[2].Conn.ReadMessage()
+			_, msg, err = clients[2].Conn.ReadMessage()
 			if err != nil {
 				fmt.Printf("%s", err.Error())
 			}
@@ -216,6 +246,12 @@ var testsuite = [...]func(){
 			}
 		}
 		judge(checkFriendship(1, 2), "兩人在資料庫中已為好友")
+		newNick := "pofsdjfjo"
+		clients[1].SetNick(2, newNick)
+		_, _, _ = clients[1].Conn.ReadMessage()
+		judge(checkNickName(1, 2, newNick), "成功修改暱稱")
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`
@@ -261,6 +297,8 @@ var testsuite = [...]func(){
 			}
 		}
 		judge(ok, "成功返回正確歷史訊息")
+		clients[1].Close()
+		clients[2].Close()
 	},
 	func() {
 		describe(`

@@ -52,6 +52,18 @@ func checkFriendship(ID1 int, ID2 int) bool {
 			break
 		}
 	}
-
 	return (check_point == 2)
+}
+
+func checkNickName(accountID int, friendID int, Nick string) bool {
+	friendships, err := database.GetFriendships(accountID)
+	if err != nil {
+		fmt.Printf("in checkNickName %s", err.Error())
+	}
+	for _, friendship := range friendships {
+		if friendship.FriendID == friendID {
+			return (friendship.NickName == Nick)
+		}
+	}
+	return false
 }

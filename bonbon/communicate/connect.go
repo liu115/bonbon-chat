@@ -103,7 +103,6 @@ func L2_FB_friendAccept(id int) func(int) bool {
 }
 
 func (wq *waitingQueue) match(id int) int {
-	// 需要lock
 	onlineUser[id].matchType = wq.Type
 	switch wq.Type {
 	case "stranger":
@@ -116,12 +115,16 @@ func (wq *waitingQueue) match(id int) int {
 	disconnectByID(id)
 	for i := 0; i < len(wq.queue); i++ {
 		if id == wq.queue[i] {
+			fmt.Printf("queue is %s\n", wq.queue)
 			return -1
 		} else if wq.accept(wq.queue[i]) {
 			stranger := wq.queue[i]
 			wq.queue = append(wq.queue[:i], wq.queue[i+1:]...)
 			onlineUser[id].match = stranger
+			onlineUser[id].matchType = ""
 			onlineUser[stranger].match = id
+			onlineUser[stranger].matchType = ""
+			fmt.Printf("queue is %s\n", wq.queue)
 			return stranger
 		}
 	}
@@ -159,9 +162,15 @@ func MatchConsumer() {
 		if req.Type != "" {
 			switch req.Cmd {
 			case "in":
+				fmt.Printf("queue in\n")
+				if t := onlineUser[req.ID].matchType; t != "" {
+					waitingQueues[t].remove(req.ID)
+				}
 				ans = waitingQueues[req.Type].match(req.ID)
 			case "out":
+				fmt.Printf("queue out\n")
 				waitingQueues[req.Type].remove(req.ID)
+				onlineUser[req.ID].matchType = ""
 			default:
 			}
 		}
@@ -182,18 +191,18 @@ func handleConnect(msg []byte, id int, u *user) {
 	matchRequestChannel <- matchRequest{Cmd: "in", ID: id, Type: req.Type}
 	stranger := <-matchDoneChannel
 	fmt.Printf("stranger is %d\n", stranger)
-	// get signatures of both
-	selfSignature, err := database.GetSignature(id)
-	if err != nil {
-		// TODO handle error
-	}
-
-	strangerSignature, err := database.GetSignature(stranger)
-	if err != nil {
-		// TODO handle error
-	}
-
 	if stranger != -1 {
+		// get signatures of both
+		selfSignature, err := database.GetSignature(id)
+		if err != nil {
+			// TODO handle error
+		}
+
+		strangerSignature, err := database.GetSignature(stranger)
+		if err != nil {
+			// TODO handle error
+		}
+
 		fmt.Printf("%d connect to %d\n", id, stranger)
 		sendJsonToUnknownStatusID(
 			stranger,
@@ -203,9 +212,11 @@ func handleConnect(msg []byte, id int, u *user) {
 	}
 }
 
-func disconnectByID(id int) {
+func disconnectByID(id int) bool {
 	var stranger int
+	disconnect := false
 	if stranger = onlineUser[id].match; stranger != -1 {
+		disconnect = true
 		onlineUser[id].match = -1
 		onlineUser[stranger].match = -1
 	}
@@ -216,10 +227,15 @@ func disconnectByID(id int) {
 			map[string]interface{}{"Cmd": "disconnected"},
 		)
 	}
+	return disconnect
 }
 
 // 實作斷線
-func handleDisconnect(id int) {
-	disconnectByID(id)
-	sendJsonToOnlineID(id, map[string]interface{}{"OK": true, "Cmd": "disconnect"})
+func handleDisconnect(id int, u *user) {
+	dis := disconnectByID(id)
+	if u.matchType != "" {
+		matchRequestChannel <- matchRequest{Cmd: "out", ID: id, Type: u.matchType}
+		<-matchDoneChannel
+	}
+	sendJsonToOnlineID(id, map[string]interface{}{"OK": dis, "Cmd": "disconnect"})
 }

@@ -69,35 +69,33 @@ func handleSend(msg []byte, id int, u *user) {
 
 func handleBonbon(id int, u *user) {
 	fmt.Printf("%d bonbon\n", id)
-	var success = false
 	var stranger *user
 	strangerID := u.match
+	fmt.Printf("strangerID is %s\n", strangerID)
 	if strangerID == -1 {
 		fmt.Printf("沒有connect就bonbon\n")
-		goto endLabel
+		sendJsonToOnlineID(id, BonbonResponse{OK: false, Cmd: "bonbon"})
+		return
 	}
 	stranger = onlineUser[strangerID]
 	if stranger == nil {
 		fmt.Printf("陌生人已經離線或不存在\n")
-		goto endLabel
+		sendJsonToOnlineID(id, BonbonResponse{OK: false, Cmd: "bonbon"})
+		return
 	}
 
 	if stranger.bonbon == false {
 		fmt.Printf("%d bonbon: 對方未bonbon\n", id)
 		u.bonbon = true
+		sendJsonToOnlineID(id, BonbonResponse{OK: true, Cmd: "bonbon"})
+		return
 	} else if stranger.bonbon == true {
 		fmt.Printf("%d bonbon: 成為朋友\n", id)
 		u.bonbon = false
 		stranger.bonbon = false
 		u.match = -1
 		stranger.match = -1
-		success = true
-	}
-endLabel:
 
-	sendJsonToOnlineID(id, bonbonResponse{OK: true, Cmd: "bonbon"})
-
-	if success {
 		err := database.MakeFriendship(id, strangerID)
 		if err != nil {
 			return
@@ -110,6 +108,7 @@ endLabel:
 		if err != nil {
 			return
 		}
+		sendJsonToOnlineID(id, BonbonResponse{OK: true, Cmd: "bonbon"})
 		sendJsonToOnlineID(id, NewFriendCmd{Cmd: "new_friend", Who: strangerID, Nick: strangerNick})
 		sendJsonToUnknownStatusID(
 			strangerID,
@@ -121,10 +120,10 @@ endLabel:
 // handle account settings update
 func handleUpdateSettings(msg []byte, id int) {
 	// decode JSON request
-	var request updateSettingsRequest
+	var request UpdateSettingsRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
-		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+		response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
@@ -132,38 +131,49 @@ func handleUpdateSettings(msg []byte, id int) {
 	// update database
 	err = database.SetSignature(id, request.Setting.Sign)
 	if err != nil {
-		response := updateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+		response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
-	// TODO 告訴所有人此人改簽名檔
+	// 通知朋友
+	friendships, err := database.GetFriendships(id)
+	if err == nil {
+		for i := 0; i < len(friendships); i++ {
+			fmt.Printf("%d 通知 %d 換簽名檔\n", id, friendships[i].FriendID)
+			sendJsonToUnknownStatusID(
+				friendships[i].FriendID,
+				SignCmd{Cmd: "change_sign", Who: id, Sign: request.Setting.Sign},
+			)
+		}
+	} else {
+		fmt.Printf("getFriendships: %s", err.Error())
+	}
 	// send success response
-	response := updateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
+	response := UpdateSettingsResponse{OK: true, Cmd: "setting", Setting: request.Setting}
 	sendJsonToOnlineID(id, &response)
 }
 
-// XXX: 下版功能 handle setting nickname of friends
 func handleSetNickName(msg []byte, id int) {
-	// TODO: 修正response
-	var request setNickNameRequest
+	var request SetNickNameRequest
 	err := json.Unmarshal(msg, &request)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		response := SetNickNameResponse{OK: false, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// update database
-	err = database.SetNickNameOfFriendship(id, request.Who, request.NickName)
+	err = database.SetNickNameOfFriendship(id, request.Who, request.Nick)
 	if err != nil {
-		response := simpleResponse{OK: false}
+		fmt.Printf("SetNickNameOfFriendship in handleSetNickName: %s\n", err.Error())
+		response := SetNickNameResponse{OK: false, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 		sendJsonToOnlineID(id, &response)
 		return
 	}
 
 	// send success response
-	response := simpleResponse{OK: true}
+	response := SetNickNameResponse{OK: true, Cmd: "set_nick", Who: request.Who, Nick: request.Nick}
 	sendJsonToOnlineID(id, &response)
 }
 
@@ -204,16 +214,15 @@ func CommandComsumer() {
 		// NOTE: 各種cmd其實也可以僅傳入id，但傳入user可增進效能（不用再搜一次map）
 		case "setting":
 			handleUpdateSettings(msg, id)
-			// XXX: 誤用API，此為下版功能
-			// case "change_nick":
-			// 	handleSetNickName(msg, id)
+		case "set_nick":
+			handleSetNickName(msg, id)
 		case "connect":
 			fmt.Printf("id %d try connect\n", id)
 			handleConnect(msg, id, user)
 		case "send":
 			handleSend(msg, id, user)
 		case "disconnect":
-			handleDisconnect(id)
+			handleDisconnect(id, user)
 		case "bonbon":
 			handleBonbon(id, user)
 		case "history":
@@ -235,9 +244,7 @@ func ChatHandler(id int, c *gin.Context) {
 	}
 	responseChannel[conn] = make(chan *user)
 	requestChannel <- requestInChannel{ID: id, Conn: conn, Special: "init"}
-	// user, err := initOnline(id, conn)
 	user := <-responseChannel[conn]
-	// TODO 通知所有人此人上線
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {

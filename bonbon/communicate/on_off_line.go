@@ -23,9 +23,10 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 
 	if onlineUser[id] == nil {
 		onlineUser[id] = &user{
-			match:  -1,
-			conns:  []*websocket.Conn{conn},
-			bonbon: false,
+			match:     -1,
+			matchType: "",
+			conns:     []*websocket.Conn{conn},
+			bonbon:    false,
 		}
 		err = sendInitMsg(id)
 		if err != nil {
@@ -129,6 +130,8 @@ func clearOffline(id int, conn *websocket.Conn) {
 					StatusCmd{Cmd: "status", Who: id, Status: "off"},
 				)
 			}
+		} else {
+			fmt.Printf("getFriendships: %s", err.Error())
 		}
 		delete(onlineUser, id)
 	}
