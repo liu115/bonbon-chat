@@ -161,10 +161,26 @@ var FriendBox = React.createClass({
       } else {
         this.setState({changing: false})
       }
-    } 
+    }
   },
   handleChange: function (e) {
     this.setState({name: e.target.value})
+  },
+  handleCheck: function(e) {
+    if (this.state.name != this.props.friend.name) {
+      console.log("try set_nick of id " + this.props.friend.ID + " to " + this.state.name);
+      this.props.chatSocket.send(JSON.stringify({Cmd: "set_nick", Who: this.props.friend.ID, Nick: this.state.name}));
+    } else {
+      this.setState({changing: false})
+    }
+    e.stopPropagation();
+  },
+  handleCancel: function() {
+    this.setState({
+      changing: false,
+      name: this.props.friend.name
+    })
+    e.stopPropagation();
   },
   componentDidUpdate: function (prevProps, prevState) {
     if (!prevState.changing && this.state.changing) {
@@ -183,8 +199,8 @@ var FriendBox = React.createClass({
         <div className="friend-info">
             {function () {
               if (this.state.changing) {
-                return <input type="text" value={this.state.name} 
-                  ref="InputName" onChange={this.handleChange} 
+                return <input type="text" value={this.state.name}
+                  ref="InputName" onChange={this.handleChange}
                   onClick={function(e) {e.stopPropagation()}}
                   onKeyPress={this.handleType}/>
               } else {
@@ -205,7 +221,14 @@ var FriendBox = React.createClass({
           </p>
         </div>
         <div className="friend-setting">
-          <i className="fa fa-pencil" onClick={this.handleClickPencil}></i>
+          {function () {
+            if (this.state.changing) { 
+              return [<i className="fa fa-check" onClick={this.handleCheck}></i>,
+                <i className="fa fa-times" onClick={this.handleCancel}></i>];
+            } else {
+              return <i className="fa fa-pencil" onClick={this.handleClickPencil}></i>;
+            }
+          }.bind(this)()}
         </div>
       </div>
     );

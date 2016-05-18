@@ -70,7 +70,7 @@
     vertical-align: top;
     display: inline-block;
     margin-left: 30px;
-    width: 200px;
+    width: 185px;
 
     .friend-info-name {
       font-size: large;
@@ -86,11 +86,23 @@
       line-height: 140%;
       margin: 4px 0;
     }
+    input {
+      border: 0px none;
+      width: 90%;
+      color: @input-box-color;
+      background: @sign-wrapper-background;
+    }
   }
   .friend-setting {
     vertical-align: top;
     display: inline-block;
     color: @major-font-color;
+    .fa {
+      opacity: 0.8
+    }
+    .fa:hover {
+      opacity: 1.0;
+    }
   }
 }
 .friend-selected {
