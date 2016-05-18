@@ -6,13 +6,26 @@ var SignClass = React.createClass({
   getInitialState: function() {
     return {
       setting: false,
-      value: ''
+      value: this.props.sign
     };
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!prevState.setting && this.state.setting) {
+      var input = React.findDOMNode(this.refs.refInput)
+      input.focus();
+      input.selectionStart = input.selectionEnd = this.state.value.length;
+    }
+  },
+
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.sign != this.props.sign) {
+      this.setState({value: nextProps.sign})
+    }
   },
 
   handleClick: function() {
     this.setState({setting: true});
-    //React.findDOMNode(this.refs.refInput).focus();
   },
 
   handleType: function(e) {
