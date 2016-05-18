@@ -191,7 +191,7 @@ var FriendBox = React.createClass({
   },
   render: function() {
     return (
-      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} 
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")}
            onClick={this.handleClick}>
         <div className={(this.props.index == 0) ? "stranger-avatar": "friend-avatar"}>
           <img src={this.props.friend.img}/>
@@ -222,7 +222,7 @@ var FriendBox = React.createClass({
         </div>
         <div className="friend-setting">
           {function () {
-            if (this.state.changing) { 
+            if (this.state.changing) {
               return [<i className="fa fa-check" onClick={this.handleCheck}></i>,
                 <i className="fa fa-times" onClick={this.handleCancel}></i>];
             } else {
@@ -342,21 +342,19 @@ var ChatRoom = React.createClass({
     this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
   },
   componentDidUpdate: function() {
+		/* If the scroll is at bottom then send 'read'. */
     if (this.shouldScrollBottom) {
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = node.scrollHeight;
       var messageLength = this.props.friends[this.props.target].messages.length;
       if (messageLength <= 0) return 0;
       var lastMessage = false;
-      for (var i = messageLength - 1; i >= 0; i--) {
-        if (this.props.friends[this.props.target].messages[i] == 'others')
-          lastMessage = this.props.friends[this.props.target].messages[i];
-      }
+      lastMessage = this.props.friends[this.props.target].messages[messageLength - 1];
       if (lastMessage === false) return 0;
       if (this.props.friends[this.props.target].read < lastMessage.time) {
-        console.log('read auto');
         this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
+			this.shouldScrollBottom = false;
     }
   },
   componentDidMount: function() {
@@ -388,20 +386,25 @@ var ChatRoom = React.createClass({
         this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: who, Number: 15, When: time, Order: 0}));
       }
     }
+		/*
     if (node.scrollTop + node.offsetHeight === node.scrollHeight) {
       var messageLength = this.props.friends[this.props.target].messages.length;
       if (messageLength <= 0) return 0;
       var lastMessage = false;
-      for (var i = messageLength - 1; i >= 0; i--) {
-        if (this.props.friends[this.props.target].messages[i] == 'other')
-          lastMessage = this.props.friends[this.props.target].messages[i];
-      }
+      //for (var i = messageLength - 1; i >= 0; i--) {
+        //if (this.props.friends[this.props.target].messages[i] == 'other')
+          lastMessage = this.props.friends[this.props.target].messages[messageLength - 1];
+					//break;
+      //}
       if (lastMessage === false) return 0;
+			console.log(this.props.friends[this.props.target].read);
+			console.log(lastMessage.time);
       if (this.props.friends[this.props.target].read < lastMessage.time) {
         console.log('read');
-        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
     }
+		*/
   },
   focusInput: function() {
     this.refs.refInput.focusInput();
@@ -483,7 +486,7 @@ var Chat = React.createClass({
           stat: 'read',
           img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
-          read: cmd.Friends[i].Read,
+          read: cmd.Friends[i].LastRead,
           messages: [],
         };
         console.log('read' + friend.read);
@@ -636,26 +639,27 @@ var Chat = React.createClass({
         read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
-      this.props.chatSocket.addHandler('read', function(cmd) {
-        var index = -1;
-        for (var i = 0; i < this.state.friends.length; i++) {
-          if (this.state.friends[i].ID == cmd.Who) {
-            index = i;
-          }
+			this.setState({
+	      friends: this.state.friends,
+	      who: index,
+	    });
+		}.bind(this));
+    this.props.chatSocket.addHandler('read', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
         }
-        if (index == -1) return 0;
-        if (this.state.friends[index].time < cmd.Time) {
-          this.state.friends[index].time = cmd.Time;
-        }
-        this.setState({
-          friends: this.state.friends
-        });
-      }.bind(this));
+      }
+      if (index == -1) return 0;
+      if (this.state.friends[index].read < cmd.Time) {
+        this.state.friends[index].read = cmd.Time;
+      }
       this.setState({
-        friends: this.state.friends,
-        who: index,
+        friends: this.state.friends
       });
     }.bind(this));
+
     this.props.chatSocket.addHandler('history', function(cmd) {
       var index = -1;
       for (var i = 0; i < this.state.friends.length; i++) {
@@ -687,6 +691,7 @@ var Chat = React.createClass({
       stat: 'read',
       img: '/static/img/stranger-m.jpg',
       sign: '猜猜我是誰',
+			read: (Date.now() * 10e+5).toString(),
       messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]}],
     };
   },
