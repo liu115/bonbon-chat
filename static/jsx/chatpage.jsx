@@ -323,10 +323,10 @@ var ChatRoom = React.createClass({
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
 		this.props.chatSocket.addHandler('bonbon', function(cmd) {
-			this.setState({bonboning: true});
+			if (cmd.OK == true) this.setState({bonboning: true});
     }.bind(this));
 		this.props.chatSocket.addHandler('disconnect', function(cmd) {
-			this.setState({bonboning: false});
+			if (cmd.OK == true) this.setState({bonboning: false});
     }.bind(this));
 		this.props.chatSocket.addHandler('new_friend', function(cmd) {
 			this.setState({bonboning: false});
@@ -596,8 +596,10 @@ var Chat = React.createClass({
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+5).toString()});
-      this.state.friends[0].online = false;
+			if (cmd.OK == true) {
+      	this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+5).toString()});
+      	this.state.friends[0].online = false;
+			}
       this.setState({
         friends: this.state.friends
       });
