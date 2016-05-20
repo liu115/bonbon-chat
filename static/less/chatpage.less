@@ -44,8 +44,8 @@
     margin-left: 15px;
 
     img {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       border: 1px solid #286090;
       border-radius: 5px;
       box-shadow: 0 0 1px black;
@@ -58,8 +58,8 @@
     margin-left: 15px;
 
     img {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       border: 1px solid #B6FA98;
       border-radius: 5px;
       box-shadow: 0 0 1px black;
@@ -159,20 +159,74 @@
     width: @sidebar-panel-width;
     text-align: center;
     background: @sidebar-panel-color;
-	border-right: 1px solid @major-font-color;
+    border-right: 1px solid @major-font-color;
 
     #sidebar-profile {
       margin-top: 60px;
+      text-align: center;
 
       #profile-avatar {
+        margin: auto;
+        width: 122px;
+        height: 122px;
         display: block;
-
+        position: relative;
         img {
-          width: 80px;
-          height: 80px;
+          left: 0px;
+          position: absolute;
+          width: 120px;
+          height: 120px;
           border: 1px solid #F8F8FF;
           border-radius: 5px;
           box-shadow: 0 0 1px black;
+        }
+        img:hover + a {
+          opacity: 1.0;
+          background-color: rgba(0, 0, 0, 0.6);
+        }
+        a {
+          display: block;
+          height: 30px;
+          position: absolute;
+          bottom: 0px;
+          left: -5px;
+          width: 125px;
+          color: @major-font-color;
+          opacity: 0.0;
+          i {
+            font-size: 24px;
+            opacity: 0.8;
+          }
+          .change-avatar-text {
+            opacity: 0.8;
+          }
+        }
+        a:hover {
+          opacity: 1.0;
+          background-color: rgba(0, 0, 0, 0.7);
+        }
+        #avatar-list {
+          position: fixed;
+          width: 800px;
+          height: 600px;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          background-color: white;
+          z-index: 2;
+          #end-avatar-list {
+            position: absolute;
+            opacity: 0.7;
+            right: -16px;
+            top: -16px;
+            font-size: 28px;
+            border-radius: 16px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid;
+            background: #dddddd;
+          }
         }
       }
 

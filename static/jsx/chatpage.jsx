@@ -70,7 +70,9 @@ var SignClass = React.createClass({
 var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
-      this.setState({Sign: cmd.Setting.Sign});
+      this.setState({
+        Sign: cmd.Setting.Sign,
+      });
     }.bind(this));
     this.props.chatSocket.addHandler("setting", function(cmd) {
       if (cmd.OK == true) {
@@ -81,7 +83,7 @@ var SideBar = React.createClass({
         console.log('setting failed!');
       }
     }.bind(this));
-    return {Sign: "", buttonList: null};
+    return {Sign: "", buttonList: null, selectAvatar: false};
   },
   NewConnection: function(i) {
       console.log(i);
@@ -101,6 +103,14 @@ var SideBar = React.createClass({
   logout: function() {
     localStorage.setItem('login', 'false');
     this.props.logout();
+  },
+  handleSelectAvatar: function(e) {
+    this.setState({selectAvatar: true})
+    e.preventDefault();
+  },
+  handleEndAvatar: function(e) {
+    this.setState({selectAvatar: false})
+    e.preventDefault();
   },
   handleClick: function() {
     if (!this.state.buttonList) {
@@ -123,13 +133,31 @@ var SideBar = React.createClass({
   },
   render: function() {
     return (
-      //<!-- start of navigation area -->
+      // <!-- start of navigation area -->
       <nav id="sidebar-panel">
         <div id="sidebar-profile">
-          <span id="profile-avatar"><a><img src="/static/img/me_finn.jpg"/></a></span>
+          <div id="profile-avatar">
+            <img src="/static/img/me_finn.jpg" />
+            <a onClick={this.handleSelectAvatar}>
+              <i className="fa fa-user"></i>
+              <span className="change-avatar-text">更改大頭貼</span>
+            </a>
+            {function() {
+              if (this.state.selectAvatar) {
+                return (
+                  <div id="avatar-list">
+                    <div id="end-avatar-list" onClick={this.handleEndAvatar}>
+                      <i className="fa fa-times"></i>
+                    </div>
+                  </div>
+                )
+              }
+              return null;
+            }.bind(this)()}
+          </div>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
         </div>
-        <a id="new-connection" onClick={/*this.props.changeState.bind(null, 'new_connection')*/this.handleClick }>建立新連線</a>
+        <a id="new-connection" onClick={this.handleClick}>建立新連線</a>
         <ReactCSSTransitionGroup transitionName="list-animate">
           {this.state.buttonList}
         </ReactCSSTransitionGroup>
