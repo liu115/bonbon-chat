@@ -137,17 +137,31 @@ var SideBar = React.createClass({
       <nav id="sidebar-panel">
         <div id="sidebar-profile">
           <div id="profile-avatar">
-            <img src="/static/img/me_finn.jpg" />
-            <a onClick={this.handleSelectAvatar}>
+            <img id="my-avatar" src="/static/img/avatar/me_finn.jpg" />
+            <a href="#" onClick={this.handleSelectAvatar}>
               <i className="fa fa-user"></i>
-              <span className="change-avatar-text">更改大頭貼</span>
+              <span className="change-avatar-text">點我改大頭</span>
             </a>
             {function() {
               if (this.state.selectAvatar) {
+                var avatars = ['ㄇㄐ', '阿砲', '毛毛', '花惹發', '桃子', 'ㄇㄐ', '阿砲', '毛毛', '花惹發', '桃子'];
                 return (
-                  <div id="avatar-list">
+                  <div id="avatar-list-wrap">
                     <div id="end-avatar-list" onClick={this.handleEndAvatar}>
                       <i className="fa fa-times"></i>
+                    </div>
+                    <div id="avatar-list">
+                      {
+                        avatars.map(
+                          function(a) {
+                            return (
+                              <div data-balloon={a} data-balloon-pos="down" className="avatar-to-select">
+                                <img src={"/static/img/avatar/" + a + ".jpg"}/>
+                              </div>
+                              )
+                          }
+                        )
+                      }
                     </div>
                   </div>
                 )
@@ -510,7 +524,7 @@ var Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'selected',
-        img: '/static/img/stranger-m.jpg',
+        img: '/static/img/avatar/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
@@ -525,7 +539,7 @@ var Chat = React.createClass({
           ID: cmd.Friends[i].ID,
           online: cmd.Friends[i].Status == 'on' ? true : false,
           stat: 'read',
-          img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
+          img: '/static/img/avatar/friend_' + parseInt(i + 1) + '.jpg',
           sign: cmd.Friends[i].Sign,
           read: cmd.Friends[i].LastRead,
           messages: [],
@@ -677,7 +691,7 @@ var Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: '/static/img/stranger-m.jpg',
+        img: '/static/img/avatar/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
@@ -732,7 +746,7 @@ var Chat = React.createClass({
       ID: 0,
       online: false,
       stat: 'read',
-      img: '/static/img/stranger-m.jpg',
+      img: '/static/img/avatar/stranger-m.jpg',
       sign: '猜猜我是誰',
 			read: (Date.now() * 10e+5).toString(),
       messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]}],
