@@ -105,7 +105,8 @@ type SetNickNameResponse struct {
 
 // structure for set setting
 type Setting struct {
-	Sign string
+	Sign   string
+	Avatar string
 }
 
 type UpdateSettingsRequest struct {
@@ -119,11 +120,18 @@ type UpdateSettingsResponse struct {
 	Setting Setting
 }
 
-// structure for change_nick
+// structure for change_sign
 type SignCmd struct {
 	Cmd  string
 	Who  int
 	Sign string
+}
+
+// structure for change_avatar
+type AvatarCmd struct {
+	Cmd    string
+	Who    int
+	Avatar string
 }
 
 // structure for bonbon
@@ -159,21 +167,24 @@ type ConnectResponse struct {
 }
 
 type ConnectSuccess struct {
-	Cmd  string
-	Sign string
+	Cmd    string
+	Sign   string
+	Avatar string
 }
 
 // structure for init
 type Friend struct {
 	ID       int
 	Sign     string
+	Avatar   string
 	Nick     string
 	Status   string
 	LastRead string
 }
 
 type setting struct {
-	Sign string
+	Sign   string
+	Avatar string
 }
 
 type InitCmd struct {

@@ -43,16 +43,18 @@ API 實體
 2.  websocket onopen
 	{"Cmd": "init",
 	"OK": true or false
-	"Setting": {"Sign": "XXXXXXX"},
-    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Nick": "XXXXX", Status: "on or off", LastRead: 時間（字串）}, ...]}
+	"Setting": {"Sign": "XXXXXXX", "Avatar": "XXXXXXXX"},
+    "Friends": [{"ID": XXXXXX, "Sign": "XXXXXXX", "Avatar": "XXXXXX", "Nick": "XXXXX", Status: "on or off", LastRead: 時間（字串）}, ...]}
+
 3.
-	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}}
+	a. {"Cmd": "setting", "Setting": {"Sign": "XXXXXX"}} // Sign, Avatar至少一個
        {"OK": true, "Cmd": "setting", "Setting": {"Sign": "XXXXXXX"}}
 	b. 伺服器主動 {"Cmd": "change_sign", "Who": "對方id", "Sign": "XXXXXX"}
+	   伺服器主動 {"Cmd": "change_avatar", "Who": "對方id", "Avatar": "XXXXXX"}
 
 4.  請求 {"Cmd": "connect", "Type": "L1_FB_friend or L2_FB_friend or stranger"} // 修改使之類似bonbon
 	回應 {"OK": true or fase, "Cmd": "connect"}
-	伺服器主動：{"Cmd": "connected", "Sign": "XXXXXXX"}
+	伺服器主動：{"Cmd": "connected", "Sign": "XXXXXXX", "Avatar": "XXXXXX"}
 5.
 	a. 請求 {"Cmd": "send", "Who": "對方id or 0(stranger)", "Msg": "XXXXXXX", "Order": XXX}
 	   回應 {"OK": true, "Cmd": "send", "Who": "對方id or 0(stranger)", "Msg": "XXXXXXX", "Time": XXXXXX, "Order": XX}

@@ -129,22 +129,43 @@ func handleUpdateSettings(msg []byte, id int) {
 	}
 
 	// update database
-	err = database.SetSignature(id, request.Setting.Sign)
-	if err != nil {
-		response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
-		sendJsonToOnlineID(id, &response)
-		return
+	if request.Setting.Sign != "" {
+		err = database.SetSignature(id, request.Setting.Sign)
+		if err != nil {
+			response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+			sendJsonToOnlineID(id, &response)
+			return
+		}
+	}
+	if request.Setting.Avatar != "" {
+		err = database.SetAvatar(id, request.Setting.Avatar)
+		if err != nil {
+			response := UpdateSettingsResponse{OK: false, Cmd: "setting", Setting: request.Setting}
+			sendJsonToOnlineID(id, &response)
+			return
+		}
 	}
 
 	// 通知朋友
 	friendships, err := database.GetFriendships(id)
 	if err == nil {
-		for i := 0; i < len(friendships); i++ {
-			fmt.Printf("%d 通知 %d 換簽名檔\n", id, friendships[i].FriendID)
-			sendJsonToUnknownStatusID(
-				friendships[i].FriendID,
-				SignCmd{Cmd: "change_sign", Who: id, Sign: request.Setting.Sign},
-			)
+		if request.Setting.Sign != "" {
+			for i := 0; i < len(friendships); i++ {
+				fmt.Printf("%d 通知 %d 換簽名檔\n", id, friendships[i].FriendID)
+				sendJsonToUnknownStatusID(
+					friendships[i].FriendID,
+					SignCmd{Cmd: "change_sign", Who: id, Sign: request.Setting.Sign},
+				)
+			}
+		}
+		if request.Setting.Avatar != "" {
+			for i := 0; i < len(friendships); i++ {
+				fmt.Printf("%d 通知 %d 換大頭貼\n", id, friendships[i].FriendID)
+				sendJsonToUnknownStatusID(
+					friendships[i].FriendID,
+					AvatarCmd{Cmd: "change_avatar", Who: id, Avatar: request.Setting.Avatar},
+				)
+			}
 		}
 	} else {
 		fmt.Printf("getFriendships: %s", err.Error())

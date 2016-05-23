@@ -46,7 +46,7 @@ func initOnline(id int, conn *websocket.Conn) (*user, error) {
 			return nil, err
 		}
 	}
-	return onlineUser[id], nil //此時必定還存在
+	return onlineUser[id], nil
 }
 
 func getInitInfo(id int) (*InitCmd, error) {
@@ -72,6 +72,7 @@ func getInitInfo(id int) (*InitCmd, error) {
 			new_firiend := Friend{
 				ID:       friendships[i].FriendID,
 				Sign:     friend_account.Signature,
+				Avatar:   friend_account.Avatar,
 				Nick:     friendships[i].NickName,
 				Status:   status,
 				LastRead: strconv.FormatInt(friendships[i].LastRead.UnixNano(), 10),
@@ -81,7 +82,7 @@ func getInitInfo(id int) (*InitCmd, error) {
 			return &InitCmd{Cmd: "init", OK: false}, err
 		}
 	}
-	my_setting := setting{Sign: account.Signature}
+	my_setting := setting{Sign: account.Signature, Avatar: account.Avatar}
 	return &InitCmd{Cmd: "init", OK: true, Setting: my_setting, Friends: friends}, nil
 }
 

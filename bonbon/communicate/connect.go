@@ -194,11 +194,13 @@ func handleConnect(msg []byte, id int, u *user) {
 	if stranger != -1 {
 		// get signatures of both
 		selfSignature, err := database.GetSignature(id)
+		selfAvatar, err := database.GetAvatar(id)
 		if err != nil {
 			// TODO handle error
 		}
 
 		strangerSignature, err := database.GetSignature(stranger)
+		strangerAvatar, err := database.GetAvatar(stranger)
 		if err != nil {
 			// TODO handle error
 		}
@@ -206,9 +208,9 @@ func handleConnect(msg []byte, id int, u *user) {
 		fmt.Printf("%d connect to %d\n", id, stranger)
 		sendJsonToUnknownStatusID(
 			stranger,
-			ConnectSuccess{Cmd: "connected", Sign: *selfSignature},
+			ConnectSuccess{Cmd: "connected", Sign: *selfSignature, Avatar: *selfAvatar},
 		)
-		sendJsonByUser(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature})
+		sendJsonByUser(u, ConnectSuccess{Cmd: "connected", Sign: *strangerSignature, Avatar: *strangerAvatar})
 	}
 }
 

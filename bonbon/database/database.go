@@ -72,6 +72,7 @@ func CreateAccountByToken(token string) (*Account, error) {
 		account = Account{AccessToken: token,
 			FacebookID:   facebookID,
 			FacebookName: facebookName,
+			Avatar:       "換個大頭貼吧",
 		}
 		query := db.Create(&account)
 
@@ -312,6 +313,49 @@ func SetSignature(id int, signature string) error {
 	}
 
 	account.Signature = signature
+	query = db.Save(&account)
+
+	if query.Error != nil {
+		return query.Error
+	}
+
+	return nil
+}
+
+// GetAvatar get the avatar string of an account
+func GetAvatar(id int) (*string, error) {
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return &account.Avatar, nil
+}
+
+// SetAvatar set the avatar string of an account
+func SetAvatar(id int, avatar string) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	var account Account
+	query := db.Where("id = ?", id).First(&account)
+
+	if query.Error != nil {
+		return query.Error
+	}
+
+	account.Avatar = avatar
 	query = db.Save(&account)
 
 	if query.Error != nil {
