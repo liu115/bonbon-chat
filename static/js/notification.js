@@ -20,12 +20,13 @@ window.onblur = function () {
 }
 
 var MSG_SOUND = new Audio("/static/audio/msg.wav");
+var BON_SOUND = new Audio("/static/audio/bonbon.mp3");
 
 function NewMessage(who, msg) {
   if (Notification && Notification.permission === "granted" && !isFocus) {
-    var n = new Notification('New Message', {
+    var n = new Notification(who, {
       icon: '',
-      body: who + ':' + msg
+      body: msg
     });
     n.onshow = function () {
       setTimeout(n.close.bind(n), 5000);
@@ -33,4 +34,17 @@ function NewMessage(who, msg) {
 	MSG_SOUND.play();
   }
   return 0;
+}
+
+function NewFriend() {
+  if (Notification && Notification.permission === "granted" && !isFocus) {
+    var n = new Notification('成為朋友', {
+      icon: '',
+      body: '已經與匿名對象成為好友囉'
+    });
+    n.onshow = function () {
+      setTimeout(n.close.bind(n), 5000);
+    }
+	BON_SOUND.play();
+  }
 }

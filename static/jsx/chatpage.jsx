@@ -6,13 +6,26 @@ var SignClass = React.createClass({
   getInitialState: function() {
     return {
       setting: false,
-      value: ''
+      value: this.props.sign
     };
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!prevState.setting && this.state.setting) {
+      var input = React.findDOMNode(this.refs.refInput)
+      input.focus();
+      input.selectionStart = input.selectionEnd = this.state.value.length;
+    }
+  },
+
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.sign != this.props.sign) {
+      this.setState({value: nextProps.sign})
+    }
   },
 
   handleClick: function() {
     this.setState({setting: true});
-    //React.findDOMNode(this.refs.refInput).focus();
   },
 
   handleType: function(e) {
@@ -57,18 +70,27 @@ var SignClass = React.createClass({
 var SideBar = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler("init", function(cmd) {
-      this.setState({Sign: cmd.Setting.Sign});
+      this.setState({
+        Sign: cmd.Setting.Sign,
+        Avatar: cmd.Setting.Avatar,
+      });
     }.bind(this));
     this.props.chatSocket.addHandler("setting", function(cmd) {
       if (cmd.OK == true) {
-        console.log('setting success, new sign is ' + cmd.Setting.Sign);
-        this.setState({Sign: cmd.Setting.Sign});
+        if (cmd.Setting.Sign) {
+          console.log('setting success, new sign is ' + cmd.Setting.Sign);
+          this.setState({Sign: cmd.Setting.Sign});
+        }
+        if (cmd.Setting.Avatar) {
+          this.setState({Avatar: cmd.Setting.Avatar});
+          console.log('setting success, new avatar is ' + cmd.Setting.Avatar);
+        }
       }
       else {
         console.log('setting failed!');
       }
     }.bind(this));
-    return {Sign: "", buttonList: null};
+    return {Sign: "", Avatar: "", buttonList: null, selectAvatar: false};
   },
   NewConnection: function(i) {
       console.log(i);
@@ -88,6 +110,19 @@ var SideBar = React.createClass({
   logout: function() {
     localStorage.setItem('login', 'false');
     this.props.logout();
+  },
+  handleStartSelectAvatar: function(e) {
+    this.setState({selectAvatar: true})
+    e.preventDefault();
+  },
+  handleEndAvatar: function(e) {
+    this.setState({selectAvatar: false})
+    e.preventDefault();
+  },
+  handleSelectAvatar: function(avatar) {
+    return function () {
+      this.props.chatSocket.send(JSON.stringify({Cmd: "setting", Setting: {Avatar: avatar}}));
+    }.bind(this)
   },
   handleClick: function() {
     if (!this.state.buttonList) {
@@ -110,13 +145,46 @@ var SideBar = React.createClass({
   },
   render: function() {
     return (
-      //<!-- start of navigation area -->
+      // <!-- start of navigation area -->
       <nav id="sidebar-panel">
         <div id="sidebar-profile">
-          <span id="profile-avatar"><a><img src="/static/img/me_finn.jpg"/></a></span>
+          <div id="profile-avatar">
+            <img id="my-avatar" src={"/static/img/avatar/" + this.state.Avatar + ".jpg"} />
+            <a href="#" onClick={this.handleStartSelectAvatar}>
+              <i className="fa fa-user"></i>
+              <span className="change-avatar-text">點我改大頭</span>
+            </a>
+            {function() {
+              if (this.state.selectAvatar) {
+                var avatars = ['換個大頭貼吧', 'ㄇㄐ', '阿砲', '毛毛', '花惹發', '桃子'];
+                return (
+                  <div id="avatar-list-wrap">
+                    <div id="end-avatar-list" onClick={this.handleEndAvatar}>
+                      <i className="fa fa-times"></i>
+                    </div>
+                    <div id="avatar-list">
+                      {
+                        avatars.map(
+                          function(a) {
+                            return (
+                              <div data-balloon={a} data-balloon-pos="down"
+                                className="avatar-to-select" onClick={this.handleSelectAvatar(a)}>
+                                <img src={"/static/img/avatar/" + a + ".jpg"}/>
+                              </div>
+                              )
+                          }.bind(this)
+                        )
+                      }
+                    </div>
+                  </div>
+                )
+              }
+              return null;
+            }.bind(this)()}
+          </div>
           <SignClass sign={this.state.Sign} chatSocket={this.props.chatSocket}/>
         </div>
-        <a id="new-connection" onClick={/*this.props.changeState.bind(null, 'new_connection')*/this.handleClick }>建立新連線</a>
+        <a id="new-connection" onClick={this.handleClick}>建立新連線</a>
         <ReactCSSTransitionGroup transitionName="list-animate">
           {this.state.buttonList}
         </ReactCSSTransitionGroup>
@@ -130,19 +198,83 @@ var SideBar = React.createClass({
 });
 
 var FriendBox = React.createClass({
+  getInitialState: function () {
+    return {
+      name: this.props.friend.name,
+      changing: false,
+    }
+  },
+  componentWillReceiveProps: function(nextProps) {
+    if (nextProps.friend.name != this.props.friend.name) {
+      this.setState({
+        changing: false,
+        name: nextProps.friend.name
+      });
+    }
+  },
   handleClick: function() {
     this.props.select(this.props.index);
     this.props.changeState('chat');
   },
-
+  handleClickPencil: function (e) {
+    this.setState({changing: true});
+    e.stopPropagation();
+  },
+  handleType: function (e) {
+    var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
+    if (keyInput == 13) {
+      if (e.target.value != this.props.friend.name) {
+        console.log("try set_nick of id " + this.props.friend.ID + " to " + e.target.value);
+        this.props.chatSocket.send(JSON.stringify({Cmd: "set_nick", Who: this.props.friend.ID, Nick: e.target.value}));
+      } else {
+        this.setState({changing: false})
+      }
+    }
+  },
+  handleChange: function (e) {
+    this.setState({name: e.target.value})
+  },
+  handleCheck: function(e) {
+    if (this.state.name != this.props.friend.name) {
+      console.log("try set_nick of id " + this.props.friend.ID + " to " + this.state.name);
+      this.props.chatSocket.send(JSON.stringify({Cmd: "set_nick", Who: this.props.friend.ID, Nick: this.state.name}));
+    } else {
+      this.setState({changing: false})
+    }
+    e.stopPropagation();
+  },
+  handleCancel: function() {
+    this.setState({
+      changing: false,
+      name: this.props.friend.name
+    })
+    e.stopPropagation();
+  },
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!prevState.changing && this.state.changing) {
+      var input = this.refs.InputName.getDOMNode();
+      input.focus();
+      input.selectionStart = input.selectionEnd = this.state.name.length;
+    }
+  },
   render: function() {
     return (
-      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")} onClick={this.handleClick}>
+      <div className={"friend-unit " + "friend-" + this.props.friend.stat + (this.props.friend.online ? '' : " off-line")}
+           onClick={this.handleClick}>
         <div className={(this.props.index == 0) ? "stranger-avatar": "friend-avatar"}>
           <img src={this.props.friend.img}/>
         </div>
         <div className="friend-info">
-          <p className="friend-info-name">{this.props.friend.name}</p>
+            {function () {
+              if (this.state.changing) {
+                return <input type="text" value={this.state.name}
+                  ref="InputName" onChange={this.handleChange}
+                  onClick={function(e) {e.stopPropagation()}}
+                  onKeyPress={this.handleType}/>
+              } else {
+                return <p className="friend-info-name"> {this.props.friend.name} </p>
+              }
+            }.bind(this)()}
           <p className="friend-info-status">
             {function() {
               if (this.props.friend.messages.length > 0)
@@ -156,7 +288,16 @@ var FriendBox = React.createClass({
             }.bind(this)()}
           </p>
         </div>
-        <div style={{clear: "both"}}></div>
+        <div className="friend-setting">
+          {function () {
+            if (this.state.changing) {
+              return [<i className="fa fa-check" onClick={this.handleCheck}></i>,
+                <i className="fa fa-times" onClick={this.handleCancel}></i>];
+            } else {
+              return <i className="fa fa-pencil" onClick={this.handleClickPencil}></i>;
+            }
+          }.bind(this)()}
+        </div>
       </div>
     );
   }
@@ -179,7 +320,7 @@ var FriendList = React.createClass({
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
       if (this.props.friends[i].name.indexOf(this.state.filterText) === -1) continue;
-      friendBoxs.push(<FriendBox index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
+      friendBoxs.push(<FriendBox chatSocket={this.props.chatSocket} index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
     }
     return (
       <div id="friend-area">
@@ -250,11 +391,14 @@ var ChatRoom = React.createClass({
       node.scrollTop = this.scrollTop + (node.scrollHeight - this.scrollHeight);
     }.bind(this));
 		this.props.chatSocket.addHandler('bonbon', function(cmd) {
-			this.setState({bonboning: true});
+			if (cmd.OK == true) this.setState({bonboning: true});
     }.bind(this));
 		this.props.chatSocket.addHandler('disconnect', function(cmd) {
-			this.setState({bonboning: false});
+			if (cmd.OK == true) this.setState({bonboning: false});
     }.bind(this));
+		this.props.chatSocket.addHandler('new_friend', function(cmd) {
+			this.setState({bonboning: false});
+		}.bind(this));
 	return {
 		bonboning: false
 		};
@@ -266,21 +410,19 @@ var ChatRoom = React.createClass({
     this.shouldScrollBottom = node.scrollTop + node.offsetHeight === node.scrollHeight;
   },
   componentDidUpdate: function() {
+		/* If the scroll is at bottom then send 'read'. */
     if (this.shouldScrollBottom) {
       var node = React.findDOMNode(this.refs.refContent);
       node.scrollTop = node.scrollHeight;
       var messageLength = this.props.friends[this.props.target].messages.length;
       if (messageLength <= 0) return 0;
       var lastMessage = false;
-      for (var i = messageLength - 1; i >= 0; i--) {
-        if (this.props.friends[this.props.target].messages[i] == 'others')
-          lastMessage = this.props.friends[this.props.target].messages[i];
-      }
+      lastMessage = this.props.friends[this.props.target].messages[messageLength - 1];
       if (lastMessage === false) return 0;
       if (this.props.friends[this.props.target].read < lastMessage.time) {
-        console.log('read auto');
         this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
+			this.shouldScrollBottom = false;
     }
   },
   componentDidMount: function() {
@@ -312,20 +454,25 @@ var ChatRoom = React.createClass({
         this.props.chatSocket.send(JSON.stringify({Cmd: "history", With_who: who, Number: 15, When: time, Order: 0}));
       }
     }
+		/*
     if (node.scrollTop + node.offsetHeight === node.scrollHeight) {
       var messageLength = this.props.friends[this.props.target].messages.length;
       if (messageLength <= 0) return 0;
       var lastMessage = false;
-      for (var i = messageLength - 1; i >= 0; i--) {
-        if (this.props.friends[this.props.target].messages[i] == 'other')
-          lastMessage = this.props.friends[this.props.target].messages[i];
-      }
+      //for (var i = messageLength - 1; i >= 0; i--) {
+        //if (this.props.friends[this.props.target].messages[i] == 'other')
+          lastMessage = this.props.friends[this.props.target].messages[messageLength - 1];
+					//break;
+      //}
       if (lastMessage === false) return 0;
+			console.log(this.props.friends[this.props.target].read);
+			console.log(lastMessage.time);
       if (this.props.friends[this.props.target].read < lastMessage.time) {
         console.log('read');
-        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID, Time: lastMessage.time}));
+        this.props.chatSocket.send(JSON.stringify({Cmd: "read", With_who: this.props.friends[this.props.target].ID}));
       }
     }
+		*/
   },
   focusInput: function() {
     this.refs.refInput.focusInput();
@@ -390,7 +537,7 @@ var Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'selected',
-        img: '/static/img/stranger-m.jpg',
+        img: '/static/img/avatar/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
@@ -404,10 +551,10 @@ var Chat = React.createClass({
           name: cmd.Friends[i].Nick,
           ID: cmd.Friends[i].ID,
           online: cmd.Friends[i].Status == 'on' ? true : false,
-          stat: i == 0 ? 'selected' : 'read',
-          img: '/static/img/friend_' + parseInt(i + 1) + '.jpg',
+          stat: 'read',
+          img: '/static/img/avatar/' + cmd.Friends[i].Avatar + '.jpg',
           sign: cmd.Friends[i].Sign,
-          read: cmd.Friends[i].Read,
+          read: cmd.Friends[i].LastRead,
           messages: [],
         };
         console.log('read' + friend.read);
@@ -437,6 +584,7 @@ var Chat = React.createClass({
       else {
         console.log('send fail(cmd.OK=false)');
       }
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -450,14 +598,9 @@ var Chat = React.createClass({
         }
       }
       NewMessage(this.state.friends[index].name, cmd.Msg);
-      this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
-			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
-				function(x , y) {
-					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
-				}
-			);
-			sorted_friends.unshift(this.state.friends[0]);
-			this.state.friends = sorted_friends;
+			this.state.friends[index].messages.push({content: cmd.Msg, from: 'others', time: cmd.Time});
+			// Sorted by
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -475,7 +618,46 @@ var Chat = React.createClass({
         friends: this.state.friends
       });
     }.bind(this));
-
+		this.props.chatSocket.addHandler('set_nick', function(cmd) {
+			var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+			if (index == -1) return 0; // Who not found
+      console.log(this.state.friends[index]);
+			this.state.friends[index] = React.addons.update(this.state.friends[index], {name: {$set: cmd.Nick}})
+			this.setState({
+        friends: this.state.friends
+      });
+		}.bind(this));
+		this.props.chatSocket.addHandler('change_sign', function(cmd) {
+			var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+			if (index == -1) return 0; // Who not found
+			this.state.friends[index].sign = cmd.Sign;
+			this.setState({
+        friends: this.state.friends
+      });
+		}.bind(this));
+		this.props.chatSocket.addHandler('change_avatar', function(cmd) {
+			var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
+        }
+      }
+			if (index == -1) return 0; // Who not found
+      this.state.friends[index].img = '/static/img/avatar/' + cmd.Avatar + '.jpg';
+			this.setState({
+        friends: this.state.friends
+      });
+		}.bind(this));
     this.props.chatSocket.addHandler('connect', function(cmd) {
       var friends = this.state.friends;
       friends[0].messages = [{from: 'system', content: '建立配對中...請稍候', time: (Date.now() * 10e+5).toString()}];
@@ -487,6 +669,7 @@ var Chat = React.createClass({
     this.props.chatSocket.addHandler('connected', function(cmd) {
       var friends = this.state.friends;
       friends[0].messages = [{from: 'system', content: '已建立新配對，可以開始聊天囉！', time: (Date.now() * 10e+5).toString()}];
+      friends[0].img = '/static/img/avatar/' + cmd.Avatar + '.jpg';
       friends[0].online = true;
       friends[0].sign = cmd.Sign;
       this.setState({
@@ -495,8 +678,10 @@ var Chat = React.createClass({
       });
     }.bind(this));
     this.props.chatSocket.addHandler('disconnect', function(cmd) {
-      this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+5).toString()});
-      this.state.friends[0].online = false;
+			if (cmd.OK == true) {
+      	this.state.friends[0].messages.push({from: 'system', content: '連線已中斷', time: (Date.now() * 10e+5).toString()});
+      	this.state.friends[0].online = false;
+			}
       this.setState({
         friends: this.state.friends
       });
@@ -512,6 +697,7 @@ var Chat = React.createClass({
 
     }.bind(this));
     this.props.chatSocket.addHandler('new_friend', function(cmd) {
+      NewFriend();
       var index = this.state.friends.length;
       var new_friend = {
         index: index,
@@ -519,7 +705,7 @@ var Chat = React.createClass({
         ID: cmd.Who,
         online: true,
         stat: 'selected',
-        img: '/static/img/friend_' + index + '.jpg',
+        img: this.state.friends[0].img,
         sign: this.state.friends[0].sign,
         read: this.state.friends[0].read,
         messages: this.state.friends[0].messages
@@ -532,31 +718,32 @@ var Chat = React.createClass({
         ID: 0,
         online: false,
         stat: 'read',
-        img: '/static/img/stranger-m.jpg',
+        img: '/static/img/avatar/stranger-m.jpg',
         sign: '猜猜我是誰',
         read: (Date.now() * 10e+5).toString(),
         messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]
       };
-      this.props.chatSocket.addHandler('read', function(cmd) {
-        var index = -1;
-        for (var i = 0; i < this.state.friends.length; i++) {
-          if (this.state.friends[i].ID == cmd.Who) {
-            index = i;
-          }
+			this.setState({
+	      friends: this.state.friends,
+	      who: index,
+	    });
+		}.bind(this));
+    this.props.chatSocket.addHandler('read', function(cmd) {
+      var index = -1;
+      for (var i = 0; i < this.state.friends.length; i++) {
+        if (this.state.friends[i].ID == cmd.Who) {
+          index = i;
         }
-        if (index == -1) return 0;
-        if (this.state.friends[index].time < cmd.Time) {
-          this.state.friends[index].time = cmd.Time;
-        }
-        this.setState({
-          friends: this.state.friends
-        });
-      }.bind(this));
+      }
+      if (index == -1) return 0;
+      if (this.state.friends[index].read < cmd.Time) {
+        this.state.friends[index].read = cmd.Time;
+      }
       this.setState({
-        friends: this.state.friends,
-        who: index,
+        friends: this.state.friends
       });
     }.bind(this));
+
     this.props.chatSocket.addHandler('history', function(cmd) {
       var index = -1;
       for (var i = 0; i < this.state.friends.length; i++) {
@@ -574,13 +761,7 @@ var Chat = React.createClass({
           this.state.friends[index].messages.unshift({content: msg.Text, from: 'me', time: msg.Time});
         }
       }
-			var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
-				function(x , y) {
-					return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
-				}
-			);
-			sorted_friends.unshift(this.state.friends[0]);
-			this.state.friends = sorted_friends;
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
@@ -592,12 +773,33 @@ var Chat = React.createClass({
       ID: 0,
       online: false,
       stat: 'read',
-      img: '/static/img/stranger-m.jpg',
+      img: '/static/img/avatar/stranger-m.jpg',
       sign: '猜猜我是誰',
+			read: (Date.now() * 10e+5).toString(),
       messages: [{from: 'system', content: '尚未配對成功', time: (Date.now() * 10e+5).toString()}]}],
     };
   },
-
+	sortFriends: function() {
+		var	who = this.state.friends[this.state.who].ID;
+		var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
+			function(x , y) {
+				if (x.messages.length == 0 || y.messages.length == 0) return (x.messages.length < y.messages.length);
+				return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+			}
+		);
+		sorted_friends.unshift(this.state.friends[0]);
+		this.state.friends = sorted_friends;
+		for (var i = 0; i < this.state.friends.length; i++) {
+			if (this.state.friends[i].ID == who) {
+				this.state.who = i;
+			}
+		}
+		console.log("sorting");
+		this.setState({
+			friends: this.state.friends,
+			who: this.state.who
+		});
+	},
   selectFriend: function(selectedFriend) {
     this.state.friends[this.state.who].stat = 'read';
     this.state.friends[selectedFriend].stat = 'selected';
