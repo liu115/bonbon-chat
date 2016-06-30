@@ -7,6 +7,7 @@
 
 .DS_Store
 _vendor/
+vendor/
 build/
 bonbon-server
 bonbon-*.tar.gz

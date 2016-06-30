@@ -39,7 +39,14 @@ collation-server=utf8_unicode_ci
 ```
 以確保mysql支援UTf-8
 
-7. 編譯並執行
+7. 編譯前端
+
+
+$ npm install
+$ cd static
+$ webpack --watch
+
+8. 編譯並執行
 ```
 $ rake
 $ ./bonbon-server             # 預設模式
