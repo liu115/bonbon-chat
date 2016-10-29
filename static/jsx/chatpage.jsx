@@ -527,6 +527,7 @@ var ChatRoom = React.createClass({
   }
 });
 
+
 var Chat = React.createClass({
   getInitialState: function() {
     this.props.chatSocket.addHandler('init', function(cmd) {
@@ -761,7 +762,7 @@ var Chat = React.createClass({
           this.state.friends[index].messages.unshift({content: msg.Text, from: 'me', time: msg.Time});
         }
       }
-			//this.sortFriends();
+			this.sortFriends();
       this.setState({
         friends: this.state.friends
       });
