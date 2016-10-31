@@ -338,48 +338,24 @@ var FriendList = React.createClass({
 var InputArea = React.createClass({
 	getInitialState: function () {
 		/* lock when message are sending */
-		this.sendLock = 'unlock';
-		this.props.chatSocket.addHandler('send', function(cmd) {
-			this.sendLock = 'unlock';
-			if (cmd.OK == true) {
-				this.setState({
-					userInput: ''
-				});
-			}
-		}.bind(this));
 		return {
-			userInput: ''
 		};
-  },
-  sendMessage: function(e) {
-    //send it to websocket
-    //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    if (this.state.userInput != '' && this.sendLock == 'unlock'){
-      this.props.addMessage(this.props.target, 'buttom', {
-        from: 'me',
-        content: this.state.userInput
-      });
-      this.sendLock = 'lock';
-    }
-    this.focusInput();
   },
   sendMessageByKeyboard: function(e) {
     var keyInput = e.keyCode == 0 ? e.which : e.keyCode;
     if (keyInput == 13 && !e.shiftKey) {
-      this.sendMessage();
+      this.props.sendMessage();
       e.preventDefault();
     }
   },
   handleChange: function(e) {
-    this.setState({
-      userInput: e.target.value
-    });
+    this.props.changeInput(e.target.value);
   },
   focusInput: function() {
     React.findDOMNode(this.refs.refInput).focus();
   },
   render: function () {
-    return <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.state.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
+    return <textarea ref="refInput" type="text" name="id" id="login-id" onKeyPress={this.sendMessageByKeyboard} value={this.props.userInput} onChange={this.handleChange} placeholder="請在這裡輸入訊息！"></textarea>
   }
 })
 
@@ -399,8 +375,18 @@ var ChatRoom = React.createClass({
 		this.props.chatSocket.addHandler('new_friend', function(cmd) {
 			this.setState({bonboning: false});
 		}.bind(this));
+    this.props.chatSocket.addHandler('send', function(cmd) {
+			if (cmd.OK == true) {
+				this.setState({
+					userInput: ''
+				});
+        this.freeSendLock();
+			}
+		}.bind(this));
+    this.sendLock = false;
 	return {
-		bonboning: false
+		bonboning: false,
+    userInput: ''
 		};
   },
   componentWillUpdate: function() {
@@ -430,6 +416,30 @@ var ChatRoom = React.createClass({
     React.findDOMNode(this.refs.refInput).focus();
   },
   componentWillUnmount: function() {
+  },
+  requireSendLock: function() {
+    if (this.sendLock) return false;
+    this.sendLock = true;
+    return true;
+  },
+  freeSendLock: function() {
+    this.sendLock = false;
+  },
+  sendMessage: function(e) {
+    //send it to websocket
+    //this.state.messages.splice(0, 0, ['me', 'lalala']);
+    if (this.state.userInput.trim() != '' && this.requireSendLock()){
+      this.props.addMessage(this.props.target, 'buttom', {
+        from: 'me',
+        content: this.state.userInput.trim()
+      });
+    }
+    this.focusInput();
+  },
+  changeInput: function(value) {
+    this.setState({
+      userInput: value
+    });
   },
 	autoScrollBottom: function() {
 		if (this.shouldScrollBottom) {
@@ -493,7 +503,7 @@ var ChatRoom = React.createClass({
         <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
-              <InputArea ref="refInput" addMessage={this.props.addMessage} chatSocket={this.props.chatSocket} target={this.props.target}/>
+              <InputArea ref="refInput" userInput={this.state.userInput} changeInput={this.changeInput.bind(this)} sendMessage={this.sendMessage.bind(this)}/>
             </div>
           </div>
           {function() {
