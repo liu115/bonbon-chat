@@ -383,10 +383,10 @@ var ChatRoom = React.createClass({
         this.freeSendLock();
 			}
 		}.bind(this));
-    this.sendLock = false;
 	return {
 		bonboning: false,
-    userInput: ''
+    userInput: '',
+    sendLock: false
 		};
   },
   componentWillUpdate: function() {
@@ -418,17 +418,16 @@ var ChatRoom = React.createClass({
   componentWillUnmount: function() {
   },
   requireSendLock: function() {
-    if (this.sendLock) return false;
-    this.sendLock = true;
+    if (this.state.sendLock) return false;
+    this.setState({sendLock: true});
     return true;
   },
   freeSendLock: function() {
-    this.sendLock = false;
+    this.setState({sendLock: false});
   },
   sendMessage: function(e) {
     //send it to websocket
     //this.state.messages.splice(0, 0, ['me', 'lalala']);
-    if (this.state.userInput.trim() != '' && this.requireSendLock()){
       this.props.addMessage(this.props.target, 'buttom', {
         from: 'me',
         content: this.state.userInput.trim()
@@ -506,25 +505,34 @@ var ChatRoom = React.createClass({
               <InputArea ref="refInput" userInput={this.state.userInput} changeInput={this.changeInput.bind(this)} sendMessage={this.sendMessage.bind(this)}/>
             </div>
           </div>
+          <div className="pull-left">
           {function() {
             switch (this.props.target) {
               case 0:
 								switch (this.state.bonboning) {
 									case true:
 										return (
-											<div className="pull-left">
+                      <span>
 			                  <a id="button-bonbon" className="message-button bonbon-button-clicked" onClick={this.bonbon}>Bonbon!</a>
 			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
-			                </div>);
+                      </span>
+                    );
 									case false:
 										return (
-											<div className="pull-left">
+                      <span>
 			                  <a id="button-bonbon" className="message-button" onClick={this.bonbon}>Bonbon!</a>
 			                  <a id="button-report" className="message-button" onClick={this.disconnect}>離開</a>
-			                </div>);
+                      </span>
+			              );
 								}
             }
           }.bind(this)()}
+          {function() {
+            if (this.state.sendLock) {
+              return (<span className="deliver-message">傳送中...</span>);
+            }
+          }.bind(this)()}
+          </div>
           <div className="pull-right">
             <a id="button-send-image" className="message-button" onclick="return false">傳送圖片</a>
             <a id="button-send-message" className="message-button" onClick={this.sendMessage}>傳送訊息</a>
