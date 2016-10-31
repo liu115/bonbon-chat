@@ -432,7 +432,6 @@ var ChatRoom = React.createClass({
         from: 'me',
         content: this.state.userInput.trim()
       });
-    }
     this.focusInput();
   },
   changeInput: function(value) {
@@ -502,7 +501,7 @@ var ChatRoom = React.createClass({
         <div id="message-control-panel" ref="panel">
           <div id="message-box">
             <div id="wrapper-message-box" className="wrapper-input">
-              <InputArea ref="refInput" userInput={this.state.userInput} changeInput={this.changeInput.bind(this)} sendMessage={this.sendMessage.bind(this)}/>
+              <InputArea ref="refInput" userInput={this.state.userInput} changeInput={this.changeInput} sendMessage={this.sendMessage}/>
             </div>
           </div>
           <div className="pull-left">
