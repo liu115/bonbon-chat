@@ -320,7 +320,7 @@ var FriendList = React.createClass({
     var friendBoxs = [];
     for (var i = 0; i < this.props.friends.length; i++) {
       if (this.props.friends[i].name.indexOf(this.state.filterText) === -1) continue;
-      friendBoxs.push(<FriendBox chatSocket={this.props.chatSocket} index={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
+      friendBoxs.push(<FriendBox chatSocket={this.props.chatSocket} index={i} key={i} friend={this.props.friends[i]} changeState={this.props.changeState} select={this.props.select}/>);
     }
     return (
       <div id="friend-area">
