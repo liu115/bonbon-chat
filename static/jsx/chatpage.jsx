@@ -784,9 +784,9 @@ var Chat = React.createClass({
 		var	who = this.state.friends[this.state.who].ID;
 		var sorted_friends = this.state.friends.slice(1, this.state.friends.length).sort(
 			function(x , y) {
-        if (x.messages.length == 0) return false;
-        if (y.messages.length == 0) return true;
-				return (x.messages[x.messages.length - 1].time < y.messages[y.messages.length - 1].time);
+        var x_time = (x.messages.length == 0) ? 0 : x.messages[x.messages.length - 1].time;
+        var y_time = (y.messages.length == 0) ? 0 : y.messages[y.messages.length - 1].time;
+        return y_time - x_time;
 			}
 		);
 		sorted_friends.unshift(this.state.friends[0]);
