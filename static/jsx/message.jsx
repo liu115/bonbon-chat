@@ -30,7 +30,7 @@ var MessageBalloon = React.createClass({
 	  return {meta: null};
   },
   findURL: function(content) {
-    var urlPattern = /(http|https):\/\/([\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-]))?/
+    var urlPattern = /(http|https):\/\/([\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-\(\)]*[\w@?^=%&amp;\/~+#-\(\)]))?/
     return this.props.msg.content.match(urlPattern);
   },
   showMsg: function() {
