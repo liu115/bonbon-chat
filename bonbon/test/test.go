@@ -1,12 +1,12 @@
 package test
 
 import (
-	"fmt"
-	"bytes"
-	"strconv"
-	"github.com/gin-gonic/gin"
-	"bonbon/database"
 	"bonbon/communicate"
+	"bonbon/database"
+	"bytes"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 // HandleTestWebsocket handler for testing websocket api
@@ -24,6 +24,17 @@ func HandleTestWebsocket(c *gin.Context) {
 func HandleTestCreateAccountByToken(c *gin.Context) {
 	token := c.Param("token")
 	account, err := database.CreateAccountByToken(token)
+	if err != nil {
+		c.String(404, err.Error())
+		return
+	}
+
+	c.String(200, strconv.Itoa(account.ID))
+}
+
+// HandleTestCreateAccountDirectly handler for testing database.CreateAccountDirectly()
+func HandleTestCreateAccountDirectly(c *gin.Context) {
+	account, err := database.CreateAccountDirectly()
 	if err != nil {
 		c.String(404, err.Error())
 		return

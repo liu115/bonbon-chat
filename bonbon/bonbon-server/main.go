@@ -46,6 +46,7 @@ func main() {
 	if config.Mode == "debug" {
 		app.GET("/test/chat/:id", test.HandleTestWebsocket)
 		app.GET("/test/create-account-by-token/:token", test.HandleTestCreateAccountByToken)
+		app.GET("/test/create-account-directly", test.HandleTestCreateAccountDirectly)
 		app.GET("/test/make-friendship/:id1/:id2", test.HandleTestMakeFriendship)
 		app.GET("/test/remove-friendship/:id1/:id2", test.HandleTestRemoveFriendship)
 		app.GET("/test/update-facebook-friends/:id", test.HandleTestUpdateFacebookFriends)

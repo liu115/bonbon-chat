@@ -98,6 +98,32 @@ func CreateAccountByToken(token string) (*Account, error) {
 	return &account, nil
 }
 
+// WARN: 僅為測試時創建帳號用，切勿使用於正式環境
+func CreateAccountDirectly() (*Account, error) {
+	// update account database
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var account Account
+
+	account = Account{
+		AccessToken:  "",
+		FacebookID:   "",
+		FacebookName: "",
+		Avatar:       "換個大頭貼吧",
+	}
+	query := db.Create(&account)
+
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return &account, nil
+}
+
 // GetAccountByID get account object by id
 func GetAccountByID(id int) (*Account, error) {
 	// update account database
