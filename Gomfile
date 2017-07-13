@@ -1,8 +1,0 @@
-gom 'github.com/jinzhu/gorm'
-gom 'github.com/go-sql-driver/mysql'
-gom 'github.com/mattn/go-sqlite3'
-gom 'github.com/gin-gonic/gin'
-gom 'github.com/gorilla/websocket'
-gom 'github.com/huandu/facebook'
-gom 'gopkg.in/gcfg.v1'
-gom 'github.com/fatih/color'
