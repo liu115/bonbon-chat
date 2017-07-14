@@ -190,6 +190,8 @@ var SideBar = React.createClass({
         </ReactCSSTransitionGroup>
         <ul id="menu">
           <li><a onClick={this.logout}><span><i className="fa fa-sign-out"></i><span style={{margin: '0px'}}>登出</span></span></a></li>
+          {/*TOTO: 應建立一份前端設設定檔，將開發者信箱置於此設定檔中*/}
+          <li><a href="mailto:yc1043@gmail.com"><span><i className="fa fa-envelope"></i><span style={{margin: '0px'}}>聯絡開發者</span></span></a></li>
         </ul>
       </nav>
       //<!-- end of navigation area -->
