@@ -1,4 +1,9 @@
 require('../js/environment.js')();
+
+require('../less/chatpage.less');
+require('../less/loginpage.less');
+require('../less/message.less');
+
 var React = require('../bower/react/react-with-addons.js');
 var ChatPage = require('./chatpage.jsx');
 var LoginPage = require('./loginpage.jsx');

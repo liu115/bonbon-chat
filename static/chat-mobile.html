@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bonbon 行動版</title>
+    <title>Bonbon 聊天 行動版</title>
     <meta charset="utf-8">
+
+    <meta name="description" content="Bonbon，與陌生人或臉書的好友匿名聊天，並在本站保持聯繫！"/>
+  
+    <meta property="og:title" content="Bonbon 聊天" />
+    <meta property="og:url" content="https://bonbon-chat.com" />
+    <meta property="og:image" content="http://bonbon-chat.com/static/img/bonbon-logo.jpg" />
+    <meta property="og:description" content="Bonbon，你會bon到誰呢？" />
+
+    <link rel="icon" href="img/bonbon-logo-small.jpg">
 
     <!--stylesheets -->
     <link rel="stylesheet" href="bower/reset-css/reset.css">
     <link rel="stylesheet" href="bower/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet/less" type="text/css" href="less/loginpage.less">
-    <link rel="stylesheet/less" type="text/css" href="less/chatpage.less">
-    <link rel="stylesheet/less" type="text/css" href="less/message.less">
+    <link rel="stylesheet" href="lib/ballon.css">
 
     <!-- js libraries -->
     <script type="text/javascript" src="bower/jquery/dist/jquery.min.js"></script>
-    <!-- <script type="text/javascript" src="bower/react/react&#45;with&#45;addons.js"></script> -->
-    <!-- <script type="text/javascript" src="bower/react/JSXTransformer.js"></script> -->
-    <script type="text/javascript" src="bower/less/dist/less.min.js"></script>
     <script type="text/javascript" src="js/websocket.js"></script>
     <script type="text/javascript" src="js/notification.js"></script>
-    <!-- [if lt IE 9]><script type="text/javascript" src="js/excanvas.js"></script><![endif] -->
   </head>
   <body>
 	<div id="all"></div>
 
     <script type="text/javascript" src="dist/app.js"></script>
-    <!-- <script type="text/jsx" src="jsx/message.jsx"></script> -->
-    <!-- <script type="text/jsx" src="jsx/chatpage.jsx"></script> -->
-    <!-- <script type="text/jsx" src="jsx/loginpage.jsx"></script> -->
-    <!-- <script type="text/jsx" src="jsx/basepage.jsx"></script> -->
   </body>
   <script>
   window.onload = function() {
