@@ -1,3 +1,4 @@
+require('../js/environment.js')();
 var React = require('../bower/react/react-with-addons.js');
 var ChatPage = require('./chatpage.jsx');
 var LoginPage = require('./loginpage.jsx');
